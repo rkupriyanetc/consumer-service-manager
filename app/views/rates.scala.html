@@ -1,0 +1,55 @@
+	
+@main(Messages("page.home.rates"), "rates") {
+			
+	<div class="panel panel-info">
+		<div class="panel-heading">
+			<h3 class="panel-title">@Messages("page.home.rates")</h3>
+		</div>
+		<div class="panel-body">
+			<h3><small>@Messages("page.home.nameRegion") @Messages("page.rates.info")</small></h3><br />
+			<p>@Messages("page.rates.resolution")</p>
+		</div>
+		
+		<table class="table table-bordered">
+			<thead align="center" valign="middle">
+				<tr>
+					<th width="60%" rowspan="3">@Messages("page.rates.title_category")</th>
+					<th width="40%" colspan="4">@Messages("page.rates.title_rate"),<br />@Messages("page.rates.title_rate_desc")</th>
+				</tr>
+				<tr>
+					<th width="20%" colspan="2">@Messages("page.rates.title_place_village")</th>
+					<th width="20%" colspan="2">@Messages("page.rates.title_place_city")</th>
+				</tr>
+				<tr>
+					<th width="10%">@Messages("page.rates.title_rate_without_tax")</th>
+					<th width="10%">@Messages("page.rates.title_rate_tax")</th>
+					<th width="10%">@Messages("page.rates.title_rate_without_tax")</th>
+					<th width="10%">@Messages("page.rates.title_rate_tax")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td rowspan="2">1</td>
+					<td>Mark</td>
+					<td>Otto</td>
+					<td>mdo</td>
+					<td>RVK</td>
+				</tr>
+				<tr>
+					<td colspan="2">RVK</td>
+					<td>Mark</td>
+					<td>Tw</td>
+				</tr>
+				<tr>
+					<td>3</td>
+					<td colspan="2">Larry</td>
+					<td colspan="2">Bird</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				
+			</tfoot>			
+		</table>
+		
+	</div>
+}

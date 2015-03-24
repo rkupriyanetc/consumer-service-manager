@@ -1,0 +1,62 @@
+@( nav: String = "" )
+
+@import be.objectify.deadbolt.java.views.html._
+
+<div class="navbar navbar-fixed-top navbar-default" role="navigation">
+      <div class="container">
+      
+        <div class="navbar-header">
+            <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#main-menu">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="@mk.ck.energy.csm.controllers.routes.Application.index()">@Messages("page.home.title")</a>
+        </div>
+        
+        <div class="collapse navbar-collapse" id="main-menu">
+          <ul id="mainTab" class="nav nav-tabs navbar-nav">
+            <li class='@("active".when(nav==""))'><a href="@mk.ck.energy.csm.controllers.routes.Application.index()"><span class="glyphicon glyphicon-home"></span> @Messages("main.menu.home.title")</a></li>
+            <li class='@("active".when(nav=="about"))'><a href="@mk.ck.energy.csm.controllers.routes.Application.about()"><span class="glyphicon glyphicon-question-sign"></span> @Messages("main.menu.about.title")</a></li>
+            <li class='@("active".when(nav=="feedback"))'><a href="@mk.ck.energy.csm.controllers.routes.Application.feedback()"><span class="glyphicon glyphicon-pencil"></span> @Messages("main.menu.feedback.title")</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-list"></span>@Messages("main.menu.oper.title")<b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="@mk.ck.energy.csm.controllers.routes.Operator.script()">@Messages("main.menu.oper.scripts.title")</a></li>
+                <li><a href="#">Submenu 2</a></li>
+                <li><a href="#">Submenu 3</a></li>
+                <li><a href="#">Submenu 4</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Submenu 5</a></li>
+                <li><a href="#">Submenu 6</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Submenu 7</a></li>
+              </ul>
+            </li>
+          </ul>
+
+          <ul class="nav navbar-nav navbar-right">
+            @subjectPresentOr() {
+        			@defining(mk.ck.energy.csm.models.auth.User.getLocalUser(session())) { user =>
+        			  <li class="dropdown">
+        				<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+        					<span class="glyphicon glyphicon-user"></span> @user.getEmail()
+        					<span class="caret"></span>
+        				</a>
+        				<ul class="dropdown-menu" role="menu">
+        				  <li><a href="@mk.ck.energy.csm.controllers.routes.Application.profile()"><span class="glyphicon glyphicon-briefcase"></span> @Messages("page.home.profile")</a></li>
+        				  <li><a href="@mk.ck.energy.csm.controllers.routes.Account.link()"><span class="glyphicon glyphicon-link"></span> @Messages("page.home.bind")</a></li>
+        				  <li class="divider"></li>
+        				  <li><a href="@com.feth.play.module.pa.controllers.routes.Authenticate.logout()"><span class="glyphicon glyphicon-log-out"></span> @Messages("page.home.logout")</a></li>
+        				</ul>
+        			  </li>
+        			}
+        	  }{
+              <li data-toggle="modal" data-target="#my-modal-box"><a href="@mk.ck.energy.csm.controllers.routes.Application.login()"><span class="glyphicon glyphicon-log-in"></span> @Messages("page.home.login")</a></li>
+            }
+          </ul>
+          
+        </div><!-- /.collapse navbar-collapse -->
+      </div><!-- /.container -->
+    </div><!-- /.navbar navbar-fixed-top -->

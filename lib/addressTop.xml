@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<regions>
+  <region>
+    <name>Київська обл.</name>
+    <refId>0</refId>
+  </region>
+  <region>
+    <name>Львівська обл.</name>
+    <refId>0</refId>
+  </region>
+  <region>
+    <name>Черкаська обл.</name>
+    <refId>0</refId>
+  </region>
+  <region>
+    <name>Маньківський р-н</name>
+    <references>Черкаська обл.</references>
+  </region>
+</regions>

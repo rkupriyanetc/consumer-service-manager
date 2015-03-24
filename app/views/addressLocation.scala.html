@@ -1,0 +1,85 @@
+@(addrForm: Form[mk.ck.energy.csm.controllers.AccountTools.AddrLocation], items: Seq[mk.ck.energy.csm.models.AddressLocation] )
+
+@import helper._
+
+@main(Messages("page.home.testAddr")) {
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">@Messages("page.home.title")</h3>
+    </div>
+    <div class="panel-body">
+    
+      @helper.form(mk.ck.energy.csm.controllers.routes.AccountTools.doTestLocationAddress, 'class -> "form") {
+                 
+        @if(addrForm.hasGlobalErrors) {
+          <div class="alert alert-danger">@addrForm.globalError.message</div>
+        }
+        
+        <div class="row">
+          <div class="col-md-2 col-xs-2">
+            @inputText(
+              addrForm("id"),
+              '_label -> Messages("Id"),
+              'size -> 4,
+              'disabled -> "disabled"
+            )
+          </div>
+          <div class="col-md-2 col-xs-2">
+            @inputText(
+              addrForm("refId"),
+              '_label -> Messages("RefId"),
+              'size -> 4
+            )
+          </div>
+          <div class="col-md-3 col-xs-3">
+            @inputText(
+              addrForm("location"),
+              '_label -> Messages("Location")
+            )
+          </div>
+          <div class="col-md-3 col-xs-3">
+            @_selectPartial(addrForm, "locationsTypes", mk.ck.energy.csm.models.LocationType.optionsFullname(), Messages("LocationsTypes"), true)
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-10 col-xs-10">
+            <input type="submit" value="Test Address" class="btn btn-info">
+          </div>
+        </div>
+        
+        @if(items != null ) {
+          @items.map { item =>
+            <div class="row">
+              <div class="col-md-2 col-xs-2">
+                _id : @item.getId()
+              </div>
+              <div class="col-md-2 col-xs-2">
+                refId :
+                 @if(item.getTopAddress() == null) {
+                   0
+                 } else {
+                   @item.getTopAddress().getId()
+                 }
+              </div>
+              <div class="col-md-3 col-xs-3">
+                name : @item.getLocation()
+              </div>
+              <div class="col-md-4 col-xs-4">
+                type : @item.getLocationsTypes()
+              </div>
+              
+              <div class="col-md-1 col-sm-1">
+                <a href='@mk.ck.energy.csm.controllers.routes.AccountTools.removeLocationAddress(item.getId())'
+                   onclick='if (!confirm(@Messages("button.address.remove.question"))) return false;'>
+                  <img alt='@Messages("button.address.remove.title")' src='@routes.Assets.at("images/delete.png")'>
+                </a>
+              </div>
+            </div>
+          }
+        }
+      }
+    </div>
+     
+  </div>
+}

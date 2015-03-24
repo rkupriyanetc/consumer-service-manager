@@ -1,0 +1,95 @@
+@(xmlFile: Form[mk.ck.energy.csm.controllers.AdministrationTools.XMLText])
+
+@import helper._
+@import mk.ck.energy.csm.controllers._
+
+@main("page.admin.adminTab.tabDBSynchronization.regions.edit") {
+  
+  
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    <h3 class="panel-title">@Messages("page.admin.adminTab.tabDBSynchronization.regions")</h3>
+  </div>
+  <br/>
+  
+  <div class="panel-body">
+     
+    @helper.form(routes.AdministrationTools.doViewXML, 'class -> "form") {
+        
+       @if(xmlFile.hasGlobalErrors) { 
+         <div class="alert alert-danger">@xmlFile.globalError.message</div>
+       }
+       <div class="row">
+         
+         <div class="col-md-7 col-sm-7">           
+           @textarea(
+             xmlFile("textXML"),
+             'rows -> 20,
+             'class -> "form-control"
+           )
+         </div>
+         @defining(xmlFile.get.getFileNumber()) { fileNumber =>
+         <div class="col-md-2 col-xs-2">
+           @if(fileNumber > 0 && fileNumber < 3) {
+             @select(
+               xmlFile("locationsTypes"),
+               options(mk.ck.energy.csm.models.LocationType.optionsShortname()),
+               '_label -> Messages("LocationsTypes"),
+               'size -> 10,
+               'multiple -> "multiple",
+               'readonly -> "readonly"
+             )
+           } else {
+             @if(fileNumber > 2) {
+               @select(
+                 xmlFile("streetTypes"),
+                 options(mk.ck.energy.csm.models.StreetType.optionsShortname()),
+                 '_label -> Messages("StreetType"),
+                 'size -> 10,
+                 'multiple -> "multiple",
+                 'readonly -> "readonly"
+               )
+             }
+           }
+         </div>
+         <div class="col-md-2 col-xs-2">
+           @if(fileNumber > 0 && fileNumber < 3) {
+             @select(
+               xmlFile("locationsTypes"),
+               options(mk.ck.energy.csm.models.LocationType.optionsValues()),
+               '_label -> Messages("LocationsTypes"),
+               'size -> 10,
+               'multiple -> "multiple",
+               'readonly -> "readonly"
+             )
+           } else {
+             @if(fileNumber > 2) {
+               @select(
+                 xmlFile("streetTypes"),
+                 options(mk.ck.energy.csm.models.StreetType.optionsValues()),
+                 '_label -> Messages("StreetType"),
+                 'size -> 10,
+                 'multiple -> "multiple",
+                 'readonly -> "readonly"
+               )
+             }
+           }
+         </div>
+         }
+         <div class="col-md-1 col-sm-1">           
+           @inputText(
+             xmlFile("fileNumber"),
+             'size -> 1,
+             '_label -> "File No",
+             'readonly -> "readonly"
+           )
+         </div>
+       </div>
+       
+       <div class="col-md-3 col-sm-3">
+         <input type="submit" value='@Messages("button.addrTop.save")' class="btn btn-info">
+       </div>
+    }
+  </div>
+</div>
+}

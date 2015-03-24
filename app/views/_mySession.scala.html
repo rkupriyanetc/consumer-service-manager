@@ -1,0 +1,14 @@
+@import be.objectify.deadbolt.java.views.html._
+@import be.objectify.deadbolt.core.utils.TemplateUtils._
+	
+	<div class="jumbotron">
+		<h2><b>@Messages("page.home.name")</b></h2>
+		<h3><b>@Messages("page.home.nameRegion")</b></h3>
+		<p class="lead">@Messages("page.home.site")</p>
+		<p>
+			@subjectNotPresent() {
+				<a class="btn btn-lg btn-info" href="@mk.ck.energy.csm.controllers.routes.Application.signup()" role="button">@Messages("page.home.signup")</a>
+				<a class="btn btn-lg btn-info" href="@mk.ck.energy.csm.controllers.routes.Application.login()" role="button">@Messages("page.home.login")</a>
+			}
+		</p>
+	</div>

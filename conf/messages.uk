@@ -1,0 +1,268 @@
+page.home.name=Маньківський РЕМ
+page.home.nameRegion=ПАТ "Черкасиобленерго"
+page.home.home=Домашня
+page.home.about=Про сайт
+page.home.feedback=Зворотній зв''язок
+page.home.created=Березень 2014 року
+page.home.site=Це не є офіційний сайт
+page.home.signup=Зареєструватися
+page.home.login=Увійти
+page.home.logout=Вийти
+page.home.profile=Профіль
+page.home.bind=Зв''язати
+page.home.rates=Тарифи
+page.home.admin=Засоби адміністрування
+page.home.testAddr=Тестування додавання адреси
+
+main.menu.home.title=Домашня
+main.menu.about.title=Про сайт
+main.menu.feedback.title=Зворотній зв''язок
+main.menu.profile.title=Профіль
+main.menu.oper.title=Оператор
+main.menu.oper.scripts.title=Створити скрипт
+
+page.home.description_1=На нашому сайті ви можете переглянути останні події та використати довідку.
+page.home.description_2=Фізичні споживачі ( населення ) можуть отримати додаткову послугу на нашому сайті - це передача показників лічильника в РЕМ. Але для цього вам потрібно зареєструватись. Під час реєстрації вам потрібно буде вказати ваш правильний особовий рахунок, який є вашим ідентифікатором при сплаті за електроенергію, точно таке ж прізвище, ім''я та по батькові, як в квитанції та таку ж адресу. Підтвердження реєстрації відбувається через електронну почту.
+page.home.description_3=В жодному іншому випадку ви не зареєструєтесь!
+
+page.registered.title=Лише для зареєстрованих споживачів
+page.signup.title=Лише для споживачів населення Маньківського району
+
+page.admin.title=Засоби адміністрування
+page.admin.adminTab.tabDBs=Адміністрування баз даних
+page.admin.adminTab.tabDBs.active=Активна
+page.admin.adminTab.tabDBs.test=Перевірка підключення
+page.admin.adminTab.tabDBs.localDB=Локальна БД
+page.admin.adminTab.tabDBs.remoteDB=Віддалена БД
+page.admin.adminTab.tabDBs.mssql.database=MSSQL база даних є {0}
+page.admin.adminTab.tabDBs.mssql.database.active=активною
+page.admin.adminTab.tabDBs.mssql.database.noActive=не активною
+
+page.admin.adminTab.tabUsers=Редагування користувачів
+
+page.admin.adminTab.tabDBSynchronization=Синхронізація бази даних
+page.admin.adminTab.tabDBSynchronization.descriptions=Синхронізація включає покрокове виконання наступних дій.
+page.admin.adminTab.tabDBSynchronization.regions=Завантаження регіонів з файлу
+page.admin.adminTab.tabDBSynchronization.regions.edit=Редагування addressTop.xml
+page.admin.adminTab.tabDBSynchronization.locations=Завантаження населених пунктів з файлу
+page.admin.adminTab.tabDBSynchronization.locations.edit=Редагування addressLocation.xml
+page.admin.adminTab.tabDBSynchronization.selecting_locality=Вибір даних з таблиці населенних пунктів {0}. Заповнення файлу addressLocation.xml
+page.admin.adminTab.tabDBSynchronization.locations.references=З посиланням на
+page.admin.adminTab.tabDBSynchronization.streets=Завантаження всіх вулиць з файлу
+page.admin.adminTab.tabDBSynchronization.selecting_streets=Вибір даних з таблиці вулиць {0}.
+page.admin.adminTab.tabDBSynchronization.streets.edit=Редагування addressStreet.xml
+page.admin.adminTab.tabDBSynchronization.fillingMeterDevices=Заповнення колекції лічильників з таблиці {0}
+page.admin.adminTab.tabDBSynchronization.consumerUpdate=Завантажити чи обновити всіх фізичних споживачів до своєї БД
+
+page.admin.adminTab.hostChange.success=Хост змінено успішно. Щоб працювати далі, потрібно увійти знову.
+
+page.admin.buttonGo=Адмініструвати
+page.admin.description=До засобів керування мають доступ лише адміністратори сайту та бази даних
+page.admin.addUser.title=Створити нового користувача
+page.admin.addUserOper.title=Створити користувача оператора
+page.admin.addUserAdmin.title=Створити користувача адміністратора
+page.admin.addUser.success=Створення користувача виконано успішно
+page.admin.delUser.hint=Видалити користувача
+page.admin.delUser.question=Ви дійсно бажаєте видалити користувача?
+page.admin.delUser.success=Користувача видалено успішно.
+page.admin.delUser.noSuccess=Не можна видалити самого себе.
+
+page.admin.user.email=Email користувача
+page.admin.user.password=Пароль користувача
+page.admin.user.passwordRepeat=Повторити пароль
+page.admin.user.role=Права користувача
+page.admin.user.name=Ім''я користувача
+page.admin.user.firstName=Прізвище користувача
+page.admin.user.lastName=По батькові
+
+page.official.title=Офіційний сайт
+page.official.link=Зв''язок з офіційним сайтом
+
+page.leadership.title=Керівництво РЕМ
+page.leadership.manager.title=Директор Маньківського РЕМ
+page.leadership.manager.name=Галай Микола Андрійович
+page.leadership.secretar.title=Секретар
+page.leadership.secretar.name=Євтушенко Олена Василівна
+page.leadership.submanager.title=Головний інженер РЕМ
+page.leadership.submanager.name=Фуркало Сергій Володимирович
+page.leadership.accounting.title=Головний бухгалтер
+page.leadership.accounting.name=Слюсаренко Любов Петрівна
+page.leadership.energosubmanager.title=Замісник директора з енергозбуту та комерційних питань
+page.leadership.energosubmanager.name=Самборський Юрій Федорович
+page.leadership.leadengineer.title=Провідний інженер ВТГ
+page.leadership.leadengineer.name=Почапський Володимир Миколайович
+page.leadership.headcustomerservice.title=Начальник абонентської дільниці
+page.leadership.headcustomerservice.name=Филька Тетяна Ілларіонівна
+page.leadership.jurisconsult.title=Юрисконсульт
+page.leadership.jurisconsult.name=Худолій Василь Володимирович
+page.leadership.chiefdispatcher.title=Начальник ОДС
+page.leadership.chiefdispatcher.name=Борона Петро Олексійович
+page.leadership.safetyengineer.title=Інженер з охорони праці
+page.leadership.safetyengineer.name=Бицюк Володимир Петрович
+page.leadership.bookkeeper.title=Бухгалтер
+page.leadership.bookkeeper.name=Максименюк Людмила Миколаївна
+page.leadership.bookkeeperenergo.title=Бухгалтер енергозбуту
+page.leadership.bookkeeperenergo.name=Перевеза Надія Казимирівна
+page.leadership.inspector.title=Інспектор
+page.leadership.inspector.name=Нечеснюк Віталій Віталійович, Фуркало Сергій Сергійович
+page.leadership.programmer.title=Інженер з комп''ютерних систем
+page.leadership.programmer.name=Купріянець Руслан Васильович
+page.leadership.operator.title=Оператори
+page.leadership.operator.name=Роєнко Юрій Володимирович, Мартинов Сергій Григорович
+
+page.phoneBook.title=Телефонний довідник
+page.phoneBook.codes=Міжміський код
+
+page.staff.about.title=Інформація про працівників Маньківського РЕМ
+page.staff.about.number=№ п/п
+page.staff.about.fnl=ПІП
+page.staff.about.account=Особовий рахунок
+page.staff.about.address=Адреса
+page.staff.about.position=Посада
+page.staff.about.phones=Телефони
+page.staff.about.phone.home=домашній
+page.staff.about.phone.mobile=мобільний
+page.staff.about.counter=Лічильник
+page.staff.about.counter.name=тип
+page.staff.about.counter.number=№
+page.staff.about.counter.voltage=Ф
+page.staff.about.counter.current=А
+page.staff.about.stamps=Пломби
+page.staff.about.currentTransformer=Трансформатор струму
+page.staff.about.coefficient=Коефіцієнт розрахунку
+page.staff.about.latterFigure=Останній показник
+page.staff.about.container=Контейнер
+
+page.rates.info=інформує про зміну тарифів на електроенергію, що відпускається населенню з 01 липня 2012 року.
+page.rates.resolution=Згідно постанови НКРЕ України від 15.06.2012 року № 750, зареєстрованої в Міністерстві юстиції України 19.06.2012 року за № 996/21308, внесені зміни до постанови НКРЕ України від 23.04.2012 року №497 щодо тарифів на електроенергію, що відпускається населенню. З 01 липня 2012 року тарифи становлять:
+page.rates.title_category=Категорії споживачів
+page.rates.title_rate=Тарифи на електроенергію
+page.rates.title_rate_desc=( грн. за 1 кВт*Год )
+page.rates.title_rate_tax=З ПДВ
+page.rates.title_rate_without_tax=Без ПДВ
+page.rates.title_place_village=В селі
+page.rates.title_place_city=В місті
+
+button.admin.addUserOper=Створити оператора
+button.admin.addUserAdmin=Створити адміністратора
+button.admin.addUser=Створити
+button.admin.test=Тест
+button.admin.synchronize=Синхронізувати
+button.navigator.first.title=Перша сторінка
+button.navigator.previous.title=Попередня сторінка
+button.navigator.next.title=Наступна сторінка
+button.navigator.last.title=Остання сторінка
+button.address.remove.title=Видалити запис
+button.address.remove.question=Ви бажаєте видалити запис?
+button.addrTop.save=Зберегти файл
+button.staff.about.export=Експорт в Excel
+
+text.feedback.contact=Пишіть, щоб встановити зв''язок
+
+text.about.rvk=Це мій перший сайт. Я радий, що у мене щось почало виходити. Дякую за підтримку!
+text.about.komora=Велике дякую цьому чоловікові за сильну підтримку, терпіння та витривалість до мого навчання.
+text.official.home=Офіційна підтримка знаходиться в
+text.official.leadership=Керівники апарату управління
+text.official.ikts.home=Інформаційно-консультаційниц центр
+text.official.rens=Всі РЕМи
+text.official.history=Історія розвитку
+text.official.customers=споживачам
+
+
+street.type.full.uncertain=
+street.type.full.area=Площа
+street.type.full.boulevard=Бульвар
+street.type.full.avenue=Проспект
+street.type.full.street=Вулиця
+street.type.full.lane=Провулок
+street.type.full.cul_de_sac=Тупик
+street.type.full.descent=Узвіз
+
+street.type.short.uncertain=
+street.type.short.area=пл.
+street.type.short.boulevard=бул.
+street.type.short.avenue=прсп.
+street.type.short.street=вул.
+street.type.short.lane=прв.
+street.type.short.cul_de_sac=туп.
+street.type.short.descent=узв.
+
+location.type.full.city=Місто
+location.type.full.hamlet=Хутір
+location.type.full.township=Селище
+location.type.full.village=Село
+location.type.full.capital=Столиця країни
+location.type.full.regional=Обласний центр
+location.type.full.district=Районний центр
+location.type.full.bowery=Окрема садиба
+
+location.type.short.city=м.
+location.type.short.hamlet=х.
+location.type.short.township=смт.
+location.type.short.village=с.
+location.type.short.capital=столиця
+location.type.short.regional=обл.
+location.type.short.district=р-н
+location.type.short.bowery=сад.
+
+
+playauthenticate.login.email.placeholder=Ваша e-mail адреса
+playauthenticate.login.password.placeholder=Підберіть секретне слово
+playauthenticate.login.password.repeat=Повторіть секретне слово
+playauthenticate.login.title=Вхід
+playauthenticate.login.password.placeholder=Секретне слово
+playauthenticate.login.now=Увійти
+playauthenticate.login.forgot.password=Забули секретне слово?
+playauthenticate.login.oauth=або увійдіть, використовуючи один із провайдерів:
+
+playauthenticate.signup.title=Реєстрація
+playauthenticate.signup.name=Ваше ім''я
+playauthenticate.signup.now=Зареєструватися
+playauthenticate.signup.oauth=або реєструйтесь, використовуючи один із провайдерів:
+
+playauthenticate.verify.account.title=Вимагається перевірка E-mail
+playauthenticate.verify.account.before=Перед установкою пароля, необхідно
+playauthenticate.verify.account.first=спочатку перевірте ваш e-mail
+
+playauthenticate.change.password.title=Тут можна змінити секретне слово
+playauthenticate.change.password.cta=Змінити секретне слово
+
+playauthenticate.profile.title=Профіль користувача
+playauthenticate.profile.nick=Ваш нік {0}
+playauthenticate.profile.mail=Ваша e-mail {0}
+playauthenticate.profile.name=Ваше ім''я: {0} {1} {2}
+playauthenticate.profile.unverified=не підтверджено - click, щоб підтвердити
+playauthenticate.profile.verified=підтверджена
+playauthenticate.profile.providers_many=Існує {0} провайдери(ів), пов''язані з вашим обліковим записом:
+playauthenticate.profile.providers_one=Існує один провайдер, пов''язаний з вашим обліковим записом:
+playauthenticate.profile.logged=На даний час ви увійшли як:
+playauthenticate.profile.session=Ваш ідентифікатор {0} і ваша сесія закінчується {1}
+playauthenticate.profile.session_endless=Ваш ідентифікатор {0} і ваша сесія є нескінченною
+playauthenticate.profile.password_change=Змінити/встановити пароль для вашого облікового запису
+playauthenticate.profile.roles=Ролі :
+
+playauthenticate.merge.accounts.title=Merge accounts
+playauthenticate.merge.accounts.question=Do you want to merge your current account ({0}) with this account: {1}?
+playauthenticate.merge.accounts.true=Yes, merge these two accounts
+playauthenticate.merge.accounts.false=No, exit my current session and log in as a new user
+playauthenticate.merge.accounts.ok=OK
+
+playauthenticate.link.account.title=Link account
+playauthenticate.link.account.question=Link ({0}) with your user?
+playauthenticate.link.account.true=Yes, link this account
+playauthenticate.link.account.false=No, log out and create a new user with this account
+playauthenticate.link.account.ok=OK
+
+playauthenticate.verify.email.title=Перевірте вашу електронну пошту
+playauthenticate.verify.email.requirement=Перед тим, як використовувати PlayAuthenticate, в першу чергу необхідно підтвердити адресу електронної пошти.
+playauthenticate.verify.email.cta=Електронного листа було відправлено ​​на зареєстровану вами адресу. Будь ласка, дотримуйтесь вбудованих посилань, щоб активувати обліковий запис.
+
+playauthenticate.password.reset.title=Reset password
+playauthenticate.password.reset.cta=Reset my password
+
+playauthenticate.password.forgot.title=Forgot password
+playauthenticate.password.forgot.cta=Send reset instructions
+
+playauthenticate.email.signup.error.email_exists=Такий Email вже існує
+playauthenticate.password.signup.error.passwords_not_same=Секретні слова не однакові
+playauthenticate.password.login.unknown_user_or_pw=Невідомий користувач або секретне слово.

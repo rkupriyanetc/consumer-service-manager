@@ -1,0 +1,45 @@
+@(signupForm: Form[_])
+
+@import helper._
+@import mk.ck.energy.csm.controllers._
+
+@main(Messages("playauthenticate.signup.title"),"signup") {
+  
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title">@Messages("page.signup.title")</h3>
+    </div>
+    <div class="panel-body">
+      
+      <div class="row">
+      
+      <div class="col-md-6 col-sm-6">
+      
+        @helper.form(routes.Application.doSignup, 'class -> "form") {
+        
+          @if(signupForm.hasGlobalErrors) { 
+				    <div class="alert alert-warning">@signupForm.globalError.message</div>
+				  }
+				  
+				  @inputText(
+					  signupForm("name"),
+					  '_label -> Messages("playauthenticate.signup.name"),
+					  'class -> "form-control"
+					)
+					
+					@_emailPartial(signupForm)
+					
+					@_passwordPartial(signupForm)
+					
+					<input type="submit" value='@Messages("playauthenticate.signup.now")' class="btn btn-info">
+				}
+			</div>
+			</div>
+    <div class="col-md-12 col-sm-12">
+        @Messages("playauthenticate.signup.oauth")
+        @* Display list of available providers *@
+        @_providerPartial(skipCurrent=false)
+    </div>
+    </div>
+  </div>
+}

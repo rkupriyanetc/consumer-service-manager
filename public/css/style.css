@@ -1,0 +1,52 @@
+/* ============================================================================================== 
+This copyright notice must be kept untouched in the stylesheet at all times.
+The original version of this stylesheet and the associated (x)html 
+is available at http://www.script-tutorials.com/responsive-website-using-bootstrap/
+Copyright (c) Script Tutorials. All rights reserved.
+This stylesheet and the associated (x)html may be modified in any way to fit your requirements.
+================================================================================================= */
+
+/* customized carousel */
+.carousel {
+    height: 300px;
+    margin-bottom: 50px;
+}
+.carousel-caption {
+    z-index: 10;
+}
+.carousel .item {
+    background-color: rgba(0, 0, 0, 0.8);
+    height: 300px;
+}
+/* ================================================================================================
+Converted main.less to css
+   ================================================================================================
+*/
+body {
+  padding-top: 60px;
+  /* 60px to make the container go all the way to the bottom of the topbar */
+
+}
+form .error input {
+  background-color: #F2DEDE;
+  border-color: #EED3D7;
+  color: #B94A48;
+}
+form .error .help-inline {
+  color: #B94A48;
+}
+.providers {
+  margin: 5px 0;
+  list-style: none;
+}
+.providers li {
+  display: inline;
+}
+.help-block {
+  margin: -10px 0 10px 0;
+  font-size: 10px;
+  color: #ccc !important;
+}
+h1 {
+  margin-bottom: 20px !important;
+}

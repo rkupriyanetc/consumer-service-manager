@@ -1,0 +1,74 @@
+@(addrForm: Form[mk.ck.energy.csm.controllers.AccountTools.AddrTop], items: Seq[mk.ck.energy.csm.models.AddressTop] )
+
+@import helper._
+
+@main(Messages("page.home.testAddr")) {
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">@Messages("page.home.title")</h3>
+    </div>
+    <div class="panel-body">
+    
+      @helper.form(mk.ck.energy.csm.controllers.routes.AccountTools.doTestTopAddress, 'class -> "form") {
+        
+        @if(addrForm.hasGlobalErrors) {
+          <div class="alert alert-danger">@addrForm.globalError.message</div>
+        }
+        
+        <div class="row">
+          <div class="col-md-2 col-xs-2">
+            @inputText(
+              addrForm("id"),
+              '_label -> Messages("Id"),
+              'size -> 4,
+              'disabled -> "disabled"
+            )
+          </div>
+          <div class="col-md-5 col-xs-5">
+            @inputText(
+              addrForm("name"),
+              '_label -> Messages("Region.or.District.name")
+            )
+          </div>
+          <div class="col-md-2 col-xs-2">
+            @inputText(
+              addrForm("refId"),
+              '_label -> Messages("Ref.Id"),
+              'size -> 4
+            )
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-4 col-xs-4">
+            <input type="submit" value="Test Address" class="btn btn-info">
+          </div>
+        </div>
+        
+        @if(items != null ) {
+          @items.map { item =>
+            <div class="row">
+              <div class="col-md-2 col-xs-2">
+                _id : @item.getId()
+              </div>
+              <div class="col-md-5 col-xs-5">
+                name : @item.getName()
+              </div>
+              <div class="col-md-2 col-xs-2">
+                refId : @item.getRefId()
+              </div>
+              
+              <div class="col-md-1 col-sm-1">
+                <a href='@mk.ck.energy.csm.controllers.routes.AccountTools.removeTopAddress(item.getId())'
+                   onclick='if (!confirm(@Messages("button.address.remove.question"))) return false;'>
+                  <img alt='@Messages("button.address.remove.title")' src='@routes.Assets.at("images/delete.png")'>
+                </a>
+              </div>
+            </div>
+          }
+        }
+      }
+    </div>
+     
+  </div>
+}

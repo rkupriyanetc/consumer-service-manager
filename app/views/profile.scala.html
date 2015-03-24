@@ -1,0 +1,109 @@
+@(localUser: mk.ck.energy.csm.models.auth.User = null)
+
+@import com.feth.play.module.pa.views.html._
+@import mk.ck.energy.csm.controllers._
+
+@main(Messages("playauthenticate.profile.title"),"profile") {
+	
+	<div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title">@Messages("playauthenticate.profile.title")</h3>
+    </div>
+    <div class="panel-body">
+      
+      <div class="row">
+        <div class="col-md-2 col-xs-2">
+          @Messages("playauthenticate.profile.mail", "")
+        </div>
+        <div class="col-md-5 col-xs-5">
+          @localUser.getEmail()
+        </div>        
+        <div class="col-md-3 col-xs-3">
+          <i>
+            @if(!localUser.isEmailValidated() && localUser.getEmail()) {
+              <a href="@routes.Account.verifyEmail">@Messages("playauthenticate.profile.unverified")</a>
+            } else {
+              @Messages("playauthenticate.profile.verified")
+            }
+          </i>
+        </div>
+      </div>
+      
+      <hr/>
+      <div class="row">
+        <div class="col-md-2 col-xs-2">
+          @Messages("playauthenticate.profile.name", "", "", "")
+        </div>
+        <div class="col-md-8 col-xs-8">
+          @if(localUser.getFirstName() || localUser.getName() || localUser.getLastName()) {
+            @localUser.getFirstName() @localUser.getName() @localUser.getLastName()
+          }
+        </div>
+      </div>
+      
+      <hr/>
+      @defining(localUser.getProviders()) { providers =>
+        @if(providers.size() > 0) {
+          <div class="row">          
+            <div class="col-md-7 col-xs-7">
+              @if(providers.size() == 1) {
+                @Messages("playauthenticate.profile.providers_one")
+              } else {
+                @Messages("playauthenticate.profile.providers_many", providers.size().toString())
+              }
+            </div>
+            <div class="col-md-3 col-xs-3">
+              @for(p <- providers) {
+                @_providerIcon(p)
+              }
+            </div>
+          </div>
+        } else {
+          <div class="row">
+            <div class="col-md-10 col-xs-10">Undefined any provider</div>
+          </div>
+        }
+      }
+      
+      @currentAuth() { auth =>
+        <div class="row">
+          <div class="col-md-7 col-xs-7">
+            @Messages("playauthenticate.profile.logged")
+          </div>
+          <div class="col-md-3 col-xs-3">
+            @_providerIcon(auth.getProvider())
+          </div>
+        </div>
+        
+        <hr/>
+        <div class="row">
+          <div class="col-md-10 col-xs-10">
+            @if(auth.expires() != -1){
+              @Messages("playauthenticate.profile.session", auth.getId(), Application.formatTimestamp(auth.expires()))
+            } else {
+              @Messages("playauthenticate.profile.session_endless", auth.getId())
+            }
+          </div>
+        </div>
+      }
+      
+      <hr/>
+      <div class="row">
+        <div class="col-md-2 col-xs-2">
+          @Messages("playauthenticate.profile.roles")
+        </div>
+        @for(rol <- localUser.getRoles()) {
+          <div class="col-md-2 col-xs-2">
+            @rol.getName()
+          </div>
+        }
+      </div>
+      
+      <hr/>      
+      <ul>
+      	<li><a href="@routes.Account.changePassword">@Messages("playauthenticate.profile.password_change")</a></li>
+      </ul>
+      
+    </div>
+  </div>
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<locations>
+  <location>
+    <name>Київ</name>
+    <refId>0</refId>
+    <type>столиця, обл., DISTRICT, м.</type>
+  </location>
+  <location>
+    <name>Черкаси</name>
+    <refId>0</refId>
+    <type>обл., DISTRICT, м.</type>
+  </location>
+  <location>
+    <name>Маньківка</name>
+    <references>Маньківський р-н</references>
+    <type>смт., DISTRICT</type>
+  </location>
+</locations>

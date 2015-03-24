@@ -1,0 +1,731 @@
+<?xml version="1.0" encoding="utf-8"?>
+<global>
+  <staff>
+    <employee>
+      <rem_id></rem_id>
+      <fullname>Фоменко Олександр Анатолійович</fullname>
+      <business_phone>6-24-92</business_phone>
+      <position>в.о. директора</position>
+      <birthday>28.09.1977</birthday>
+      <employment_day>06.02.2015</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>53-003929</rem_id>
+      <fullname>Євтушенко Олена Василівна</fullname>
+      <business_phone>6-24-92</business_phone>
+      <home_phone>6-30-20</home_phone>
+      <mobile_phone>0979718974</mobile_phone>
+      <position>секретар</position>
+      <birthday>01.01.1969</birthday>
+      <employment_day>17.04.2002</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id></rem_id>
+      <fullname>Трохимець Вадим Петрович</fullname>
+      <business_phone>6-11-09</business_phone>
+      <position>в.о. головного інженера</position>
+      <birthday>10.11.1976</birthday>
+      <employment_day>15.02.2015</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>080413</rem_id>
+      <fullname>Самборський Юрій Федорович</fullname>
+      <business_phone>6-11-09</business_phone>
+      <home_phone>34-2-27</home_phone>
+      <mobile_phone>0681328921</mobile_phone>
+      <position>замісник директора з енергозбуту та комерційних питань</position>
+      <birthday>05.12.1964</birthday>
+      <employment_day>19.09.2002</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>03-000511</rem_id>
+      <fullname>Худолій Василь Володимирович</fullname>
+      <business_phone>6-11-09</business_phone>
+      <home_phone>6-41-01</home_phone>
+      <mobile_phone>0967651196</mobile_phone>
+      <position>юрисконсульт</position>
+      <birthday>13.10.1960</birthday>
+      <employment_day>11.03.2008</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>38-002733</rem_id>
+      <fullname>Слюсаренко Любов Петрівна</fullname>
+      <business_phone>6-36-20</business_phone>
+      <home_phone>6-17-49</home_phone>
+      <mobile_phone>0979142957</mobile_phone>
+      <position>головний бухгалтер</position>
+      <birthday>06.03.1961</birthday>
+      <employment_day>14.03.1993</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>01-000211</rem_id>
+      <fullname>Борона Петро Олексійович</fullname>
+      <business_phone>6-19-58</business_phone>
+      <mobile_phone>0969368036</mobile_phone>
+      <position>начальник ОДС</position>
+      <birthday>18.10.1959</birthday>
+      <employment_day>06.01.1983</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>46-003889</rem_id>
+      <fullname>Ярун Василь Володимирович</fullname>
+      <business_phone>6-19-58</business_phone>
+      <home_phone>6-14-00</home_phone>
+      <mobile_phone>0988156218</mobile_phone>
+      <position>диспетчер</position>
+      <birthday>13.01.1961</birthday>
+      <employment_day>03.04.1991</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>16-001353</rem_id>
+      <fullname>Письменний Володимир Дмитрович</fullname>
+      <business_phone>6-19-58</business_phone>
+      <home_phone>6-31-38</home_phone>
+      <mobile_phone>0960134373</mobile_phone>
+      <position>диспетчер</position>
+      <birthday>27.07.1960</birthday>
+      <employment_day>18.12.2008</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>37-002548</rem_id>
+      <fullname>Прилуцький Вадим Петрович</fullname>
+      <business_phone>6-19-58</business_phone>
+      <home_phone>6-23-38</home_phone>
+      <mobile_phone>0968340010</mobile_phone>
+      <position>диспетчер</position>
+      <birthday>27.05.1974</birthday>
+      <employment_day>20.07.2001</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>13-001265</rem_id>
+      <fullname>Дерев’янко Вадим Андрійович</fullname>
+      <business_phone>6-19-58</business_phone>
+      <mobile_phone>0976677419</mobile_phone>
+      <position>диспетчер</position>
+      <birthday>20.10.1980</birthday>
+      <employment_day>01.06.2000</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>24-001960</rem_id>
+      <fullname>Прохоренко Вадим Вікторович</fullname>
+      <business_phone>6-19-58</business_phone>
+      <mobile_phone>0976677419</mobile_phone>
+      <position>диспетчер</position>
+      <birthday>20.10.1980</birthday>
+      <employment_day>01.06.2000</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>160454</rem_id>
+      <fullname>Почапський Володимир Миколайович</fullname>
+      <business_phone>6-22-02</business_phone>
+      <home_phone>32-5-37</home_phone>
+      <mobile_phone>0976968524</mobile_phone>
+      <position>провідний інженер ВТГ</position>
+      <birthday>25.10.1961</birthday>
+      <employment_day>09.11.1994</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>140511</rem_id>
+      <fullname>Ільницький Вадим Євгенович</fullname>
+      <business_phone>6-22-02</business_phone>
+      <mobile_phone>0678354056</mobile_phone>
+      <position>інженер ВТГ</position>
+      <birthday>13.01.1977</birthday>
+      <employment_day>06.10.1999</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>01-000132</rem_id>
+      <fullname>Максименюк Людмила Миколаївна</fullname>
+      <business_phone>6-22-02</business_phone>
+      <home_phone>6-19-73</home_phone>
+      <mobile_phone>0979265720</mobile_phone>
+      <position>бухгалтер</position>
+      <birthday>24.05.1966</birthday>
+      <employment_day>27.01.1999</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>04-000538</rem_id>
+      <fullname>Табакар Віктор Анатолійович</fullname>
+      <business_phone>6-22-02</business_phone>
+      <home_phone>6-12-26</home_phone>
+      <mobile_phone>0674701374</mobile_phone>
+      <position>бухгалтер</position>
+      <birthday>04.05.1974</birthday>
+      <employment_day>05.12.2002</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>07-000673</rem_id>
+      <fullname>Борсенко Лариса Володимирівна</fullname>
+      <business_phone>6-22-02</business_phone>
+      <home_phone>6-27-43</home_phone>
+      <mobile_phone>0969762849</mobile_phone>
+      <position>комірник</position>
+      <birthday>20.02.1967</birthday>
+      <employment_day>24.07.2001</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>040400</rem_id>
+      <fullname>Нечеснюк Вiталiй Вiталiйович</fullname>
+      <business_phone>6-22-02</business_phone>
+      <home_phone>75-2-60</home_phone>
+      <mobile_phone>0989558339</mobile_phone>
+      <position>старший інспектор</position>
+      <birthday>17.10.1968</birthday>
+      <employment_day>07.02.2000</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>02-000215</rem_id>
+      <fullname>Фуркало Сергій Сергійович</fullname>
+      <business_phone>6-22-02</business_phone>
+      <home_phone>6-20-16</home_phone>
+      <mobile_phone></mobile_phone>
+      <position>інспектор</position>
+      <birthday>08.02.1991</birthday>
+      <employment_day>20.01.2014</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>39-004094</rem_id>
+      <fullname>Бицюк Володимир Петрович</fullname>
+      <business_phone>6-22-98</business_phone>
+      <mobile_phone>0969368096</mobile_phone>
+      <position>інженер з охорони праці</position>
+      <birthday>18.11.1975</birthday>
+      <employment_day>16.07.2001</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>17-001512</rem_id>
+      <fullname>Юдченко Василь Семенович</fullname>
+      <business_phone>6-22-98</business_phone>
+      <home_phone>6-29-26</home_phone>
+      <mobile_phone>0977355491</mobile_phone>
+      <position>інженер з транспорту</position>
+      <birthday>14.01.1955</birthday>
+      <employment_day>04.05.2012</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>03-000529</rem_id>
+      <fullname>Филька Тетяна Іларіонівна</fullname>
+      <business_phone>6-22-51</business_phone>
+      <home_phone>6-33-86</home_phone>
+      <mobile_phone>0966321915</mobile_phone>
+      <position>начальник абонентської дільниці</position>
+      <birthday>09.02.1960</birthday>
+      <employment_day>10.05.1988</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>39-002814</rem_id>
+      <fullname>Перевеза Надія Казимирівна</fullname>
+      <business_phone>6-22-51</business_phone>
+      <home_phone>6-26-53</home_phone>
+      <mobile_phone>0979483449</mobile_phone>
+      <position>бухгалтер</position>
+      <birthday>27.01.1973</birthday>
+      <employment_day>09.12.1994</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>35-002463</rem_id>
+      <fullname>Купріянець Руслан Васильович</fullname>
+      <business_phone>6-35-34</business_phone>
+      <home_phone>6-24-70</home_phone>
+      <mobile_phone>0964900599</mobile_phone>
+      <position>інженер з комп'ютерних систем</position>
+      <birthday>30.01.1970</birthday>
+      <employment_day>21.03.2001</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>07-000689</rem_id>
+      <fullname>Роєнко Юрій Володимирович</fullname>
+      <business_phone>6-19-42</business_phone>
+      <mobile_phone>0966816934</mobile_phone>
+      <position>оператор</position>
+      <birthday>04.05.1980</birthday>
+      <employment_day>11.02.2002</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>32-002381</rem_id>
+      <fullname>Мартинов Сергій Григорович</fullname>
+      <business_phone>6-19-42</business_phone>
+      <home_phone>6-40-47</home_phone>
+      <mobile_phone>0978351568</mobile_phone>
+      <position>оператор</position>
+      <birthday>07.09.1985</birthday>
+      <employment_day>05.11.2010</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>080891</rem_id>
+      <fullname>Полюга Олександр Андрійович</fullname>
+      <business_phone>6-22-02</business_phone>
+      <home_phone>34-4-26</home_phone>
+      <mobile_phone>0971661139</mobile_phone>
+      <position>майстер по обліку</position>
+      <birthday>29.08.1988</birthday>
+      <employment_day>12.09.2008</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>18-001550</rem_id>
+      <fullname>Драюк Володимир Ілліч</fullname>
+      <business_phone>6-19-42</business_phone>
+      <home_phone>6-25-31</home_phone>
+      <mobile_phone>0978351568</mobile_phone>
+      <position>майстер Маньківської дільниці</position>
+      <birthday>27.01.1963</birthday>
+      <employment_day>11.01.1994</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>250674</rem_id>
+      <fullname>Горбатюк Василь Вікторович</fullname>
+      <business_phone>31-3-06</business_phone>
+      <mobile_phone>0975725420</mobile_phone>
+      <position>майстер Буцької дільниці</position>
+      <birthday>13.01.1968</birthday>
+      <employment_day>09.02.2001</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>140216</rem_id>
+      <fullname>Кіт Юрій Ігорович</fullname>
+      <home_phone>6-34-08</home_phone>
+      <mobile_phone>0976384758</mobile_phone>
+      <position>майстер</position>
+      <birthday>25.05.1989</birthday>
+      <employment_day>25.02.2009</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>01-000098</rem_id>
+      <fullname>Лелека Віктор Володимирович</fullname>
+      <home_phone>6-30-11</home_phone>
+      <mobile_phone>0965714849</mobile_phone>
+      <position>майстер</position>
+      <birthday>09.10.1981</birthday>
+      <employment_day>01.11.2004</employment_day>
+      <to_phone_book>1</to_phone_book>
+    </employee>
+    <employee>
+      <rem_id>080409</rem_id>
+      <fullname>Дудник Олександр Дмитрович</fullname>
+      <home_phone>6-20-61</home_phone>
+      <mobile_phone>0676452650</mobile_phone>
+      <position>водій</position>
+      <birthday>15.07.1956</birthday>
+      <employment_day>05.05.2003</employment_day>
+    </employee>
+    <employee>
+      <rem_id>18-001574</rem_id>
+      <fullname>Манжола Віктор Миколайович</fullname>
+      <mobile_phone>0988797772</mobile_phone>
+      <home_phone>6-10-66</home_phone>
+      <position>водій</position>
+      <birthday>18.09.1957</birthday>
+      <employment_day>19.04.1993</employment_day>
+    </employee>
+    <employee>
+      <rem_id>37-002629</rem_id>
+      <fullname>Бурлака Василь Сергійович</fullname>
+      <home_phone>6-20-01</home_phone>
+      <mobile_phone>0974404523</mobile_phone>
+      <position>водій</position>
+      <birthday>11.02.1962</birthday>
+      <employment_day>13.02.2001</employment_day>
+    </employee>
+    <employee>
+      <rem_id>04-000557</rem_id>
+      <fullname>Лещенко Петро Олександрович</fullname>
+      <home_phone>6-22-31</home_phone>
+      <position>водій</position>
+      <birthday>09.07.1956</birthday>
+      <employment_day>11.03.2014</employment_day>
+    </employee>
+    <employee>
+      <rem_id>13-001264</rem_id>
+      <fullname>Маковій Сергій Васильович</fullname>
+      <home_phone>6-26-64</home_phone>
+      <mobile_phone>0988195849</mobile_phone>
+      <position>водій</position>
+      <birthday>20.12.1966</birthday>
+      <employment_day>03.09.1991</employment_day>
+    </employee>
+    <employee>
+      <rem_id>49-003802</rem_id>
+      <fullname>Солонько Сергій Степанович</fullname>
+      <home_phone>6-28-32</home_phone>
+      <mobile_phone>0673796420</mobile_phone>
+      <position>водій</position>
+      <birthday>11.04.1963</birthday>
+      <employment_day>01.08.2008</employment_day>
+    </employee>
+    <employee>
+      <rem_id>28-002138</rem_id>
+      <fullname>Гурський Руслан Миколайович</fullname>
+      <position>водій</position>
+      <birthday>18.08.1977</birthday>
+      <employment_day>02.02.2007</employment_day>
+    </employee>
+    <employee>
+      <rem_id>02-000344</rem_id>
+      <fullname>Щур Юрій Васильович</fullname>
+      <home_phone>6-41-14</home_phone>
+      <position>водій</position>
+      <birthday>04.05.1989</birthday>
+      <employment_day>10.04.2013</employment_day>
+    </employee>
+    <employee>
+      <rem_id>250443</rem_id>
+      <fullname>Рябокінь Олександр Анатолійович</fullname>
+      <position>водій</position>
+      <birthday>18.08.1980</birthday>
+      <employment_day>03.06.2013</employment_day>
+    </employee>
+    <employee>
+      <rem_id>07-000671</rem_id>
+      <fullname>Плюта Сергій Олексійович</fullname>
+      <home_phone>6-21-69</home_phone>
+      <position>машиніст</position>
+      <birthday>08.07.1981</birthday>
+      <employment_day>02.08.2001</employment_day>
+    </employee>
+    <employee>
+      <rem_id>31-002387</rem_id>
+      <fullname>Юдченко Микола Федорович</fullname>
+      <home_phone>6-40-80</home_phone>
+      <mobile_phone>0981294157</mobile_phone>
+      <position>тракторист</position>
+      <birthday>01.01.1956</birthday>
+      <employment_day>15.09.2006</employment_day>
+    </employee>
+    <employee>
+      <rem_id>42-003096</rem_id>
+      <fullname>Сокотуха Олександр Степанович</fullname>
+      <home_phone>6-38-77</home_phone>
+      <mobile_phone>0969589462</mobile_phone>
+      <position>тракторист</position>
+      <birthday>18.03.1973</birthday>
+      <employment_day>13.04.2004</employment_day>
+    </employee>
+    <employee>
+      <rem_id>38-002774</rem_id>
+      <fullname>Дядя Микола Михайлович</fullname>
+      <home_phone>6-37-57</home_phone>
+      <mobile_phone>0986755099</mobile_phone>
+      <position>електромонтер</position>
+      <birthday>16.12.1961</birthday>
+      <employment_day>11.12.2000</employment_day>
+    </employee>
+    <employee>
+      <rem_id>12-001214</rem_id>
+      <fullname>Яненко Сергій Дмитрович</fullname>
+      <home_phone>6-32-61</home_phone>
+      <position>електромонтер</position>
+      <birthday>29.01.1968</birthday>
+      <employment_day>12.02.2001</employment_day>
+    </employee>
+    <employee>
+      <rem_id>31-002354</rem_id>
+      <fullname>Бондаренко Віктор Олексійович</fullname>
+      <mobile_phone>0966170746</mobile_phone>
+      <position>електромонтер</position>
+      <birthday>12.09.1973</birthday>
+      <employment_day>12.02.2001</employment_day>
+    </employee>
+    <employee>
+      <rem_id>02-000285</rem_id>
+      <fullname>Таран Анатолій Миколайович</fullname>
+      <mobile_phone>0978518801</mobile_phone>
+      <position>електромонтер з експлуатації лічильників</position>
+      <birthday>08.03.1978</birthday>
+      <employment_day>05.06.2001</employment_day>
+    </employee>
+    <employee>
+      <rem_id>07-000700</rem_id>
+      <fullname>Гончаренко Віталій Васильович</fullname>
+      <home_phone>6-11-87</home_phone>
+      <position>електромонтер</position>
+      <birthday>29.07.1985</birthday>
+      <employment_day>23.09.2005</employment_day>
+    </employee>
+    <employee>
+      <rem_id>18-003324</rem_id>
+      <fullname>Давидчик Олексій Іванович</fullname>
+      <home_phone>6-29-34</home_phone>
+      <position>електромонтер</position>
+      <birthday>09.03.1960</birthday>
+      <employment_day>19.05.2010</employment_day>
+    </employee>
+    <employee>
+      <rem_id>46-004024</rem_id>
+      <fullname>Кавун Петро Григорович</fullname>
+      <home_phone>6-28-84</home_phone>
+      <mobile_phone>0988714291</mobile_phone>
+      <position>електромонтер</position>
+      <birthday>09.11.1961</birthday>
+      <employment_day>03.11.2003</employment_day>
+    </employee>
+    <employee>
+      <rem_id>21-001797</rem_id>
+      <fullname>Корж Микола Володимирович</fullname>
+      <home_phone>6-29-41</home_phone>
+      <mobile_phone>0974851415</mobile_phone>
+      <position>електромонтер</position>
+      <birthday>16.05.1965</birthday>
+      <employment_day>09.09.1988</employment_day>
+    </employee>
+    <employee>
+      <rem_id>18-001553</rem_id>
+      <fullname>Драюк Володимир Володимирович</fullname>
+      <home_phone>6-25-31</home_phone>
+      <position>електромонтер</position>
+      <birthday>26.09.1987</birthday>
+      <employment_day>05.05.2009</employment_day>
+    </employee>
+    <employee>
+      <rem_id>250106</rem_id>
+      <fullname>Добровольський Віталій Валентинович</fullname>
+      <position>електромонтер</position>
+      <birthday>16.10.1991</birthday>
+      <employment_day>14.01.2013</employment_day>
+    </employee>
+    <employee>
+      <rem_id>39-002806</rem_id>
+      <fullname>Боднюк Віталій Анатолійович</fullname>
+      <position>електромонтер з випробувальних вимірювань</position>
+      <birthday>17.02.1988</birthday>
+      <employment_day>03.11.2008</employment_day>
+    </employee>
+    <employee>
+      <rem_id>18-003282</rem_id>
+      <fullname>Крамаренко Павло Володимирович</fullname>
+      <position>електромонтер</position>
+      <birthday>03.06.1982</birthday>
+      <employment_day>03.08.2006</employment_day>
+    </employee>
+    <employee>
+      <rem_id>28-002190</rem_id>
+      <fullname>Лелека Володимир Володимирович</fullname>
+      <home_phone>6-30-11</home_phone>
+      <position>електромонтер</position>
+      <birthday>28.01.1984</birthday>
+      <employment_day>22.11.2010</employment_day>
+    </employee>
+    <employee>
+      <rem_id>01-000144</rem_id>
+      <fullname>Макаренко Юрій Миколайович</fullname>
+      <home_phone>6-39-39</home_phone>
+      <mobile_phone>0987517510</mobile_phone>
+      <position>електромонтер</position>
+      <birthday>06.11.1962</birthday>
+      <employment_day>10.12.2010</employment_day>
+    </employee>
+    <employee>
+      <rem_id>08-000978</rem_id>
+      <fullname>Самелюк Іван Петрович</fullname>
+      <home_phone>6-18-13</home_phone>
+      <mobile_phone>0971461742</mobile_phone>
+      <position>електромонтер</position>
+      <birthday>23.11.1970</birthday>
+      <employment_day>16.11.1999</employment_day>
+    </employee>
+    <employee>
+      <rem_id>01-003634</rem_id>
+      <fullname>Сірченко Олександр Васильович</fullname>
+      <position>електромонтер</position>
+      <birthday>08.04.1966</birthday>
+      <employment_day>15.09.2000</employment_day>
+    </employee>
+    <employee>
+      <rem_id></rem_id>
+      <fullname>Макаренко Сергій Борисович</fullname>
+      <position>електромонтер</position>
+      <birthday>12.02.1987</birthday>
+      <employment_day>16.12.2013</employment_day>
+    </employee>
+    <employee>
+      <rem_id>250272</rem_id>
+      <fullname>Марищенко Олександр Іванович</fullname>
+      <mobile_phone>0965568606</mobile_phone>
+      <position>електромонтер</position>
+      <birthday>12.08.1971</birthday>
+      <employment_day>01.10.1999</employment_day>
+    </employee>
+    <employee>
+      <rem_id></rem_id>
+      <fullname>Миронюк Олег Олександрович</fullname>
+      <position>електромонтер</position>
+      <birthday>14.10.1992</birthday>
+      <employment_day>20.05.2014</employment_day>
+    </employee>
+    <employee>
+      <rem_id></rem_id>
+      <fullname>Парій Іван Вікторович</fullname>
+      <position>електромонтер</position>
+      <birthday>25.03.1988</birthday>
+      <employment_day>22.04.2014</employment_day>
+    </employee>
+    <employee>
+      <rem_id>37-002660</rem_id>
+      <fullname>Стороженко Олександр Васильович</fullname>
+      <home_phone>6-31-17</home_phone>
+      <mobile_phone>0968677576</mobile_phone>
+      <position>електромонтер</position>
+      <birthday>08.01.1979</birthday>
+      <employment_day>24.10.2006</employment_day>
+    </employee>
+    <employee>
+      <rem_id>01-003653</rem_id>
+      <fullname>Черватюк Микола Володимирович</fullname>
+      <home_phone>6-30-33</home_phone>
+      <position>електромонтер</position>
+      <birthday>24.03.1964</birthday>
+      <employment_day>23.09.2010</employment_day>
+    </employee>
+    <employee>
+      <rem_id>60-003008</rem_id>
+      <fullname>Чорний Олександр Валентинович</fullname>
+      <home_phone>6-30-32</home_phone>
+      <position>електромонтер</position>
+      <birthday>19.01.1986</birthday>
+      <employment_day>26.02.2014</employment_day>
+    </employee>
+    <employee>
+      <rem_id>03-000399</rem_id>
+      <fullname>Солонько Василь Ульянович</fullname>
+      <home_phone>6-12-08</home_phone>
+      <position>слюсар</position>
+      <birthday>11.07.1952</birthday>
+      <employment_day>04.10.1991</employment_day>
+    </employee>
+    <employee>
+      <rem_id>02-000324</rem_id>
+      <fullname>Ткаченко Наталія Павлівна</fullname>
+      <home_phone>6-13-63</home_phone>
+      <mobile_phone>0684701962</mobile_phone>
+      <position>контролер</position>
+      <birthday>24.09.1954</birthday>
+      <employment_day>19.12.1978</employment_day>
+    </employee>
+    <employee>
+      <rem_id>02-000320</rem_id>
+      <fullname>Галай Надія Іванівна</fullname>
+      <home_phone>6-33-80</home_phone>
+      <position>контролер</position>
+      <birthday>17.12.1965</birthday>
+      <employment_day>06.09.2001</employment_day>
+    </employee>
+    <employee>
+      <rem_id>60-002970</rem_id>
+      <fullname>Татуревич Наталія Сергіївна</fullname>
+      <home_phone>6-34-97</home_phone>
+      <mobile_phone>0967121381</mobile_phone>
+      <position>контролер</position>
+      <birthday>04.09.1981</birthday>
+      <employment_day>22.06.2001</employment_day>
+    </employee>
+    <employee>
+      <rem_id>07-000671</rem_id>
+      <fullname>Плюта Світлана Миколаївна</fullname>
+      <home_phone>6-21-69</home_phone>
+      <position>контролер</position>
+      <birthday>25.03.1985</birthday>
+      <employment_day>01.12.2010</employment_day>
+    </employee>
+    <employee>
+      <rem_id>08-000852</rem_id>
+      <fullname>Завірюха Тетяна Степанівна</fullname>
+      <home_phone>6-40-02</home_phone>
+      <mobile_phone>0973242342</mobile_phone>
+      <position>контролер</position>
+      <birthday>24.06.1967</birthday>
+      <employment_day>01.11.2005</employment_day>
+    </employee>
+    <employee>
+      <rem_id>02-000315</rem_id>
+      <fullname>Орловська Любов Іванівна</fullname>
+      <home_phone>6-33-12</home_phone>
+      <mobile_phone>0976381419</mobile_phone>
+      <position>контролер</position>
+      <birthday>30.08.1970</birthday>
+      <employment_day>27.09.2006</employment_day>
+    </employee>
+    <employee>
+      <rem_id>07-000747</rem_id>
+      <fullname>Кравчук Павло Григорович</fullname>
+      <position>контролер</position>
+      <birthday>14.07.1984</birthday>
+      <employment_day>05.09.2012</employment_day>
+    </employee>
+    <employee>
+      <rem_id>01-000143</rem_id>
+      <fullname>Мартинюк Віта Іванівна</fullname>
+      <position>контролер</position>
+      <birthday>09.08.1990</birthday>
+      <employment_day>09.02.2009</employment_day>
+    </employee>
+    <employee>
+      <rem_id>140266</rem_id>
+      <fullname>Гладченко Павло Вікторович</fullname>
+      <home_phone>72-2-22</home_phone>
+      <position>контролер</position>
+      <birthday>18.10.1986</birthday>
+      <employment_day>14.01.2013</employment_day>
+    </employee>
+    <employee>
+      <rem_id>080120</rem_id>
+      <fullname>Семченко Олександр Олександрович</fullname>
+      <position>контролер</position>
+      <birthday>24.12.1992</birthday>
+      <employment_day>23.01.2013</employment_day>
+    </employee>
+    <employee>
+      <rem_id>02-000285</rem_id>
+      <fullname>Таран Віта Анатоліївна</fullname>
+      <home_phone>6-30-31</home_phone>
+      <mobile_phone>0961764562</mobile_phone>
+      <position>контролер</position>
+      <birthday>05.02.1984</birthday>
+      <employment_day>22.06.2006</employment_day>
+    </employee>
+    <employee>
+      <rem_id>31-002327</rem_id>
+      <fullname>Рокошанська Алла Олексіївна</fullname>
+      <home_phone>6-19-50</home_phone>
+      <position>прибиральник</position>
+      <birthday>15.12.1969</birthday>
+      <employment_day>25.07.2013</employment_day>
+    </employee>
+    <employee>
+      <rem_id>03-000399</rem_id>
+      <fullname>Солонько Василь Ульянович</fullname>
+      <home_phone>6-12-08</home_phone>
+      <position>слюсар</position>
+      <birthday>11.07.1952</birthday>
+      <employment_day>04.10.1991</employment_day>
+    </employee>
+  </staff>
+</global>

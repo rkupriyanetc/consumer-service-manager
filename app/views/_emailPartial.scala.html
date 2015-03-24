@@ -1,0 +1,9 @@
+@(f: Form[_], constraints: Boolean = false)
+
+@import helper._
+
+@inputText(
+  f("email"),
+  '_showConstraints -> constraints,
+  '_label -> Messages("playauthenticate.login.email.placeholder")
+)

@@ -1,0 +1,20 @@
+
+@import helper._
+
+@main(Messages("page.staff.about.title")) {
+       
+  <div class="panel panel-success">
+    <div class="panel-heading">
+      <h3 class="panel-title">@Messages("page.staff.about.title")</h3>
+    </div>
+    <div class="panel-body">
+      
+      @helper.form(mk.ck.energy.csm.controllers.routes.Application.doListAboutStaft, 'class -> "form") {
+                 
+        <input type="submit" value='@Messages("button.staff.about.export")' class="btn btn-lg btn-success">   
+        
+      }
+      
+    </div>
+  </div>
+}

@@ -1,0 +1,213 @@
+page.home.title=Customer Service Manager
+page.home.home=Home
+page.home.about=About
+page.home.feedback=Feedback
+page.home.created=March 2014 year
+page.home.version=1.0-SNAPSHOT
+page.home.site=This is not the official site
+page.home.signup=Sign Up
+page.home.login=Login
+page.home.logout=Logout
+page.home.profile=Profile
+page.home.bind=Link
+page.home.rates=Rates
+page.home.admin=Administration Tools
+page.home.testAddr=Test adding Address
+
+main.menu.home.title=Home
+main.menu.about.title=About
+main.menu.feedback.title=Feedback
+main.menu.profile.title=Profile
+main.menu.oper.title=Operator
+main.menu.oper.scripts.title=Create script
+
+page.registered.title=Only registered customers
+
+page.admin.title=Administration Tools
+page.admin.adminTab.tabDBs=Database administration
+page.admin.adminTab.tabDBs.active=Active
+page.admin.adminTab.tabDBs.url=MongoDB URI
+page.admin.adminTab.tabDBs.test=Test connection
+page.admin.adminTab.tabDBs.mssql.database=MSSQL Database is {0}
+page.admin.adminTab.tabDBs.mssql.database.active=active
+page.admin.adminTab.tabDBs.mssql.database.noActive=no active
+
+page.admin.adminTab.tabUsers=Editing Users
+
+page.admin.adminTab.tabDBSynchronization=Database synchronization
+page.admin.adminTab.tabDBSynchronization.descriptions=Synchronization involves stepping through these actions.
+page.admin.adminTab.tabDBSynchronization.regions=Loading regions a file
+page.admin.adminTab.tabDBSynchronization.regions.edit=Edit addressTop.xml
+page.admin.adminTab.tabDBSynchronization.locations=Loading locations a file
+page.admin.adminTab.tabDBSynchronization.locations.edit=Edit addressLocation.xml
+page.admin.adminTab.tabDBSynchronization.selecting_locality=Selecting data from a table locations {0}. Fill the file addressLocation.xml
+page.admin.adminTab.tabDBSynchronization.locations.references=with reference to
+page.admin.adminTab.tabDBSynchronization.streets=Loading all streets a file
+page.admin.adminTab.tabDBSynchronization.selecting_streets=Selecting data from a table streets {0}.
+page.admin.adminTab.tabDBSynchronization.streets.edit=Edit addressStreet.xml
+page.admin.adminTab.tabDBSynchronization.fillingMeterDevices=Filling the collection meters from table {0}
+page.admin.adminTab.tabDBSynchronization.consumerUpdate=Download or upgrade of all physical consumers in their database
+
+page.admin.adminTab.hostChange.success=Host change success. You must sign in again to work
+
+page.admin.buttonGo=Administer
+page.admin.description=By means of control is only available to administrators and database administrators
+page.admin.addUser.title=Create new User
+page.admin.addUserOper.title=Create User Operator
+page.admin.addUserAdmin.title=Create User Administrator
+page.admin.addUser.success=Creating a user successfully
+page.admin.delUser.hint=Remove user
+page.admin.delUser.question=Are you sure you want to remove user?
+page.admin.delUser.success=User been removed successfully.
+page.admin.delUser.noSuccess=You can not remove himself.
+
+page.admin.user.email=User Email
+page.admin.user.password=User Password
+page.admin.user.passwordRepeat=Repeat Password
+page.admin.user.role=User Role
+page.admin.user.name=User Name
+page.admin.user.firstName=User First Name
+page.admin.user.lastName=User Last Name
+
+page.leadership.title=Guide REN
+
+page.phoneBook.title=Telephone directory
+page.phoneBook.codes=Dialing code
+
+button.admin.addUserOper=Create Operator
+button.admin.addUserAdmin=Create Administrator
+button.admin.addUser=Create Now
+button.admin.test=Test
+button.admin.synchronize=Synchronize
+button.navigator.first.title=First page
+button.navigator.previous.title=Previous page
+button.navigator.next.title=Next page
+button.navigator.last.title=Last page
+button.address.remove.title=Remove record
+button.address.remove.question=Do you want to delete the record?
+button.addrTop.save=Save file
+button.staff.about.export=Export to Excel
+
+text.about.play=Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis.
+text.about.bootstrap=Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis.
+text.about.play_authenticate=Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis.
+
+text.feedback.contact=Write to establish a link
+
+
+street.type.full.area=Area
+street.type.full.boulevard=Boulevard
+street.type.full.avenue=Avenue
+street.type.full.street=Street
+street.type.full.lane=Lane
+street.type.full.cul_de_sac=Cul_de_sac
+street.type.full.descent=Descent
+
+street.type.short.area=ar.
+street.type.short.boulevard=blv.
+street.type.short.avenue=avn.
+street.type.short.street=st.
+street.type.short.lane=ln.
+street.type.short.cul_de_sac=cul.
+street.type.short.descent=dsc.
+
+location.type.full.city=City
+location.type.full.hamlet=Hamlet
+location.type.full.township=Township
+location.type.full.village=Village
+location.type.full.capital=Capital center
+location.type.full.regional=Regional center
+location.type.full.district=District center
+location.type.full.bowery=Bowery
+
+location.type.short.city=c.
+location.type.short.hamlet=h.
+location.type.short.township=tsh.
+location.type.short.village=v.
+location.type.short.capital=capital
+location.type.short.regional=reg.
+location.type.short.district=dstr.
+location.type.short.bowery=bow.
+
+
+playauthenticate.login.email.placeholder=Your e-mail address
+playauthenticate.login.password.placeholder=Choose a password
+playauthenticate.login.password.repeat=Repeat chosen password
+playauthenticate.login.title=Login
+playauthenticate.login.password.placeholder=Password
+playauthenticate.login.now=Login now
+playauthenticate.login.forgot.password=Forgot your password?
+playauthenticate.login.oauth=or log in using one of the following providers:
+
+playauthenticate.signup.title=Signup
+playauthenticate.signup.name=Your name
+playauthenticate.signup.now=Sign up now
+playauthenticate.signup.oauth=or sign up using one of the following providers:
+
+playauthenticate.verify.account.title=E-mail verification required
+playauthenticate.verify.account.before=Before setting a password, you need to
+playauthenticate.verify.account.first=first verify your e-mail address
+
+playauthenticate.change.password.title=Change your password here
+playauthenticate.change.password.cta=Change my password
+
+playauthenticate.profile.title=User profile
+playauthenticate.profile.nick=Your nick is {0}
+playauthenticate.profile.mail=Your email address is {0}
+playauthenticate.profile.name=Your name is {0} {1} {2}
+playauthenticate.profile.unverified=unverified - click to verify
+playauthenticate.profile.verified=verified
+playauthenticate.profile.providers_many=There are {0} providers linked with your account:
+playauthenticate.profile.providers_one=There is one provider linked with your account:
+playauthenticate.profile.logged=You are currently logged in with:
+playauthenticate.profile.session=Your user ID is {0} and your session will expire on {1}
+playauthenticate.profile.session_endless=Your user ID is {0} and your session will not expire, as it is endless
+playauthenticate.profile.password_change=Change/set a password for your account
+playauthenticate.profile.roles=Roles :
+
+playauthenticate.merge.accounts.title=Merge accounts
+playauthenticate.merge.accounts.question=Do you want to merge your current account ({0}) with this account: {1}?
+playauthenticate.merge.accounts.true=Yes, merge these two accounts
+playauthenticate.merge.accounts.false=No, exit my current session and log in as a new user
+playauthenticate.merge.accounts.ok=OK
+
+playauthenticate.link.account.title=Link account
+playauthenticate.link.account.question=Link ({0}) with your user?
+playauthenticate.link.account.true=Yes, link this account
+playauthenticate.link.account.false=No, log out and create a new user with this account
+playauthenticate.link.account.ok=OK
+
+playauthenticate.verify.email.title=Verify your e-mail
+playauthenticate.verify.email.requirement=Before you can use PlayAuthenticate, you first need to verify your e-mail address.
+playauthenticate.verify.email.cta=An e-mail has been sent to the registered address. Please follow the embedded link to activate your account.
+
+playauthenticate.password.reset.title=Reset password
+playauthenticate.password.reset.cta=Reset my password
+
+playauthenticate.password.forgot.title=Forgot password
+playauthenticate.password.forgot.cta=Send reset instructions
+
+playauthenticate.email.signup.error.email_exists=Email already exists
+playauthenticate.password.signup.error.passwords_not_same=Passwords not same
+playauthenticate.password.login.unknown_user_or_pw=Unknown user or password.
+
+playauthenticate.change_password.error.passwords_not_same=Passwords do not match.
+playauthenticate.change_password.success=Password has been changed successfully.
+
+consumer.code.status.type.1=ACTIVE
+consumer.code.status.type.2=CLOSED
+consumer.code.status.type.3=OFF_ON_PILLAR
+consumer.code.status.type.4=TEMPORARILY
+consumer.code.status.type.5=WARNED
+consumer.code.status.type.6=OFF_ON_METER
+consumer.code.status.type.7=LITTLE_USE
+consumer.code.status.type.8=UNAVAILABLE_MORE_ONE_YEAR
+consumer.code.status.type.9=OFF_ON_PANEL
+
+place.meter.install.type.1=SAFE
+place.meter.install.type.2=APARTMENT
+place.meter.install.type.3=CORRIDOR
+place.meter.install.type.4=UNCOMFORTABLE
+place.meter.install.type.5=CONTAINER
+place.meter.install.type.6=ASCME
+place.meter.install.type.7=OTHER

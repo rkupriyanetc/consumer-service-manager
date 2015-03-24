@@ -1,0 +1,91 @@
+@(userForm: Form[_])
+
+@import helper._
+@import mk.ck.energy.csm.controllers._
+
+@main(Messages("page.home.admin")) {
+	
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">@Messages("page.admin.title")</h3>
+    </div>
+    
+    <div class="panel-body">
+     
+     @helper.form(routes.AdministrationTools.doAddUser, 'class -> "form") {
+        
+       @if(userForm.hasGlobalErrors) { 
+			   <div class="alert alert-danger">@userForm.globalError.message</div>
+			 }
+			 <div class="row">
+         
+         <div class="col-md-4 col-sm-4">           
+           @inputText(
+				     userForm("email"),
+				     '_label -> Messages("page.admin.user.email"),
+				     'class -> "form-control",
+             '_error -> userForm.error("email")
+				   )
+				 </div>
+				 <div class="col-md-4 col-sm-4">
+				   @inputPassword(
+				     userForm("password"),
+				     '_label -> Messages("page.admin.user.password")
+				   )
+				 </div>
+				 <div class="col-md-4 col-sm-4">
+				   @inputPassword(
+				     userForm("repeatPassword"),
+				     '_label -> Messages("page.admin.user.passwordRepeat"),
+				     'class -> "form-control",
+				     '_error -> userForm.error("password")
+				   )
+			   </div>
+			 </div>
+			
+			<div class="row">
+         
+         <div class="col-md-4 col-sm-4">
+				   @inputText(
+					   userForm("firstName"),
+					   '_label -> Messages("page.admin.user.firstName"),
+					   'class -> "form-control"
+					 )
+				 </div>
+				 <div class="col-md-4 col-sm-4">
+					 @inputText(
+					  userForm("name"),
+					  '_label -> Messages("page.admin.user.name"),
+					  'class -> "form-control"
+					)
+				</div>
+				<div class="col-md-4 col-sm-4">
+					@inputText(
+					  userForm("lastName"),
+					  '_label -> Messages("page.admin.user.lastName"),
+					  'class -> "form-control"
+					)
+				</div>				
+			</div>
+			
+			<div class="row">
+			  <div class="col-md-3 col-sm-3">
+				  @inputText(
+					  userForm("role"),
+					  '_label -> Messages("page.admin.user.role"),
+					  'class -> "form-control",
+					  'readonly -> "readonly"
+					)
+				</div>
+				<div class="col-md-6 col-sm-6">
+				  &nbsp;
+				</div>
+				
+				<div class="col-md-3 col-sm-3">
+			    <input type="submit" value='@Messages("button.admin.addUser")' class="btn btn-info">
+			  </div>
+			</div>			
+		 }
+	  </div>
+  </div>
+}

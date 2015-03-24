@@ -1,0 +1,22 @@
+@(f: Form[_], nameField: String, map: java.util.Map[String, String], labelField: String, multiples: Boolean = false, constraints: Boolean = false)
+
+@import helper._
+
+  @if(multiples) {
+    @select(
+      f(nameField),
+      options(map),
+      '_showConstraints -> constraints,
+      '_label -> labelField,
+      'rows -> 10,
+      'multiple -> "multiple"
+    )
+  } else {
+    @select(
+      f(nameField),
+      options(map),
+      '_showConstraints -> constraints,
+      '_label -> labelField,
+      'rows -> 10
+    )
+  }
