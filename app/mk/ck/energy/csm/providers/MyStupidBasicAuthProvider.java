@@ -29,14 +29,14 @@ public class MyStupidBasicAuthProvider extends BasicAuthProvider {
 	
 	@Override
 	protected AuthUser authenticateUser( final String username, final String password ) {
-		if ( username.equals( "example" ) && password.equals( "secret" ) )
+		if ( username.equals( "guests" ) && password.equals( "guests" ) )
 			return new AuthUser() {
 				
 				private static final long	serialVersionUID	= 1L;
 				
 				@Override
 				public String getId() {
-					return "example";
+					return "guests";
 				}
 				
 				@Override
