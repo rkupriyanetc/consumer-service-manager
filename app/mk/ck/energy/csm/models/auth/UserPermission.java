@@ -11,6 +11,8 @@ import com.mongodb.DBObject;
  */
 public class UserPermission implements Permission {
 	
+	static final String		DB_FIELD_VALUE	= "value";
+	
 	private final String	value;
 	
 	private UserPermission( final String value ) {
@@ -18,7 +20,7 @@ public class UserPermission implements Permission {
 	}
 	
 	public static UserPermission getInstance( final DBObject doc ) {
-		return new UserPermission( ( String )doc.get( "value" ) );
+		return new UserPermission( ( String )doc.get( DB_FIELD_VALUE ) );
 	}
 	
 	public static UserPermission getInstance( final String value ) {
@@ -31,6 +33,6 @@ public class UserPermission implements Permission {
 	}
 	
 	DBObject getDBObject() {
-		return new BasicDBObject( "value", value );
+		return new BasicDBObject( DB_FIELD_VALUE, value );
 	}
 }

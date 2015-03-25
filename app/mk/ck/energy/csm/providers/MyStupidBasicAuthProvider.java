@@ -23,25 +23,29 @@ import com.feth.play.module.pa.user.AuthUser;
 /** A really simple basic auth provider that accepts one hard coded user */
 public class MyStupidBasicAuthProvider extends BasicAuthProvider {
 	
+	public static String	GUEST_PROVIDER	= "basic";
+	
+	public static String	GUEST_ID				= "basic";
+	
 	public MyStupidBasicAuthProvider( final Application app ) {
 		super( app );
 	}
 	
 	@Override
 	protected AuthUser authenticateUser( final String username, final String password ) {
-		if ( username.equals( "guests" ) && password.equals( "guests" ) )
+		if ( username.equals( "guest" ) && password.equals( "guest" ) )
 			return new AuthUser() {
 				
 				private static final long	serialVersionUID	= 1L;
 				
 				@Override
 				public String getId() {
-					return "guests";
+					return GUEST_ID;
 				}
 				
 				@Override
 				public String getProvider() {
-					return "basic";
+					return GUEST_PROVIDER;
 				}
 			};
 		return null;
@@ -49,7 +53,7 @@ public class MyStupidBasicAuthProvider extends BasicAuthProvider {
 	
 	@Override
 	public String getKey() {
-		return "basic";
+		return GUEST_ID;
 	}
 	
 	/** Diplay the normal login form if HTTP authentication fails */

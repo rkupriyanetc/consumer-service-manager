@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import mk.ck.energy.csm.models.Database;
+import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,27 @@ import com.mongodb.QueryBuilder;
  */
 public class User implements Subject {
 	
-	private static final Logger						LOGGER					= LoggerFactory.getLogger( User.class );
+	private static final Logger						LOGGER										= LoggerFactory.getLogger( User.class );
+	
+	static final String										DB_FIELD_ID								= "_id";
+	
+	static final String										DB_FIELD_EMAIL						= "email";
+	
+	static final String										DB_FIELD_NAME							= "name";
+	
+	static final String										DB_FIELD_FIRST_NAME				= "first_name";
+	
+	static final String										DB_FIELD_LAST_NAME				= "last_name";
+	
+	static final String										DB_FIELD_LAST_LOGIN				= "last_login";
+	
+	static final String										DB_FIELD_ACTIVE						= "active";
+	
+	static final String										DB_FIELD_EMAIL_VALIDATED	= "validated";
+	
+	static final String										DB_FIELD_ROLES						= "roles";
+	
+	static final String										DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
 	
 	private String												id;
 	
@@ -59,16 +80,20 @@ public class User implements Subject {
 	
 	private boolean												emailValidated;
 	
-	private final List< UserRole >				roles						= new ArrayList< UserRole >( 0 );
+	private final List< UserRole >				roles											= new ArrayList< UserRole >( 0 );
 	
-	private final List< LinkedAccount >		linkedAccounts	= new ArrayList< LinkedAccount >( 0 );
+	private final List< LinkedAccount >		linkedAccounts						= new ArrayList< LinkedAccount >( 0 );
 	
-	private final List< UserPermission >	permissions			= new ArrayList< UserPermission >( 0 );
+	private final List< UserPermission >	permissions								= new ArrayList< UserPermission >( 0 );
 	
 	private User( final AuthUser authUser ) {
 		lastLogin = System.currentTimeMillis();
 		active = true;
-		roles.add( UserRole.USER );
+		if ( authUser.getProvider().equals( MyStupidBasicAuthProvider.GUEST_PROVIDER )
+				&& authUser.getId().equals( MyStupidBasicAuthProvider.GUEST_ID ) )
+			roles.add( UserRole.GUEST );
+		else
+			roles.add( UserRole.USER );
 		// user.permissions = new ArrayList<UserPermission>();
 		// user.permissions.add(UserPermission.findByValue("printers.edit"));
 		linkedAccounts.add( LinkedAccount.getInstance( authUser ) );
@@ -101,18 +126,18 @@ public class User implements Subject {
 	}
 	
 	private User( final DBObject doc ) {
-		this.id = ( String )doc.get( "_id" );
-		this.email = ( String )doc.get( "email" );
-		this.name = ( String )doc.get( "name" );
-		this.firstName = ( String )doc.get( "firstName" );
-		this.lastName = ( String )doc.get( "lastName" );
-		this.lastLogin = ( Long )doc.get( "lastLogin" );
-		this.active = ( Boolean )doc.get( "active" );
-		this.emailValidated = ( Boolean )doc.get( "validated" );
-		final BasicDBList dbRoles = ( BasicDBList )doc.get( "roles" );
+		this.id = ( String )doc.get( DB_FIELD_ID );
+		this.email = ( String )doc.get( DB_FIELD_EMAIL );
+		this.name = ( String )doc.get( DB_FIELD_NAME );
+		this.firstName = ( String )doc.get( DB_FIELD_FIRST_NAME );
+		this.lastName = ( String )doc.get( DB_FIELD_LAST_NAME );
+		this.lastLogin = ( Long )doc.get( DB_FIELD_LAST_LOGIN );
+		this.active = ( Boolean )doc.get( DB_FIELD_ACTIVE );
+		this.emailValidated = ( Boolean )doc.get( DB_FIELD_EMAIL_VALIDATED );
+		final BasicDBList dbRoles = ( BasicDBList )doc.get( DB_FIELD_ROLES );
 		for ( final Object elm : dbRoles )
 			roles.add( UserRole.getInstance( ( DBObject )elm ) );
-		final BasicDBList dbAccounts = ( BasicDBList )doc.get( "accs" );
+		final BasicDBList dbAccounts = ( BasicDBList )doc.get( DB_FIELD_LINKED_ACCOUNTS );
 		for ( final Object elm : dbAccounts )
 			linkedAccounts.add( LinkedAccount.getInstance( ( DBObject )elm ) );
 	}
@@ -168,7 +193,7 @@ public class User implements Subject {
 	}
 	
 	private static QueryBuilder getAuthUserFind( final AuthUserIdentity identity ) {
-		return QueryBuilder.start( "active" ).is( true ).and( "accs" )
+		return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_LINKED_ACCOUNTS )
 				.elemMatch( LinkedAccount.getInstance( identity ).getDBObject() );
 	}
 	
@@ -224,15 +249,16 @@ public class User implements Subject {
 	}
 	
 	private static QueryBuilder getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {
-		return getEmailUserFind( identity.getEmail() ).and( "accs" ).elemMatch(
-				new BasicDBObject( "provider", identity.getProvider() ) );
+		return getEmailUserFind( identity.getEmail() ).and( DB_FIELD_LINKED_ACCOUNTS ).elemMatch(
+				new BasicDBObject( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) );
 	}
 	
 	public static List< User > findByRole( final UserRole role ) throws UserNotFoundException {
 		final DBObject sort = new BasicDBObject();
-		sort.put( "roles", 1 );
+		sort.put( DB_FIELD_ROLES, 1 );
 		final DBCursor cursor = getUsersCollection().find(
-				QueryBuilder.start( "active" ).is( true ).and( "roles" ).elemMatch( role.getDBObject() ).get() ).sort( sort );
+				QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_ROLES ).elemMatch( role.getDBObject() ).get() )
+				.sort( sort );
 		if ( cursor == null ) {
 			LOGGER.warn( "Could not find users by role {}", role );
 			throw new UserNotFoundException();
@@ -253,22 +279,22 @@ public class User implements Subject {
 		final BasicDBList dbAccounts = new BasicDBList();
 		for ( final LinkedAccount acc : linkedAccounts )
 			dbAccounts.add( acc.getDBObject() );
-		final DBObject doc = new BasicDBObject( "_id", getOrCreateId() );
+		final DBObject doc = new BasicDBObject( DB_FIELD_ID, getOrCreateId() );
 		if ( email != null )
-			doc.put( "email", email );
+			doc.put( DB_FIELD_EMAIL, email );
 		if ( firstName != null )
-			doc.put( "firstName", firstName );
+			doc.put( DB_FIELD_FIRST_NAME, firstName );
 		if ( name != null )
-			doc.put( "name", name );
+			doc.put( DB_FIELD_NAME, name );
 		if ( lastName != null )
-			doc.put( "lastName", lastName );
-		doc.put( "active", active );
-		doc.put( "validated", emailValidated );
+			doc.put( DB_FIELD_LAST_NAME, lastName );
+		doc.put( DB_FIELD_ACTIVE, active );
+		doc.put( DB_FIELD_EMAIL_VALIDATED, emailValidated );
 		if ( !dbRoles.isEmpty() )
-			doc.put( "roles", dbRoles );
+			doc.put( DB_FIELD_ROLES, dbRoles );
 		if ( !dbAccounts.isEmpty() )
-			doc.put( "accs", dbAccounts );
-		doc.put( "lastLogin", lastLogin );
+			doc.put( DB_FIELD_LINKED_ACCOUNTS, dbAccounts );
+		doc.put( DB_FIELD_LAST_LOGIN, lastLogin );
 		return doc;
 	}
 	
@@ -290,7 +316,7 @@ public class User implements Subject {
 		otherUser.active = false;
 		final DBCollection users = getUsersCollection();
 		users.save( getDBObject() );
-		users.update( new BasicDBObject( "_id", otherUser.getId() ), otherUser.getDBObject() );
+		users.update( new BasicDBObject( DB_FIELD_ID, otherUser.getId() ), otherUser.getDBObject() );
 	}
 	
 	public static User create( final AuthUser authUser ) {
@@ -358,7 +384,7 @@ public class User implements Subject {
 	}
 	
 	public static User findById( final String userId ) throws UserNotFoundException {
-		final DBObject doc = getUsersCollection().findOne( QueryBuilder.start( "_id" ).is( userId ).get() );
+		final DBObject doc = getUsersCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( userId ).get() );
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", userId );
 			throw new UserNotFoundException();
@@ -384,7 +410,7 @@ public class User implements Subject {
 	}
 	
 	private static QueryBuilder getEmailUserFind( final String email ) {
-		return QueryBuilder.start( "active" ).is( true ).and( "email" ).is( email );
+		return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_EMAIL ).is( email );
 	}
 	
 	public LinkedAccount getAccountByProvider( final String providerKey ) {
@@ -432,7 +458,7 @@ public class User implements Subject {
 	}
 	
 	public static User remove( final String id ) throws UserNotFoundException {
-		final DBObject doc = getUsersCollection().findOne( QueryBuilder.start( "_id" ).is( id ).get() );
+		final DBObject doc = getUsersCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", id );
 			throw new UserNotFoundException();

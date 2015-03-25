@@ -9,6 +9,10 @@ import com.mongodb.DBObject;
  */
 public class LinkedAccount {
 	
+	static final String		DB_FIELD_PROVIDER	= "provider";
+	
+	static final String		DB_FIELD_USER_ID	= "user_id";
+	
 	private final String	provider;
 	
 	private final String	userId;
@@ -27,7 +31,7 @@ public class LinkedAccount {
 	}
 	
 	public static LinkedAccount getInstance( final DBObject doc ) {
-		return new LinkedAccount( ( String )doc.get( "provider" ), ( String )doc.get( "userId" ) );
+		return new LinkedAccount( ( String )doc.get( DB_FIELD_PROVIDER ), ( String )doc.get( DB_FIELD_USER_ID ) );
 	}
 	
 	public String getProvider() {
@@ -39,6 +43,6 @@ public class LinkedAccount {
 	}
 	
 	DBObject getDBObject() {
-		return new BasicDBObject( "provider", provider ).append( "userId", userId );
+		return new BasicDBObject( DB_FIELD_PROVIDER, provider ).append( DB_FIELD_USER_ID, userId );
 	}
 }
