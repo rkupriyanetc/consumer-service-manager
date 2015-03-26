@@ -57,6 +57,8 @@ public class Consumer {
 	 */
 	private User								user;
 	
+	private String							userId;
+	
 	private String							fullName;
 	
 	private Address							address;
@@ -82,6 +84,7 @@ public class Consumer {
 	private Consumer( final String id, final String userId ) throws ImpossibleCreatingException {
 		try {
 			this.user = User.findById( userId );
+			this.userId = user.getId();
 		}
 		catch ( final UserNotFoundException unfe ) {
 			this.user = null;
@@ -160,6 +163,14 @@ public class Consumer {
 	
 	public String getId() {
 		return id;
+	}
+	
+	public User getUser() {
+		return user;
+	}
+	
+	public String getUserId() {
+		return userId;
 	}
 	
 	public String getFullName() {
@@ -287,6 +298,13 @@ public class Consumer {
 			}
 		else
 			throw new ConsumerException( "Id should not be null or empty in Consumer.findById( id )" );
+	}
+	
+	public void joinConsumerElectricity( final User user ) {
+		this.user = user;
+		this.userId = user.getId();
+		this.active = true;
+		save( ( short )( UPDATING_READING_ACTIVE + UPDATING_READING_USER ) );
 	}
 	
 	public void save( final short updateSet ) {

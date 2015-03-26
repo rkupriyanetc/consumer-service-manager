@@ -19,9 +19,19 @@ import com.mongodb.WriteResult;
 
 public class AddressLocation {
 	
-	private static final Logger		LOGGER	= LoggerFactory.getLogger( AddressLocation.class );
+	private static final Logger		LOGGER											= LoggerFactory.getLogger( AddressLocation.class );
+	
+	static final String						DB_FIELD_ID									= "_id";
+	
+	static final String						DB_FIELD_LOCATIONS_TYPES		= "locations_types";
+	
+	static final String						DB_FIELD_LOCATION						= "location";
+	
+	static final String						DB_FIELD_REF_TO_TOP_ADDRESS	= "ref_id";
 	
 	private long									id;
+	
+	private long									refId;
 	
 	/**
 	 * Типи населенних пунктів: столиця, обласний центр, районний, місто, село,
@@ -58,16 +68,16 @@ public class AddressLocation {
 		final AddressLocation addr = new AddressLocation();
 		addr.locationsTypes = new ArrayList< LocationType >( 0 );
 		try {
-			addr.topAddress = AddressTop.findById( ( ( Long )dbo.get( "refId" ) ).longValue() );
+			addr.topAddress = AddressTop.findById( ( ( Long )dbo.get( DB_FIELD_REF_TO_TOP_ADDRESS ) ).longValue() );
 		}
 		catch ( final AddressNotFoundException anfe ) {
 			throw new ImpossibleCreatingException( "Cannot AddressLocation.create( DBObject dbo ) because could not find AddressTop" );
 		}
-		addr.location = ( String )dbo.get( "location" );
-		final BasicDBList getList = ( BasicDBList )dbo.get( "locationsTypes" );
+		addr.location = ( String )dbo.get( DB_FIELD_LOCATION );
+		final BasicDBList getList = ( BasicDBList )dbo.get( DB_FIELD_LOCATIONS_TYPES );
 		for ( final Object o : getList )
 			addr.locationsTypes.add( LocationType.valueOf( ( String )o ) );
-		addr.id = ( ( Long )dbo.get( "_id" ) ).longValue();
+		addr.id = ( ( Long )dbo.get( DB_FIELD_ID ) ).longValue();
 		return addr;
 	}
 	
@@ -77,6 +87,10 @@ public class AddressLocation {
 	
 	public void setId( final long id ) {
 		this.id = id;
+	}
+	
+	public long getRefId() {
+		return refId;
 	}
 	
 	public String getLocation() {
@@ -101,19 +115,23 @@ public class AddressLocation {
 	
 	public void setTopAddress( final AddressTop topAddress ) {
 		this.topAddress = topAddress;
+		if ( topAddress != null )
+			this.refId = topAddress.getId();
+		else
+			this.refId = 0;
 	}
 	
 	private long getOrCreateId() {
 		long id = 1;
 		try {
-			final DBObject doc = new BasicDBObject( "_id", id );
+			final DBObject doc = new BasicDBObject( DB_FIELD_ID, id );
 			final DBObject rec = getAddressCollection().find( doc ).one();
 			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( ( Long )rec.get( "_id" ) ).longValue();
+				id = ( ( Long )rec.get( DB_FIELD_ID ) ).longValue();
 			else {
-				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( "_id", -1 ) ).limit( 1 );
+				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( DB_FIELD_ID, -1 ) ).limit( 1 );
 				if ( cursor.hasNext() ) {
-					final Object o = cursor.next().get( "_id" );
+					final Object o = cursor.next().get( DB_FIELD_ID );
 					final Long i = ( Long )o;
 					id = i.longValue() + 1;
 				}
@@ -131,16 +149,13 @@ public class AddressLocation {
 	DBObject getDBObject() {
 		final DBObject doc = new BasicDBObject();
 		if ( location != null && !location.isEmpty() )
-			doc.put( "location", location );
+			doc.put( DB_FIELD_LOCATION, location );
 		final BasicDBList dbTypes = new BasicDBList();
 		for ( final LocationType type : locationsTypes )
 			dbTypes.add( type.name() );
 		if ( !dbTypes.isEmpty() )
-			doc.put( "locationsTypes", dbTypes );
-		if ( topAddress != null )
-			doc.put( "refId", topAddress.getId() );
-		else
-			doc.put( "refId", 0L );
+			doc.put( DB_FIELD_LOCATIONS_TYPES, dbTypes );
+		doc.put( DB_FIELD_REF_TO_TOP_ADDRESS, refId );
 		return doc;
 	}
 	
@@ -148,19 +163,19 @@ public class AddressLocation {
 		if ( locationsTypes.contains( LocationType.CAPITAL ) ) {
 			final BasicDBList dbo = new BasicDBList();
 			dbo.add( LocationType.CAPITAL.name() );
-			final DBObject qu = new BasicDBObject( "locationsTypes", new BasicDBObject( "$in", dbo ) );
+			final DBObject qu = new BasicDBObject( DB_FIELD_LOCATIONS_TYPES, new BasicDBObject( "$in", dbo ) );
 			if ( getAddressCollection().find( qu ).hasNext() )
 				throw new ImpossibleCreatingException();
 		}
 		final DBObject o = getDBObject();
-		o.put( "_id", getOrCreateId() );
+		o.put( DB_FIELD_ID, getOrCreateId() );
 		getAddressCollection().save( o );
 	}
 	
 	public static AddressLocation findById( final long id ) throws AddressNotFoundException {
 		if ( id > 0 )
 			try {
-				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( "_id" ).is( id ).get() );
+				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
 				try {
 					final AddressLocation addr = AddressLocation.create( doc );
 					return addr;
@@ -178,7 +193,8 @@ public class AddressLocation {
 	
 	public static AddressLocation findByAddressTop( final AddressTop topAddr ) throws AddressNotFoundException {
 		try {
-			final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( "refId" ).is( topAddr.getId() ).get() );
+			final DBObject doc = getAddressCollection().findOne(
+					QueryBuilder.start( DB_FIELD_REF_TO_TOP_ADDRESS ).is( topAddr.getId() ).get() );
 			if ( doc == null )
 				throw new AddressNotFoundException( "Address " + topAddr.getName() + " not found" );
 			final AddressLocation addr = AddressLocation.create( doc );
@@ -195,16 +211,14 @@ public class AddressLocation {
 	
 	public static List< AddressLocation > findByAddress( final DBObject address ) throws AddressNotFoundException {
 		final List< AddressLocation > locations = new ArrayList< AddressLocation >( 0 );
-		final BasicDBList lts = ( BasicDBList )address.get( "locationsTypes" );
+		final BasicDBList lts = ( BasicDBList )address.get( DB_FIELD_LOCATIONS_TYPES );
 		final DBObject qu = new BasicDBObject();
 		if ( lts != null )
-			qu.put( "locationsTypes", new BasicDBObject( "$in", lts ) );
-		final DBObject name = ( DBObject )address.get( "location" );
+			qu.put( DB_FIELD_LOCATIONS_TYPES, new BasicDBObject( "$in", lts ) );
+		final String name = ( String )address.get( DB_FIELD_LOCATION );
 		if ( name != null )
-			qu.put( "location", name.get( "location" ) );
-		final DBObject ref = ( DBObject )address.get( "refId" );
-		if ( ref != null )
-			qu.put( "refId", ref.get( "refId" ) );
+			qu.put( DB_FIELD_LOCATION, name );
+		qu.put( DB_FIELD_REF_TO_TOP_ADDRESS, ( ( Long )address.get( DB_FIELD_REF_TO_TOP_ADDRESS ) ).longValue() );
 		try {
 			final DBCursor cursor = getAddressCollection().find( qu );
 			if ( cursor == null )
@@ -228,7 +242,7 @@ public class AddressLocation {
 	public static List< AddressLocation > findByLocationName( final String locationName ) throws AddressNotFoundException {
 		final List< AddressLocation > locations = new ArrayList< AddressLocation >( 0 );
 		try {
-			final DBCursor cursor = getAddressCollection().find( QueryBuilder.start( "location" ).is( locationName ).get() );
+			final DBCursor cursor = getAddressCollection().find( QueryBuilder.start( DB_FIELD_LOCATION ).is( locationName ).get() );
 			if ( cursor == null )
 				throw new AddressNotFoundException( "Location by " + locationName + " not found" );
 			while ( cursor.hasNext() ) {
@@ -253,7 +267,7 @@ public class AddressLocation {
 			throw new ForeignKeyException( "This record has dependencies" );
 		else
 			try {
-				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( "_id" ).is( addr.id ).get() );
+				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( addr.id ).get() );
 				final WriteResult wr = getAddressCollection().remove( doc );
 				LOGGER.debug( "AddressLocation object removed {}", wr );
 			}
