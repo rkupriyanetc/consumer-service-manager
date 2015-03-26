@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import mk.ck.energy.csm.models.auth.User;
-import mk.ck.energy.csm.models.auth.UserNotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,27 +32,48 @@ public class Consumer {
 	
 	public static final short		UPDATING_READING_ADDRESS_PLACE		= 8;
 	
-	public static final short		UPDATING_READING_DOCUMENTS				= 16;
+	public static final short		UPDATING_READING_ADDRESS_OTHER		= 16;
 	
-	public static final short		UPDATING_READING_ACTIVE						= 32;
+	public static final short		UPDATING_READING_ADDRESS_FULL			= 32;
 	
-	public static final short		UPDATING_READING_METERS						= 64;
+	public static final short		UPDATING_READING_DOCUMENTS				= 64;
 	
 	public static final short		UPDATING_READING_OTHER						= 128;
 	
-	public static final short		UPDATING_READING_ADDRESS_OTHER		= 256;
+	public static final short		UPDATING_READING_ACTIVE						= 256;
 	
-	public static final short		READING_ID												= 512;
+	public static final short		READING_ID												= 16384;
 	
 	private static final Logger	LOGGER														= LoggerFactory.getLogger( User.class );
 	
 	/**
-	 * Customer's account from Paked soft: Особовий рахунок
+	 * This are fields names
 	 */
-	private String							id;
+	static final String					DB_FIELD_ID												= "_id";
+	
+	static final String					DB_FIELD_USER_ID									= "user_id";
+	
+	static final String					DB_FIELD_FULLNAME									= "full_name";
+	
+	static final String					DB_FIELD_ADDRESS									= "address";
+	
+	static final String					DB_FIELD_ACTIVE										= "active";
+	
+	static final String					DB_FIELD_DOCUMENT									= "document";
+	
+	static final String					DB_FIELD_CONSUMER_TYPE						= "type";
+	
+	static final String					DB_FIELD_STATUS_TYPE							= "status";
+	
+	static final String					DB_FIELD_HOUSE_TYPE								= "house_type";
 	
 	/**
-	 * auth.User.id
+	 * Customer's account from Paked soft: Особовий рахунок
+	 */
+	private final String				id;
+	
+	/**
+	 * auth.User
 	 */
 	private User								user;
 	
@@ -71,7 +91,7 @@ public class Consumer {
 	/**
 	 * All possible meters of consumer
 	 */
-	private final List< Meter >	meters;
+	private List< Meter >				meters;
 	
 	private Document						document;
 	
@@ -81,24 +101,20 @@ public class Consumer {
 	
 	private Set< HouseType >		houseType;
 	
-	private Consumer( final String id, final String userId ) throws ImpossibleCreatingException {
-		try {
-			this.user = User.findById( userId );
+	private Consumer( final String id, final User user, final String fullName, final Address address, final boolean active,
+			final ConsumerStatusType statusType, final ConsumerType consumerType ) {
+		if ( user != null ) {
+			this.user = user;
 			this.userId = user.getId();
 		}
-		catch ( final UserNotFoundException unfe ) {
-			this.user = null;
-			this.consumerType = null;
-			LOGGER.warn( "Sorry. Consumer user can not be created. Could not find auth user by id {}.", userId );
-			throw new ImpossibleCreatingException();
-		}
-		finally {
-			this.id = id;
-			this.active = false;
-			this.consumerType = ConsumerType.INDIVIDUAL;
-			this.meters = new ArrayList< Meter >( 0 );
-			this.houseType = new HashSet< HouseType >( 0 );
-		}
+		this.id = id;
+		this.active = active;
+		this.consumerType = consumerType == null ? ConsumerType.INDIVIDUAL : consumerType;
+		this.statusType = statusType == null ? ConsumerStatusType.TEMPORARILY : statusType;
+		this.fullName = fullName;
+		this.address = address;
+		this.meters = new ArrayList< Meter >( 0 );
+		this.houseType = new HashSet< HouseType >( 0 );
 	}
 	
 	private Consumer( final String id ) {
@@ -110,55 +126,45 @@ public class Consumer {
 		this.houseType = new HashSet< HouseType >( 0 );
 	}
 	
-	public static Consumer create( final String id, final String userId ) throws ImpossibleCreatingException {
-		return new Consumer( id, userId );
-	}
-	
 	public static Consumer create( final String id ) {
 		return new Consumer( id );
 	}
 	
-	public static Consumer create( final DBObject dbo, final short readingSet ) {
-		if ( dbo == null )
-			return null;
-		final String id = ( String )dbo.get( "_id" );
-		final String userid = ( String )dbo.get( "user_id" );
-		Consumer consumer = null;
-		if ( userid != null && !userid.isEmpty() )
-			try {
-				consumer = new Consumer( id, userid );
+	private Consumer( final DBObject dbo, final short readingSet ) throws ImpossibleCreatingException {
+		if ( dbo != null ) {
+			id = ( String )dbo.get( DB_FIELD_ID );
+			userId = ( String )dbo.get( DB_FIELD_USER_ID );
+			if ( UPDATING_READING_ALL == readingSet || ( readingSet & UPDATING_READING_FULLNAME ) == UPDATING_READING_FULLNAME )
+				fullName = ( String )dbo.get( DB_FIELD_FULLNAME );
+			if ( UPDATING_READING_ALL == readingSet || ( readingSet & UPDATING_READING_ACTIVE ) == UPDATING_READING_ACTIVE )
+				active = ( ( Boolean )dbo.get( DB_FIELD_ACTIVE ) ).booleanValue();
+			if ( UPDATING_READING_ALL == readingSet || ( readingSet & UPDATING_READING_ADDRESS_FULL ) == UPDATING_READING_ADDRESS_FULL )
+				address = ( Address )dbo.get( DB_FIELD_ADDRESS );
+			/**
+			 * final long idPlace = ( ( Long )dbo.get( "address.addressPlace_id" )
+			 * ).longValue();
+			 * final Address address = new Address();
+			 * try {
+			 * address.setAddressLocation( AddressLocation.findById( idLocation ) );
+			 * address.setAddressPlace( AddressPlace.findById( idPlace ) );
+			 * }
+			 * catch ( final AddressNotFoundException anfe ) {
+			 * LOGGER.error( "Can not find address" );
+			 * }
+			 * address.setHouse( ( String )dbo.get( "address.house" ) );
+			 * address.setApartment( ( String )dbo.get( "address.apartment" ) );
+			 * address.setPostalCode( ( String )dbo.get( "address.postal_code" ) );
+			 */
+			if ( UPDATING_READING_ALL == readingSet || ( readingSet & UPDATING_READING_DOCUMENTS ) == UPDATING_READING_DOCUMENTS )
+				document = ( Document )dbo.get( DB_FIELD_DOCUMENT );
+			// ( String )dbo.get( "document.passport_series" ), ( String )dbo.get(
+			// "document.passport_number" ) );
+			if ( UPDATING_READING_ALL == readingSet || ( readingSet & UPDATING_READING_OTHER ) == UPDATING_READING_OTHER ) {
+				consumerType = ConsumerType.valueOf( ( String )dbo.get( DB_FIELD_CONSUMER_TYPE ) );
+				statusType = ConsumerStatusType.valueOf( ( String )dbo.get( DB_FIELD_STATUS_TYPE ) );
 			}
-			catch ( final ImpossibleCreatingException ice ) {}
-		else
-			consumer = new Consumer( id );
-		if ( readingSet < READING_ID )
-			if ( consumer != null ) {
-				consumer.fullName = ( String )dbo.get( "full_name" );
-				consumer.active = ( ( Boolean )dbo.get( "active" ) ).booleanValue();
-				final long idLocation = ( ( Long )dbo.get( "address.addressLocation_id" ) ).longValue();
-				final long idPlace = ( ( Long )dbo.get( "address.addressPlace_id" ) ).longValue();
-				final Address address = new Address();
-				try {
-					address.setAddressLocation( AddressLocation.findById( idLocation ) );
-					address.setAddressPlace( AddressPlace.findById( idPlace ) );
-				}
-				catch ( final AddressNotFoundException anfe ) {
-					LOGGER.error( "Can not find address" );
-				}
-				address.setHouse( ( String )dbo.get( "address.house" ) );
-				address.setApartment( ( String )dbo.get( "address.apartment" ) );
-				address.setPostalCode( ( String )dbo.get( "address.postal_code" ) );
-				consumer.setAddress( address );
-				final Document docum = new Document( ( String )dbo.get( "document.id_code" ),
-						( String )dbo.get( "document.passport_series" ), ( String )dbo.get( "document.passport_number" ) );
-				consumer.setDocuments( docum );
-				consumer.consumerType = ( ConsumerType )dbo.get( "consumer_type" );
-				consumer.statusType = ConsumerStatusType.valueOf( ( String )dbo.get( "status" ) );
-				final BasicDBList getList = ( BasicDBList )dbo.get( "meters" );
-				for ( final Object o : getList )
-					consumer.meters.add( ( Meter )o );
-			}
-		return consumer;
+		} else
+			throw new ImpossibleCreatingException( "The parameter dbObject should not be null in create Consumer" );
 	}
 	
 	public String getId() {
@@ -242,11 +248,11 @@ public class Consumer {
 		short up = 0;
 		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_USER ) == UPDATING_READING_USER )
 			if ( user != null )
-				doc.put( "user_id", user.getId() );
+				doc.put( DB_FIELD_USER_ID, userId );
 		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_FULLNAME ) == UPDATING_READING_FULLNAME )
-			doc.put( "full_name", fullName );
+			doc.put( DB_FIELD_FULLNAME, fullName );
 		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_ACTIVE ) == UPDATING_READING_ACTIVE )
-			doc.put( "active", active );
+			doc.put( DB_FIELD_ACTIVE, active );
 		if ( UPDATING_READING_ALL == updateSet
 				|| ( updateSet & UPDATING_READING_ADDRESS_LOCATION ) == UPDATING_READING_ADDRESS_LOCATION )
 			up += Address.UPDATING_READING_ADDRESS_LOCATION;
@@ -258,29 +264,22 @@ public class Consumer {
 			up = 0;
 		if ( address != null ) {
 			final DBObject addr = address.getDBObject( up );
-			doc.put( "address", addr );
+			doc.put( DB_FIELD_ADDRESS, addr );
 		}
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_METERS ) == UPDATING_READING_METERS )
-			if ( !meters.isEmpty() ) {
-				final BasicDBList met = new BasicDBList();
-				for ( final Meter meter : meters )
-					met.add( meter.getDBObject( Meter.UPDATING_READING_ALL ) );
-				doc.put( "meters", met );
-			}
 		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_DOCUMENTS ) == UPDATING_READING_DOCUMENTS )
 			if ( document != null ) {
 				final DBObject docs = document.getDBObject();
-				doc.put( "document", docs );
+				doc.put( DB_FIELD_DOCUMENT, docs );
 			}
 		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_OTHER ) == UPDATING_READING_OTHER ) {
-			doc.put( "consumer_type", consumerType.name() );
+			doc.put( DB_FIELD_CONSUMER_TYPE, consumerType.name() );
 			if ( statusType != null )
-				doc.put( "status", statusType.name() );
+				doc.put( DB_FIELD_STATUS_TYPE, statusType.name() );
 			if ( !houseType.isEmpty() ) {
 				final BasicDBList hType = new BasicDBList();
 				for ( final HouseType ht : houseType )
 					hType.add( ht.name() );
-				doc.put( "house_type", hType );
+				doc.put( DB_FIELD_HOUSE_TYPE, hType );
 			}
 		}
 		return new BasicDBObject( "$set", doc );
@@ -289,12 +288,15 @@ public class Consumer {
 	public static Consumer findById( final String id, final short updateSet ) throws ConsumerException {
 		if ( id == null || !id.isEmpty() )
 			try {
-				final DBObject doc = getConsumerCollection().findOne( QueryBuilder.start( "_id" ).is( id ).get() );
-				final Consumer consumer = Consumer.create( doc, updateSet );
+				final DBObject doc = getConsumerCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
+				final Consumer consumer = new Consumer( doc, updateSet );
 				return consumer;
 			}
 			catch ( final MongoException me ) {
 				throw new ConsumerException( "Exception in Consumer.findById( id ) of DBCollection", me );
+			}
+			catch ( final ImpossibleCreatingException ice ) {
+				throw new ConsumerException( "The Consumer was found by " + id + ". Error creating consumer!" );
 			}
 		else
 			throw new ConsumerException( "Id should not be null or empty in Consumer.findById( id )" );
@@ -308,7 +310,7 @@ public class Consumer {
 	}
 	
 	public void save( final short updateSet ) {
-		final DBObject query = new BasicDBObject( "_id", id );
+		final DBObject query = new BasicDBObject( DB_FIELD_ID, id );
 		getConsumerCollection().update( query, getDBObject( updateSet ), true, false );
 	}
 	
