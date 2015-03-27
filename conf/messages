@@ -162,8 +162,9 @@ playauthenticate.profile.providers_one=There is one provider linked with your ac
 playauthenticate.profile.logged=You are currently logged in with:
 playauthenticate.profile.session=Your user ID is {0} and your session will expire on {1}
 playauthenticate.profile.session_endless=Your user ID is {0} and your session will not expire, as it is endless
-playauthenticate.profile.password_change=Change/set a password for your account
+playauthenticate.profile.password_change=Change/set a password
 playauthenticate.profile.roles=Roles :
+playauthenticate.profile.join_consumer.electricity=Join consumer electricity
 
 playauthenticate.merge.accounts.title=Merge accounts
 playauthenticate.merge.accounts.question=Do you want to merge your current account ({0}) with this account: {1}?

@@ -1,7 +1,11 @@
 package mk.ck.energy.csm.controllers;
 
 import static play.data.Form.form;
+
+import java.util.List;
+
 import mk.ck.energy.csm.models.auth.User;
+import mk.ck.energy.csm.models.auth.UserRole;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthProvider;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthUser;
 import play.data.Form;
@@ -16,6 +20,8 @@ import views.html.account.ask_merge;
 import views.html.account.link;
 import views.html.account.password_change;
 import views.html.account.unverified;
+import views.html.account.joinConsumer;
+import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.SubjectPresent;
 
 import com.feth.play.module.pa.PlayAuthenticate;
@@ -71,9 +77,92 @@ public class Account extends Controller {
 		}
 	}
 	
+	public static class AppendConsumer {
+		
+		@MinLength( 5 )
+		@Required
+		private String					id;
+		
+		@Required
+		private String					fullName;
+		
+		@Required
+		private List< String >	topAddress;
+		
+		@Required
+		private List< String >	locationAddress;
+		
+		@Required
+		private List< String >	placeAddress;
+		
+		@Required
+		private String					house;
+		
+		@Required
+		private String					apartment;
+		
+		public String getId() {
+			return id;
+		}
+		
+		public void setId( final String id ) {
+			this.id = id;
+		}
+		
+		public String getFullName() {
+			return fullName;
+		}
+		
+		public void setFullName( final String fullName ) {
+			this.fullName = fullName;
+		}
+		
+		public List< String > getTopAddress() {
+			return topAddress;
+		}
+		
+		public void setTopAddress( final List< String > topAddress ) {
+			this.topAddress = topAddress;
+		}
+		
+		public List< String > getLocationAddress() {
+			return locationAddress;
+		}
+		
+		public void setLocationAddress( final List< String > locationAddress ) {
+			this.locationAddress = locationAddress;
+		}
+		
+		public List< String > getPlaceAddress() {
+			return placeAddress;
+		}
+		
+		public void setPlaceAddress( final List< String > placeAddress ) {
+			this.placeAddress = placeAddress;
+		}
+		
+		public String getHouse() {
+			return house;
+		}
+		
+		public void setHouse( final String house ) {
+			this.house = house;
+		}
+		
+		public String getApartment() {
+			return apartment;
+		}
+		
+		public void setApartment( final String apartment ) {
+			this.apartment = apartment;
+		}
+	}
+	
 	private static final Form< Accept >					ACCEPT_FORM						= form( Accept.class );
 	
 	private static final Form< PasswordChange >	PASSWORD_CHANGE_FORM	= form( PasswordChange.class );
+	
+	private static final Form< AppendConsumer >	APPEND_CONSUMER_FORM	= form( AppendConsumer.class );
 	
 	@SubjectPresent
 	public static Result link() {
@@ -172,6 +261,35 @@ public class Account extends Controller {
 	
 	@SubjectPresent
 	public static Result doMerge() {
+		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
+		// this is the currently logged in user
+		final AuthUser aUser = PlayAuthenticate.getUser( session() );
+		// this is the user that was selected for a login
+		final AuthUser bUser = PlayAuthenticate.getMergeUser( session() );
+		if ( bUser == null )
+			// user to merge with could not be found, silently redirect to login
+			return redirect( routes.Application.index() );
+		final Form< Accept > filledForm = ACCEPT_FORM.bindFromRequest();
+		if ( filledForm.hasErrors() )
+			// User did not select whether to merge or not merge
+			return badRequest( ask_merge.render( filledForm, aUser, bUser ) );
+		else {
+			// User made a choice :)
+			final boolean merge = filledForm.get().getAccept();
+			if ( merge )
+				flash( Application.FLASH_MESSAGE_KEY, Messages.get( "playauthenticate.accounts.merge.success" ) );
+			return PlayAuthenticate.merge( ctx(), merge );
+		}
+	}
+	
+	@Group( UserRole.USER_ROLE_NAME )
+	public static Result joinConsumerElectricity() {
+		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
+		return ok( joinConsumer.render() );
+	}
+	
+	@Group( UserRole.USER_ROLE_NAME )
+	public static Result doJoinConsumerElectricity() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		// this is the currently logged in user
 		final AuthUser aUser = PlayAuthenticate.getUser( session() );

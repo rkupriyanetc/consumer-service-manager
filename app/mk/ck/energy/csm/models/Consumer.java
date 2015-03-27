@@ -101,22 +101,26 @@ public class Consumer {
 	
 	private Set< HouseType >		houseType;
 	
-	private Consumer( final String id, final User user, final String fullName, final Address address, final boolean active,
-			final ConsumerStatusType statusType, final ConsumerType consumerType ) {
-		if ( user != null ) {
-			this.user = user;
-			this.userId = user.getId();
-		}
-		this.id = id;
-		this.active = active;
-		this.consumerType = consumerType == null ? ConsumerType.INDIVIDUAL : consumerType;
-		this.statusType = statusType == null ? ConsumerStatusType.TEMPORARILY : statusType;
-		this.fullName = fullName;
-		this.address = address;
-		this.meters = new ArrayList< Meter >( 0 );
-		this.houseType = new HashSet< HouseType >( 0 );
-	}
-	
+	/**
+	 * private Consumer( final String id, final User user, final String fullName,
+	 * final Address address, final boolean active,
+	 * final ConsumerStatusType statusType, final ConsumerType consumerType ) {
+	 * if ( user != null ) {
+	 * this.user = user;
+	 * this.userId = user.getId();
+	 * }
+	 * this.id = id;
+	 * this.active = active;
+	 * this.consumerType = consumerType == null ? ConsumerType.INDIVIDUAL :
+	 * consumerType;
+	 * this.statusType = statusType == null ? ConsumerStatusType.TEMPORARILY :
+	 * statusType;
+	 * this.fullName = fullName;
+	 * this.address = address;
+	 * this.meters = new ArrayList< Meter >( 0 );
+	 * this.houseType = new HashSet< HouseType >( 0 );
+	 * }
+	 */
 	private Consumer( final String id ) {
 		this.id = id;
 		this.active = false;
@@ -127,6 +131,7 @@ public class Consumer {
 	}
 	
 	public static Consumer create( final String id ) {
+		LOGGER.debug( "It creates consumer {}", id );
 		return new Consumer( id );
 	}
 	

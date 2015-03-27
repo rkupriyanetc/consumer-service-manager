@@ -238,8 +238,9 @@ playauthenticate.profile.providers_one=Існує один провайдер, �
 playauthenticate.profile.logged=На даний час ви увійшли як:
 playauthenticate.profile.session=Ваш ідентифікатор {0} і ваша сесія закінчується {1}
 playauthenticate.profile.session_endless=Ваш ідентифікатор {0} і ваша сесія є нескінченною
-playauthenticate.profile.password_change=Змінити/встановити пароль для вашого облікового запису
+playauthenticate.profile.password_change=Змінити/встановити пароль
 playauthenticate.profile.roles=Ролі :
+playauthenticate.profile.join_consumer.electricity=Приєднати споживача електроенергії
 
 playauthenticate.merge.accounts.title=Merge accounts
 playauthenticate.merge.accounts.question=Do you want to merge your current account ({0}) with this account: {1}?

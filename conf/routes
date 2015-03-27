@@ -47,6 +47,9 @@ POST    /accounts/link              	     mk.ck.energy.csm.controllers.Account.d
 GET     /accounts/merge             	     mk.ck.energy.csm.controllers.Account.askMerge
 POST    /accounts/merge             	     mk.ck.energy.csm.controllers.Account.doMerge
 
+GET     /accounts/joinConsumer             mk.ck.energy.csm.controllers.Account.joinConsumerElectricity
+POST    /accounts/joinConsumer             mk.ck.energy.csm.controllers.Account.doJoinConsumerElectricity
+
 GET     /login/password/forgot     		     mk.ck.energy.csm.controllers.Signup.forgotPassword(email: String ?= "")
 POST    /login/password/forgot     		     mk.ck.energy.csm.controllers.Signup.doForgotPassword
 
