@@ -143,6 +143,8 @@ page.rates.title_rate_without_tax=Без ПДВ
 page.rates.title_place_village=В селі
 page.rates.title_place_city=В місті
 
+page.profile.consumer.id=Особовий рахунок РЕМ
+
 button.admin.addUserOper=Створити оператора
 button.admin.addUserAdmin=Створити адміністратора
 button.admin.addUser=Створити

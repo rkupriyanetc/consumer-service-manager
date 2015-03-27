@@ -1,4 +1,4 @@
-
+@(f: Form[_])
 
 @main(Messages("playauthenticate.profile.join_consumer.electricity"), "joinConsumer") {
   
@@ -7,7 +7,22 @@
       <h3 class="panel-title">@Messages("playauthenticate.profile.join_consumer.electricity")</h3>
     </div>
     <div class="panel-body">
-    
+      
+      <div class="row">
+        <div class="col-md-4 col-sm-4">
+          @inputText(
+            f("id"),
+            '_label -> Messages("page.profile.consumer.id")
+          )
+        </div>
+        <div class="col-md-5 col-sm-5">
+          @checkbox(
+            step("addressTopXML")
+          )
+        </div>
+      </div>
+      <hr/>
+      
     </div>
     
   </div>

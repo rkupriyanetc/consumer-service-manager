@@ -17,11 +17,12 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.account.ask_link;
 import views.html.account.ask_merge;
+import views.html.account.joinConsumer;
 import views.html.account.link;
 import views.html.account.password_change;
 import views.html.account.unverified;
-import views.html.account.joinConsumer;
 import be.objectify.deadbolt.java.actions.Group;
+import be.objectify.deadbolt.java.actions.Restrict;
 import be.objectify.deadbolt.java.actions.SubjectPresent;
 
 import com.feth.play.module.pa.PlayAuthenticate;
@@ -100,6 +101,8 @@ public class Account extends Controller {
 		
 		@Required
 		private String					apartment;
+		
+		public AppendConsumer() {}
 		
 		public String getId() {
 			return id;
@@ -282,32 +285,24 @@ public class Account extends Controller {
 		}
 	}
 	
-	@Group( UserRole.USER_ROLE_NAME )
+	@Restrict( @Group( UserRole.USER_ROLE_NAME ) )
 	public static Result joinConsumerElectricity() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
-		return ok( joinConsumer.render() );
+		final Form< AppendConsumer > filledForm = APPEND_CONSUMER_FORM.bindFromRequest();
+		final AppendConsumer ac = new AppendConsumer();
+		return ok( joinConsumer.render( filledForm.fill( ac ) ) );
 	}
 	
-	@Group( UserRole.USER_ROLE_NAME )
+	@Restrict( @Group( UserRole.USER_ROLE_NAME ) )
 	public static Result doJoinConsumerElectricity() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
-		// this is the currently logged in user
-		final AuthUser aUser = PlayAuthenticate.getUser( session() );
-		// this is the user that was selected for a login
-		final AuthUser bUser = PlayAuthenticate.getMergeUser( session() );
-		if ( bUser == null )
-			// user to merge with could not be found, silently redirect to login
-			return redirect( routes.Application.index() );
-		final Form< Accept > filledForm = ACCEPT_FORM.bindFromRequest();
+		final Form< AppendConsumer > filledForm = APPEND_CONSUMER_FORM.bindFromRequest();
 		if ( filledForm.hasErrors() )
-			// User did not select whether to merge or not merge
-			return badRequest( ask_merge.render( filledForm, aUser, bUser ) );
+			// User did not select whether to link or not link
+			return badRequest( joinConsumer.render( filledForm ) );
 		else {
-			// User made a choice :)
-			final boolean merge = filledForm.get().getAccept();
-			if ( merge )
-				flash( Application.FLASH_MESSAGE_KEY, Messages.get( "playauthenticate.accounts.merge.success" ) );
-			return PlayAuthenticate.merge( ctx(), merge );
+			final AppendConsumer u = filledForm.get();
+			return Application.profile();
 		}
 	}
 }
