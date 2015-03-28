@@ -1,4 +1,8 @@
-@(f: Form[_])
+@(joinForm: Form[_])
+
+@import helper._
+@import mk.ck.energy.csm.controllers._
+@import mk.ck.energy.csm.models.AddressTop
 
 @main(Messages("playauthenticate.profile.join_consumer.electricity"), "joinConsumer") {
   
@@ -8,21 +12,41 @@
     </div>
     <div class="panel-body">
       
-      <div class="row">
-        <div class="col-md-4 col-sm-4">
-          @inputText(
-            f("id"),
-            '_label -> Messages("page.profile.consumer.id")
-          )
+      @helper.form(routes.Account.doJoinConsumerElectricity, 'class -> "form") {
+        @if(joinForm.hasGlobalErrors) {
+          <div class="alert alert-danger">@joinForm.globalError.message</div>
+        }
+        <div class="text-center"><h3><font color="blue">@Messages("page.profile.consumer.description")</font></h3></div><br/>
+        
+        <div class="row">
+          <div class="col-md-2 col-sm-2">
+            @inputText(
+              joinForm("id"),
+              '_label -> Messages("page.profile.consumer.id"),
+              'size -> 10,
+              'class -> "form-control"
+            )
+          </div>
+          
+          <div class="col-md-7 col-sm-7">
+            @inputText(
+              joinForm("fullName"),
+              '_label -> Messages("page.profile.consumer.fullname"),
+              'size -> 35,
+              'class -> "form-control"
+            )
+          </div>
+          
+          <div class="col-md-3 col-sm-3">
+            @defining(AddressTop.getMap()) { map =>
+              @if(map != null) {
+                @_selectPartial(joinForm, "topAddress", map, Messages("page.profile.consumer.addressTop"), false, true)
+              }
+            }
+          </div>
         </div>
-        <div class="col-md-5 col-sm-5">
-          @checkbox(
-            step("addressTopXML")
-          )
-        </div>
-      </div>
-      <hr/>
-      
+        <hr/>
+      }
     </div>
     
   </div>

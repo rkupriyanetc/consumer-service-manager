@@ -80,7 +80,6 @@ public class Account extends Controller {
 	
 	public static class AppendConsumer {
 		
-		@MinLength( 5 )
 		@Required
 		private String					id;
 		
