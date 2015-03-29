@@ -1,4 +1,4 @@
-@(joinForm: Form[_])
+@(joinForm: Form[_], addrLacations: java.util.Map[String, String])
 
 @import helper._
 @import mk.ck.energy.csm.controllers._
@@ -38,9 +38,14 @@
           </div>
           
           <div class="col-md-3 col-sm-3">
+            <label>@Messages("page.profile.consumer.addressTop")</label>
             @defining(AddressTop.getMap()) { map =>
               @if(map != null) {
-                @_selectPartial(joinForm, "topAddress", map, Messages("page.profile.consumer.addressTop"), false, true)
+                <select id="topAddress.id" name="topAddress.id" onchange="onChangeAddressTopSelect(this)">
+                  @for((key,value) <- map) {
+                    <option value="@key">@value</option>
+                  }
+                </select>
               }
             }
           </div>

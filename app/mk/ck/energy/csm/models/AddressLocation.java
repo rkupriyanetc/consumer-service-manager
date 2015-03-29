@@ -1,7 +1,9 @@
 package mk.ck.energy.csm.models;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -191,14 +193,18 @@ public class AddressLocation {
 			throw new AddressNotFoundException( "ID must be greater than zero in AddressLocation.findById( id )" );
 	}
 	
-	public static AddressLocation findByAddressTop( final AddressTop topAddr ) throws AddressNotFoundException {
+	public static List< AddressLocation > findByAddressTop( final AddressTop topAddr ) throws AddressNotFoundException {
+		final List< AddressLocation > locations = new ArrayList< AddressLocation >( 0 );
 		try {
-			final DBObject doc = getAddressCollection().findOne(
-					QueryBuilder.start( DB_FIELD_REF_TO_TOP_ADDRESS ).is( topAddr.getId() ).get() );
-			if ( doc == null )
+			final DBCursor cur = getAddressCollection().find( new BasicDBObject( DB_FIELD_REF_TO_TOP_ADDRESS, topAddr.getId() ) );
+			if ( cur == null )
 				throw new AddressNotFoundException( "Address " + topAddr.getName() + " not found" );
-			final AddressLocation addr = AddressLocation.create( doc );
-			return addr;
+			while ( cur.hasNext() ) {
+				final DBObject o = cur.next();
+				final AddressLocation addr = AddressLocation.create( o );
+				locations.add( addr );
+			}
+			return locations;
 		}
 		catch ( final MongoException me ) {
 			return null;
@@ -278,6 +284,19 @@ public class AddressLocation {
 	
 	private static boolean hasChildren( final AddressLocation addr ) {
 		return false;
+	}
+	
+	public static Map< String, String > getMap( final long refId ) {
+		final Map< String, String > references = new LinkedHashMap< String, String >();
+		for ( final DBObject o : getAddressCollection().find( new BasicDBObject( DB_FIELD_REF_TO_TOP_ADDRESS, refId ) ) ) {
+			final String name = ( String )o.get( DB_FIELD_LOCATIONS_TYPES ) + " " + ( String )o.get( DB_FIELD_LOCATION );
+			final String _id = ( ( Long )o.get( DB_FIELD_ID ) ).toString();
+			references.put( _id, name );
+		}
+		if ( references.isEmpty() )
+			return null;
+		else
+			return references;
 	}
 	
 	public static List< AddressLocation > asClassType( final List< DBObject > all ) {

@@ -175,8 +175,8 @@ public class AddressTop {
 		if ( b )
 			return true;
 		try {
-			final AddressLocation al = AddressLocation.findByAddressTop( addr );
-			return al != null;
+			final List< AddressLocation > al = AddressLocation.findByAddressTop( addr );
+			return !al.isEmpty();
 		}
 		catch ( final AddressNotFoundException anfe ) {
 			return false;

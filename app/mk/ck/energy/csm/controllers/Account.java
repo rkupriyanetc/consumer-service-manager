@@ -2,12 +2,19 @@ package mk.ck.energy.csm.controllers;
 
 import static play.data.Form.form;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import mk.ck.energy.csm.models.AddressLocation;
 import mk.ck.energy.csm.models.auth.User;
 import mk.ck.energy.csm.models.auth.UserRole;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthProvider;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthUser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import play.data.Form;
 import play.data.format.Formats.NonEmpty;
 import play.data.validation.Constraints.MinLength;
@@ -29,6 +36,8 @@ import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.user.AuthUser;
 
 public class Account extends Controller {
+	
+	private static final Logger	LOGGER	= LoggerFactory.getLogger( Account.class );
 	
 	public static class Accept {
 		
@@ -285,11 +294,16 @@ public class Account extends Controller {
 	}
 	
 	@Restrict( @Group( UserRole.USER_ROLE_NAME ) )
-	public static Result joinConsumerElectricity() {
+	public static Result joinConsumerElectricity( final Long idAddrTop ) {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< AppendConsumer > filledForm = APPEND_CONSUMER_FORM.bindFromRequest();
 		final AppendConsumer ac = new AppendConsumer();
-		return ok( joinConsumer.render( filledForm.fill( ac ) ) );
+		Map< String, String > loc;
+		if ( idAddrTop != null && idAddrTop.longValue() != 0 )
+			loc = AddressLocation.getMap( idAddrTop.longValue() );
+		else
+			loc = new HashMap< String, String >( 0 );
+		return ok( joinConsumer.render( filledForm.fill( ac ), loc ) );
 	}
 	
 	@Restrict( @Group( UserRole.USER_ROLE_NAME ) )
@@ -298,10 +312,15 @@ public class Account extends Controller {
 		final Form< AppendConsumer > filledForm = APPEND_CONSUMER_FORM.bindFromRequest();
 		if ( filledForm.hasErrors() )
 			// User did not select whether to link or not link
-			return badRequest( joinConsumer.render( filledForm ) );
+			return badRequest( joinConsumer.render( filledForm, new HashMap< String, String >( 0 ) ) );
 		else {
 			final AppendConsumer u = filledForm.get();
 			return Application.profile();
 		}
+	}
+	
+	public static Result onChangeAddressTopSelect( final Long idTopAddr ) {
+		LOGGER.trace( "Selected id is {}", idTopAddr.longValue() );
+		return ok( joinConsumer.render( null, new HashMap< String, String >( 0 ) ) );
 	}
 }
