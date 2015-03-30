@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import mk.ck.energy.csm.models.auth.User;
+import mk.ck.energy.csm.models.util.AnyConsumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,7 @@ import com.mongodb.QueryBuilder;
 /**
  * @author RVK
  */
-public class Consumer {
+public class Consumer implements AnyConsumer {
 	
 	public static final short		UPDATING_READING_ALL							= 0;
 	
@@ -172,10 +173,12 @@ public class Consumer {
 			throw new ImpossibleCreatingException( "The parameter dbObject should not be null in create Consumer" );
 	}
 	
+	@Override
 	public String getId() {
 		return id;
 	}
 	
+	@Override
 	public User getUser() {
 		return user;
 	}
@@ -184,6 +187,7 @@ public class Consumer {
 		return userId;
 	}
 	
+	@Override
 	public String getFullName() {
 		return fullName;
 	}
@@ -192,6 +196,7 @@ public class Consumer {
 		this.fullName = fullName;
 	}
 	
+	@Override
 	public Address getAddress() {
 		return address;
 	}
@@ -200,6 +205,7 @@ public class Consumer {
 		this.address = address;
 	}
 	
+	@Override
 	public boolean isActive() {
 		return active;
 	}
@@ -208,12 +214,18 @@ public class Consumer {
 		this.active = active;
 	}
 	
+	@Override
 	public List< Meter > getMeters() {
 		return meters;
 	}
 	
 	public boolean addMeters( final Meter meter ) {
 		return meters.add( meter );
+	}
+	
+	@Override
+	public String getOrganization() {
+		return "M REM";
 	}
 	
 	public Document getDocument() {
