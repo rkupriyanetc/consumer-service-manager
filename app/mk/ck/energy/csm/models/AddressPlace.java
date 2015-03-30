@@ -14,7 +14,13 @@ import com.mongodb.QueryBuilder;
 
 public class AddressPlace {
 	
-	private static final Logger	LOGGER	= LoggerFactory.getLogger( AddressPlace.class );
+	private static final Logger	LOGGER								= LoggerFactory.getLogger( AddressPlace.class );
+	
+	static final String					DB_FIELD_ID						= "_id";
+	
+	static final String					DB_FIELD_STREET_NAME	= "street";
+	
+	static final String					DB_FIELD_STREET_TYPE	= "street_type";
 	
 	private long								id;
 	
@@ -41,9 +47,9 @@ public class AddressPlace {
 		if ( dbo == null )
 			return null;
 		final AddressPlace addr = new AddressPlace();
-		addr.streetType = StreetType.valueOf( ( String )dbo.get( "streetType" ) );
-		addr.street = ( String )dbo.get( "street" );
-		addr.id = ( ( Long )dbo.get( "_id" ) ).longValue();
+		addr.streetType = StreetType.valueOf( ( String )dbo.get( DB_FIELD_STREET_TYPE ) );
+		addr.street = ( String )dbo.get( DB_FIELD_STREET_NAME );
+		addr.id = ( ( Long )dbo.get( DB_FIELD_ID ) ).longValue();
 		return addr;
 	}
 	
@@ -73,11 +79,11 @@ public class AddressPlace {
 			final DBObject doc = getDBObject();
 			final DBObject rec = getAddressCollection().find( doc ).one();
 			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( ( Long )rec.get( "_id" ) ).intValue();
+				id = ( ( Long )rec.get( DB_FIELD_ID ) ).intValue();
 			else {
-				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( "_id", -1 ) ).limit( 1 );
+				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( DB_FIELD_ID, -1 ) ).limit( 1 );
 				if ( cursor.hasNext() ) {
-					final Object o = cursor.next().get( "_id" );
+					final Object o = cursor.next().get( DB_FIELD_ID );
 					final Long i = ( Long )o;
 					id = i.longValue() + 1;
 				}
@@ -96,8 +102,8 @@ public class AddressPlace {
 	DBObject getDBObject() {
 		final DBObject doc = new BasicDBObject();
 		if ( street != null && !street.isEmpty() )
-			doc.put( "street", street );
-		doc.put( "streetType", streetType.name() );
+			doc.put( DB_FIELD_STREET_NAME, street );
+		doc.put( DB_FIELD_STREET_TYPE, streetType.name() );
 		return doc;
 	}
 	
@@ -105,7 +111,7 @@ public class AddressPlace {
 		final DBObject o = getDBObject();
 		if ( getAddressCollection().find( o ).count() < 1 ) {
 			id = getOrCreateId();
-			o.put( "_id", id );
+			o.put( DB_FIELD_ID, id );
 			getAddressCollection().save( o );
 		}
 	}
@@ -113,7 +119,7 @@ public class AddressPlace {
 	public static AddressPlace find( final String streetName, final StreetType streetType ) throws AddressNotFoundException {
 		try {
 			final DBObject doc = getAddressCollection().findOne(
-					QueryBuilder.start( "street" ).is( streetName ).and( "streetType" ).is( streetType.name() ).get() );
+					QueryBuilder.start( DB_FIELD_STREET_NAME ).is( streetName ).and( DB_FIELD_STREET_TYPE ).is( streetType.name() ).get() );
 			if ( doc == null )
 				throw new AddressNotFoundException( StreetType.optionsShortname().get( streetType.name() ) + " " + streetName
 						+ " not found" );
@@ -128,7 +134,7 @@ public class AddressPlace {
 	public static AddressPlace findById( final long id ) throws AddressNotFoundException {
 		if ( id > 0 )
 			try {
-				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( "_id" ).is( id ).get() );
+				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
 				final AddressPlace addr = AddressPlace.create( doc );
 				return addr;
 			}

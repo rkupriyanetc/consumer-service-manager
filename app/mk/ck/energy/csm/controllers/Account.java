@@ -319,8 +319,12 @@ public class Account extends Controller {
 		}
 	}
 	
-	public static Result onChangeAddressTopSelect( final Long idTopAddr ) {
-		LOGGER.trace( "Selected id is {}", idTopAddr.longValue() );
-		return ok( joinConsumer.render( null, new HashMap< String, String >( 0 ) ) );
+	public static Result onChangeAddressTopSelect( final Long addrId ) {
+		LOGGER.trace( "Selected id is {}", addrId );
+		final Map< String, String > vals = AddressLocation.getMap( addrId );
+		final StringBuilder buf = new StringBuilder();
+		for ( final Map.Entry< String, String > entry : vals.entrySet() )
+			buf.append( "<option value='" ).append( entry.getKey() ).append( "'>" ).append( entry.getValue() ).append( "</option>" );
+		return ok( buf.toString() );
 	}
 }

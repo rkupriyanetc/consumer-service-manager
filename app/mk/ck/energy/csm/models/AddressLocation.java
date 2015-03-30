@@ -293,10 +293,7 @@ public class AddressLocation {
 			final String _id = ( ( Long )o.get( DB_FIELD_ID ) ).toString();
 			references.put( _id, name );
 		}
-		if ( references.isEmpty() )
-			return null;
-		else
-			return references;
+		return references;
 	}
 	
 	public static List< AddressLocation > asClassType( final List< DBObject > all ) {

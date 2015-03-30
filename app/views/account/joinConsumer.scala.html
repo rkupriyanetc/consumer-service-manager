@@ -41,13 +41,21 @@
             <label>@Messages("page.profile.consumer.addressTop")</label>
             @defining(AddressTop.getMap()) { map =>
               @if(map != null) {
-                <select id="topAddress.id" name="topAddress.id" onchange="onChangeAddressTopSelect(this)">
+                <select id="topAddress" name="topAddress.id" >
+                  <option value="0" selected>---select something---</option>
                   @for((key,value) <- map) {
                     <option value="@key">@value</option>
                   }
                 </select>
               }
             }
+            
+          </div>
+          
+          <div class="col-md-3 col-sm-3">
+            <label>@Messages("page.profile.consumer.addressBottom")</label>
+                <select id="bottomSelect" name="bottomAddress.id" >
+                </select>
           </div>
         </div>
         <hr/>
@@ -55,5 +63,6 @@
     </div>
     
   </div>
+<script src='@controllers.routes.Assets.at("js/join-consumer.js")'></script>
 }
       

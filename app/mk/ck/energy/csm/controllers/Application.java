@@ -152,9 +152,10 @@ public class Application extends Controller {
 	}
 	
 	public static Result jsRoutes() {
-		return ok(
-				Routes.javascriptRouter( "jsRoutes", mk.ck.energy.csm.controllers.routes.javascript.Signup.forgotPassword(),
-						mk.ck.energy.csm.controllers.routes.javascript.Account.onChangeAddressTopSelect() ) ).as( "text/javascript" );
+		return ok( Routes.javascriptRouter( "jsRoutes", //
+				routes.javascript.Signup.forgotPassword(), //
+				routes.javascript.Account.onChangeAddressTopSelect() //
+				) ).as( "text/javascript" );
 	}
 	
 	public static Result doSignup() {

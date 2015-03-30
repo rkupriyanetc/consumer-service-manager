@@ -1,4 +1,4 @@
-name := """consumer-service-manager"""
+name := "consumer-service-manager"
 
 version := "1.0-SNAPSHOT"
 
@@ -21,8 +21,11 @@ libraryDependencies ++= Seq(
   "com.feth"             %% "play-authenticate"       % "0.6.8",
   "org.mongodb"          %  "mongo-java-driver"       % "2.13.0",
   "org.apache.poi"       %  "poi"                     % "3.11",
-  "org.apache.poi"       %  "poi-ooxml"               % "3.11"
+  "org.apache.poi"       %  "poi-ooxml"               % "3.11",
+  "org.webjars"          %  "select2"                 % "4.0.0-rc.2"
 )
 
 //  Uncomment the next line for local development of the Play Authenticate core:
 //lazy val playAuthenticate = project.in(file("modules/play-authenticate")).enablePlugins(PlayJava)
+
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8")

@@ -18,7 +18,13 @@ import com.mongodb.WriteResult;
 
 public class AddressTop {
 	
-	private static final Logger	LOGGER	= LoggerFactory.getLogger( AddressTop.class );
+	private static final Logger	LOGGER							= LoggerFactory.getLogger( AddressTop.class );
+	
+	static final String					DB_FIELD_ID					= "_id";
+	
+	static final String					DB_FIELD_NAME				= "name";
+	
+	static final String					DB_FIELD_REF_TO_TOP	= "ref_id";
 	
 	/**
 	 * Id of Region or District name
@@ -52,9 +58,9 @@ public class AddressTop {
 	
 	public static AddressTop create( final DBObject dbo ) {
 		final AddressTop addr = new AddressTop();
-		addr.name = ( String )dbo.get( "name" );
-		addr.refId = ( ( Long )dbo.get( "refId" ) ).longValue();
-		addr.id = ( ( Long )dbo.get( "_id" ) ).longValue();
+		addr.name = ( String )dbo.get( DB_FIELD_NAME );
+		addr.refId = ( ( Long )dbo.get( DB_FIELD_REF_TO_TOP ) ).longValue();
+		addr.id = ( ( Long )dbo.get( DB_FIELD_ID ) ).longValue();
 		return addr;
 	}
 	
@@ -81,15 +87,15 @@ public class AddressTop {
 	private long getOrCreateId() {
 		long id = 1;
 		try {
-			final DBObject doc = new BasicDBObject( "refId", refId );
-			doc.put( "name", name );
+			final DBObject doc = new BasicDBObject( DB_FIELD_REF_TO_TOP, refId );
+			doc.put( DB_FIELD_NAME, name );
 			final DBObject rec = getAddressCollection().find( doc ).one();
 			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( ( Long )rec.get( "_id" ) ).longValue();
+				id = ( ( Long )rec.get( DB_FIELD_ID ) ).longValue();
 			else {
-				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( "_id", -1 ) ).limit( 1 );
+				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( DB_FIELD_ID, -1 ) ).limit( 1 );
 				if ( cursor.hasNext() ) {
-					final Object o = cursor.next().get( "_id" );
+					final Object o = cursor.next().get( DB_FIELD_ID );
 					final Long i = ( Long )o;
 					id = i.longValue() + 1;
 				}
@@ -106,18 +112,18 @@ public class AddressTop {
 	
 	DBObject getDBObject() {
 		id = getOrCreateId();
-		final DBObject doc = new BasicDBObject( "_id", id );
+		final DBObject doc = new BasicDBObject( DB_FIELD_ID, id );
 		if ( name != null && !name.isEmpty() )
-			doc.put( "name", name );
-		doc.put( "refId", refId );
+			doc.put( DB_FIELD_NAME, name );
+		doc.put( DB_FIELD_REF_TO_TOP, refId );
 		return doc;
 	}
 	
 	public void save() {
 		final DBObject o = new BasicDBObject();
 		if ( name != null && !name.isEmpty() )
-			o.put( "name", name );
-		o.put( "refId", refId );
+			o.put( DB_FIELD_NAME, name );
+		o.put( DB_FIELD_REF_TO_TOP, refId );
 		if ( getAddressCollection().find( o ).count() < 1 )
 			getAddressCollection().save( getDBObject() );
 	}
@@ -125,7 +131,7 @@ public class AddressTop {
 	public static AddressTop findById( final long id ) throws AddressNotFoundException {
 		if ( id > 0 )
 			try {
-				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( "_id" ).is( id ).get() );
+				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
 				final AddressTop addr = AddressTop.create( doc );
 				return addr;
 			}
@@ -143,7 +149,7 @@ public class AddressTop {
 		if ( name == null || name.isEmpty() )
 			throw new AddressNotFoundException( "The parameter cannot be empty" );
 		try {
-			final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( "name" ).is( name ).get() );
+			final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_NAME ).is( name ).get() );
 			if ( doc == null )
 				throw new AddressNotFoundException( "Address " + name + " not found" );
 			final AddressTop addr = AddressTop.create( doc );
@@ -159,7 +165,7 @@ public class AddressTop {
 			throw new ForeignKeyException( "This record has dependencies" );
 		else
 			try {
-				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( "_id" ).is( addr.id ).get() );
+				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( addr.id ).get() );
 				final WriteResult wr = getAddressCollection().remove( doc );
 				LOGGER.debug( "AddressTop object removed {}", wr );
 			}
@@ -169,7 +175,7 @@ public class AddressTop {
 	}
 	
 	private static boolean hasChildren( final AddressTop addr ) {
-		final DBObject doc = new BasicDBObject( "refId", addr.id );
+		final DBObject doc = new BasicDBObject( DB_FIELD_REF_TO_TOP, addr.id );
 		final DBObject rec = getAddressCollection().find( doc ).one();
 		final boolean b = rec != null && !rec.toMap().isEmpty();
 		if ( b )
@@ -202,16 +208,13 @@ public class AddressTop {
 	}
 	
 	public static Map< String, String > getMap() {
-		final Map< String, String > references = new LinkedHashMap< String, String >();
+		final Map< String, String > references = new LinkedHashMap< String, String >( 0 );
 		for ( final DBObject o : getAddressCollection().find() ) {
-			final String name = ( String )o.get( "name" );
-			final String _id = ( ( Long )o.get( "_id" ) ).toString();
+			final String name = ( String )o.get( DB_FIELD_NAME );
+			final String _id = ( ( Long )o.get( DB_FIELD_ID ) ).toString();
 			references.put( _id, name );
 		}
-		if ( references.isEmpty() )
-			return null;
-		else
-			return references;
+		return references;
 	}
 	
 	public static List< AddressTop > asClassType( final List< DBObject > all ) {

@@ -12,7 +12,6 @@ GET     /officialHome                	     mk.ck.energy.csm.controllers.Applicat
 GET     /rates                 			       mk.ck.energy.csm.controllers.Application.rates
 GET     /aboutStaft                        mk.ck.energy.csm.controllers.Application.listAboutStaft
 POST    /aboutStaft                        mk.ck.energy.csm.controllers.Application.doListAboutStaft
-GET     /assets/javascript/routes.js       mk.ck.energy.csm.controllers.Application.jsRoutes
 
 GET     /profile                    	     mk.ck.energy.csm.controllers.Application.profile
 
@@ -49,7 +48,8 @@ POST    /accounts/merge             	     mk.ck.energy.csm.controllers.Account.d
 
 GET     /accounts/joinConsumer             mk.ck.energy.csm.controllers.Account.joinConsumerElectricity(idAddrTop: Long)
 POST    /accounts/joinConsumer             mk.ck.energy.csm.controllers.Account.doJoinConsumerElectricity
-GET     /accounts/topAddrSelected          mk.ck.energy.csm.controllers.Account.onChangeAddressTopSelect(idTopAddr: Long)
+
+GET     /accounts/joinConsumerAC           mk.ck.energy.csm.controllers.Account.onChangeAddressTopSelect(addrId: Long)
 
 GET     /login/password/forgot     		     mk.ck.energy.csm.controllers.Signup.forgotPassword(email: String ?= "")
 POST    /login/password/forgot     		     mk.ck.energy.csm.controllers.Signup.doForgotPassword
@@ -77,4 +77,5 @@ GET     /oper                              mk.ck.energy.csm.controllers.Operator
 GET     /oper/scripts                      mk.ck.energy.csm.controllers.Operator.script
 
 # Map static resources from the /public folder to the /assets URL path
+GET     /assets/javascript/routes.js       mk.ck.energy.csm.controllers.Application.jsRoutes
 GET     /assets/*file               	     controllers.Assets.at(path="/public", file)
