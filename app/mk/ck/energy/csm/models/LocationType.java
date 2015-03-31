@@ -71,4 +71,8 @@ public enum LocationType {
 			vals.put( lType.name(), lType.name() );
 		return vals;
 	}
+	
+	public String renamingLocationType( final String method ) {
+		return Messages.get( method + "." + name().toLowerCase() );
+	}
 }

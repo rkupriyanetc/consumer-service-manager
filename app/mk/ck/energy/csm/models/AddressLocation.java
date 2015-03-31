@@ -69,17 +69,18 @@ public class AddressLocation {
 			return null;
 		final AddressLocation addr = new AddressLocation();
 		addr.locationsTypes = new ArrayList< LocationType >( 0 );
-		try {
-			addr.topAddress = AddressTop.findById( ( ( Long )dbo.get( DB_FIELD_REF_TO_TOP_ADDRESS ) ).longValue() );
-		}
-		catch ( final AddressNotFoundException anfe ) {
-			throw new ImpossibleCreatingException( "Cannot AddressLocation.create( DBObject dbo ) because could not find AddressTop" );
-		}
 		addr.location = ( String )dbo.get( DB_FIELD_LOCATION );
 		final BasicDBList getList = ( BasicDBList )dbo.get( DB_FIELD_LOCATIONS_TYPES );
 		for ( final Object o : getList )
 			addr.locationsTypes.add( LocationType.valueOf( ( String )o ) );
 		addr.id = ( ( Long )dbo.get( DB_FIELD_ID ) ).longValue();
+		addr.refId = ( ( Long )dbo.get( DB_FIELD_REF_TO_TOP_ADDRESS ) ).longValue();
+		try {
+			addr.topAddress = AddressTop.findById( addr.refId );
+		}
+		catch ( final AddressNotFoundException anfe ) {
+			throw new ImpossibleCreatingException( "Cannot AddressLocation.create( DBObject dbo ) because could not find AddressTop" );
+		}
 		return addr;
 	}
 	
@@ -167,7 +168,7 @@ public class AddressLocation {
 			dbo.add( LocationType.CAPITAL.name() );
 			final DBObject qu = new BasicDBObject( DB_FIELD_LOCATIONS_TYPES, new BasicDBObject( "$in", dbo ) );
 			if ( getAddressCollection().find( qu ).hasNext() )
-				throw new ImpossibleCreatingException();
+				throw new ImpossibleCreatingException( "One of the country's capital already exists in the database" );
 		}
 		final DBObject o = getDBObject();
 		o.put( DB_FIELD_ID, getOrCreateId() );
@@ -198,7 +199,7 @@ public class AddressLocation {
 		try {
 			final DBCursor cur = getAddressCollection().find( new BasicDBObject( DB_FIELD_REF_TO_TOP_ADDRESS, topAddr.getId() ) );
 			if ( cur == null )
-				throw new AddressNotFoundException( "Address " + topAddr.getName() + " not found" );
+				throw new AddressNotFoundException( "Addresses in the " + topAddr + " not found" );
 			while ( cur.hasNext() ) {
 				final DBObject o = cur.next();
 				final AddressLocation addr = AddressLocation.create( o );
@@ -289,7 +290,8 @@ public class AddressLocation {
 	public static Map< String, String > getMap( final long refId ) {
 		final Map< String, String > references = new LinkedHashMap< String, String >();
 		for ( final DBObject o : getAddressCollection().find( new BasicDBObject( DB_FIELD_REF_TO_TOP_ADDRESS, refId ) ) ) {
-			final String name = ( String )o.get( DB_FIELD_LOCATIONS_TYPES ) + " " + ( String )o.get( DB_FIELD_LOCATION );
+			final String name = LocationType.valueOf( choiceFromLocationsTypes( ( BasicDBList )o.get( DB_FIELD_LOCATIONS_TYPES ) ) ).r
+					+ " " + ( String )o.get( DB_FIELD_LOCATION );
 			final String _id = ( ( Long )o.get( DB_FIELD_ID ) ).toString();
 			references.put( _id, name );
 		}
@@ -311,21 +313,15 @@ public class AddressLocation {
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer();
-		if ( locationsTypes.contains( LocationType.CITY ) )
-			sb.append( Messages.get( Address.LOCATION_TYPE_SHORTNAME + "." + LocationType.CITY.name().toLowerCase() ) );
-		else
-			if ( locationsTypes.contains( LocationType.HAMLET ) )
-				sb.append( Messages.get( Address.LOCATION_TYPE_SHORTNAME + "." + LocationType.HAMLET.name().toLowerCase() ) );
-			else
-				if ( locationsTypes.contains( LocationType.TOWNSHIP ) )
-					sb.append( Messages.get( Address.LOCATION_TYPE_SHORTNAME + "." + LocationType.TOWNSHIP.name().toLowerCase() ) );
-				else
-					if ( locationsTypes.contains( LocationType.VILLAGE ) )
-						sb.append( Messages.get( Address.LOCATION_TYPE_SHORTNAME + "." + LocationType.VILLAGE.name().toLowerCase() ) );
+		sb.append( locationsTypes.renamingLocationType( Address.LOCATION_TYPE_SHORTNAME ) );
 		if ( sb.length() > 0 )
 			sb.append( " " );
 		sb.append( location );
 		return sb.toString();
+	}
+	
+	protected static String choiceFromLocationsTypes( final BasicDBList dbList ) {
+		dbList.
 	}
 	
 	public static DBCollection getAddressCollection() {

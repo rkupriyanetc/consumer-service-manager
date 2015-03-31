@@ -71,6 +71,14 @@ public class Address {
 	
 	public Address() {}
 	
+	public Address( final DBObject doc ) {
+		setAddressLocationId( ( ( Long )doc.get( DB_FIELD_ADDRESS_LOCATION_ID ) ).longValue() );
+		setAddressPlaceId( ( ( Long )doc.get( DB_FIELD_ADDRESS_PLACE_ID ) ).longValue() );
+		apartment = ( String )doc.get( DB_FIELD_ADDRESS_APARTMENT );
+		house = ( String )doc.get( DB_FIELD_ADDRESS_HOUSE );
+		postalCode = ( String )doc.get( DB_FIELD_ADDRESS_POSTAL_CODE );
+	}
+	
 	public AddressLocation getAddressLocation() {
 		return addressLocation;
 	}
@@ -84,6 +92,18 @@ public class Address {
 		return addressLocationId;
 	}
 	
+	public void setAddressLocationId( final long addressLocationId ) {
+		if ( this.addressLocationId != addressLocationId )
+			try {
+				this.addressLocation = AddressLocation.findById( addressLocationId );
+				this.addressLocationId = addressLocationId;
+			}
+			catch ( final AddressNotFoundException anfe ) {
+				this.addressLocationId = 0;
+				LOGGER.trace( "Sorry. Cannot find address location by {}", addressLocationId );
+			}
+	}
+	
 	public AddressPlace getAddressPlace() {
 		return addressPlace;
 	}
@@ -95,6 +115,18 @@ public class Address {
 	
 	public long getAddressPlaceId() {
 		return addressPlaceId;
+	}
+	
+	public void setAddressPlaceId( final long addressPlaceId ) {
+		if ( this.addressPlaceId != addressPlaceId )
+			try {
+				this.addressPlace = AddressPlace.findById( addressPlaceId );
+				this.addressPlaceId = addressPlaceId;
+			}
+			catch ( final AddressNotFoundException anfe ) {
+				this.addressPlaceId = 0;
+				LOGGER.trace( "Sorry. Cannot find address place by {}", addressPlaceId );
+			}
 	}
 	
 	public String getHouse() {
