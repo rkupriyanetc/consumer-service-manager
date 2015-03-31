@@ -30,15 +30,29 @@ public class Address {
 	
 	private static final Logger	LOGGER														= LoggerFactory.getLogger( Address.class );
 	
+	static final String					DB_FIELD_ADDRESS_LOCATION_ID			= "address_location_id";
+	
+	static final String					DB_FIELD_ADDRESS_PLACE_ID					= "address_place_id";
+	
+	static final String					DB_FIELD_ADDRESS_HOUSE						= "house";
+	
+	static final String					DB_FIELD_ADDRESS_APARTMENT				= "apartment";
+	
+	static final String					DB_FIELD_ADDRESS_POSTAL_CODE			= "postal_code";
+	
 	/**
 	 * Деяка частина адреси: населений пункт.
 	 */
 	private AddressLocation			addressLocation;
 	
+	private long								addressLocationId;
+	
 	/**
 	 * Деяка частина адреси: вулиця.
 	 */
 	private AddressPlace				addressPlace;
+	
+	private long								addressPlaceId;
 	
 	/**
 	 * Будинок
@@ -63,6 +77,11 @@ public class Address {
 	
 	public void setAddressLocation( final AddressLocation address ) {
 		this.addressLocation = address;
+		this.addressLocationId = address.getId();
+	}
+	
+	public long getAddressLocationId() {
+		return addressLocationId;
 	}
 	
 	public AddressPlace getAddressPlace() {
@@ -71,6 +90,11 @@ public class Address {
 	
 	public void setAddressPlace( final AddressPlace address ) {
 		this.addressPlace = address;
+		this.addressPlaceId = address.getId();
+	}
+	
+	public long getAddressPlaceId() {
+		return addressPlaceId;
 	}
 	
 	public String getHouse() {
@@ -103,21 +127,21 @@ public class Address {
 			if ( UPDATING_READING_ALL == updateSet
 					|| ( updateSet & UPDATING_READING_ADDRESS_LOCATION ) == UPDATING_READING_ADDRESS_LOCATION ) {
 				addressLocation.save();
-				doc.put( "addressLocation_id", addressLocation.getId() );
+				doc.put( DB_FIELD_ADDRESS_LOCATION_ID, addressLocation.getId() );
 			}
 			if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_ADDRESS_PLACE ) == UPDATING_READING_ADDRESS_PLACE ) {
 				addressPlace.save();
-				doc.put( "addressPlace_id", addressPlace.getId() );
+				doc.put( DB_FIELD_ADDRESS_PLACE_ID, addressPlace.getId() );
 			}
 			if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_HOUSE ) == UPDATING_READING_HOUSE )
 				if ( house != null && !house.isEmpty() )
-					doc.put( "house", house );
+					doc.put( DB_FIELD_ADDRESS_HOUSE, house );
 			if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_APARTMENT ) == UPDATING_READING_APARTMENT )
 				if ( apartment != null && !apartment.isEmpty() )
-					doc.put( "apartment", apartment );
+					doc.put( DB_FIELD_ADDRESS_APARTMENT, apartment );
 			if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_POSTAL_CODE ) == UPDATING_READING_POSTAL_CODE )
 				if ( postalCode != null && postalCode.isEmpty() )
-					doc.put( "postal_code", postalCode );
+					doc.put( DB_FIELD_ADDRESS_POSTAL_CODE, postalCode );
 			return doc;
 		}
 		catch ( final ImpossibleCreatingException ice ) {
