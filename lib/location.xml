@@ -2,17 +2,17 @@
 <locations>
   <location>
     <name>Київ</name>
-    <refId>0</refId>
+    <references>Київська обл.</references>
     <type>столиця, обл., DISTRICT, м.</type>
   </location>
   <location>
     <name>Черкаси</name>
-    <refId>0</refId>
+    <references>Черкаська обл.</references>
     <type>обл., DISTRICT, м.</type>
   </location>
   <location>
     <name>Львів</name>
-    <refId>0</refId>
+    <references>Львівська обл.</references>
     <type>обл., DISTRICT, м.</type>
   </location>
   <location>

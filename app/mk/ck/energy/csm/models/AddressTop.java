@@ -87,8 +87,7 @@ public class AddressTop {
 	private long getOrCreateId() {
 		long id = 1;
 		try {
-			final DBObject doc = new BasicDBObject( DB_FIELD_REF_TO_TOP, refId );
-			doc.put( DB_FIELD_NAME, name );
+			final DBObject doc = getDBObject();
 			final DBObject rec = getAddressCollection().find( doc ).one();
 			if ( rec != null && !rec.toMap().isEmpty() )
 				id = ( ( Long )rec.get( DB_FIELD_ID ) ).longValue();
@@ -111,8 +110,7 @@ public class AddressTop {
 	}
 	
 	DBObject getDBObject() {
-		id = getOrCreateId();
-		final DBObject doc = new BasicDBObject( DB_FIELD_ID, id );
+		final DBObject doc = new BasicDBObject();
 		if ( name != null && !name.isEmpty() )
 			doc.put( DB_FIELD_NAME, name );
 		doc.put( DB_FIELD_REF_TO_TOP, refId );
@@ -120,12 +118,10 @@ public class AddressTop {
 	}
 	
 	public void save() {
-		final DBObject o = new BasicDBObject();
-		if ( name != null && !name.isEmpty() )
-			o.put( DB_FIELD_NAME, name );
-		o.put( DB_FIELD_REF_TO_TOP, refId );
-		if ( getAddressCollection().find( o ).count() < 1 )
-			getAddressCollection().save( getDBObject() );
+		id = getOrCreateId();
+		final DBObject o = new BasicDBObject( DB_FIELD_ID, id );
+		o.putAll( getDBObject() );
+		getAddressCollection().save( o );
 	}
 	
 	public static AddressTop findById( final long id ) throws AddressNotFoundException {
