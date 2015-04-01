@@ -109,12 +109,10 @@ public class AddressPlace {
 	}
 	
 	public void save() {
-		final DBObject o = getDBObject();
-		if ( getAddressCollection().find( o ).count() < 1 ) {
-			id = getOrCreateId();
-			o.put( DB_FIELD_ID, id );
-			getAddressCollection().save( o );
-		}
+		id = getOrCreateId();
+		final DBObject o = new BasicDBObject( DB_FIELD_ID, id );
+		o.putAll( getDBObject() );
+		getAddressCollection().save( o );
 	}
 	
 	public static AddressPlace find( final String streetName, final StreetType streetType ) throws AddressNotFoundException {

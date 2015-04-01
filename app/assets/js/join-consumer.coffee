@@ -1,10 +1,8 @@
 
 topAddrChanged = ->
-  console.log "Called onChange"
   jsRoutes.mk.ck.energy.csm.controllers.Account.onChangeAddressTopSelect($('#topAddress').val()).ajax
     method: "get"
     success: (data) ->
-      console.log "success with #{data}"
       $('#bottomSelect').html data
       return
     error: (err) ->

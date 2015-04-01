@@ -125,7 +125,7 @@ public class AddressLocation {
 	private long getOrCreateId() {
 		long id = 1;
 		try {
-			final DBObject doc = new BasicDBObject( DB_FIELD_ID, this.id );
+			final DBObject doc = getDBObject();
 			final DBObject rec = getAddressCollection().find( doc ).one();
 			if ( rec != null && !rec.toMap().isEmpty() )
 				id = ( ( Long )rec.get( DB_FIELD_ID ) ).longValue();
@@ -168,12 +168,10 @@ public class AddressLocation {
 			if ( getAddressCollection().find( qu ).hasNext() )
 				throw new ImpossibleCreatingException( "One of the country's capital already exists in the database" );
 		}
-		final DBObject o = getDBObject();
-		if ( getAddressCollection().find( o ).count() < 1 ) {
-			id = getOrCreateId();
-			o.put( DB_FIELD_ID, id );
-			getAddressCollection().save( o );
-		}
+		id = getOrCreateId();
+		final DBObject o = new BasicDBObject( DB_FIELD_ID, id );
+		o.putAll( getDBObject() );
+		getAddressCollection().save( o );
 	}
 	
 	public static AddressLocation findById( final long id ) throws AddressNotFoundException {

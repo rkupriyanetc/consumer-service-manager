@@ -20,4 +20,9 @@
     <references>Маньківський р-н</references>
     <type>смт., DISTRICT</type>
   </location>
+  <location>
+    <name>Жашків</name>
+    <references>Жашківський р-н</references>
+    <type>м., DISTRICT</type>
+  </location>
 </locations>
