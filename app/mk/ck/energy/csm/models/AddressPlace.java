@@ -40,6 +40,7 @@ public class AddressPlace {
 		final AddressPlace addr = new AddressPlace();
 		addr.setStreet( street );
 		addr.setStreetType( streetType );
+		addr.save();
 		return addr;
 	}
 	

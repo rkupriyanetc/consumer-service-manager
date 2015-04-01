@@ -5,11 +5,17 @@ import com.mongodb.DBObject;
 
 public class Document {
 	
-	private String	passportSeries;
+	static final String	DB_FIELD_ID_CODE					= "id_code";
 	
-	private String	passportNumber;
+	static final String	DB_FIELD_PASSPORT_SERIES	= "passport_series";
 	
-	private String	idCode;
+	static final String	DB_FIELD_PASSPORT_NUMBER	= "passport_number";
+	
+	private String			passportSeries;
+	
+	private String			passportNumber;
+	
+	private String			idCode;
 	
 	public Document( final String id, final String passportSeries, final String passportNumber ) {
 		this.passportSeries = passportSeries;
@@ -44,14 +50,11 @@ public class Document {
 	DBObject getDBObject() {
 		final DBObject doc = new BasicDBObject();
 		if ( idCode != null && !idCode.isEmpty() )
-			doc.put( "id_code", idCode );
+			doc.put( DB_FIELD_ID_CODE, idCode );
 		if ( passportSeries != null && !passportSeries.isEmpty() )
-			doc.put( "passport_series", passportSeries );
+			doc.put( DB_FIELD_PASSPORT_SERIES, passportSeries );
 		if ( passportNumber != null && !passportNumber.isEmpty() )
-			doc.put( "passport_number", passportNumber );
-		if ( !doc.toMap().isEmpty() )
-			return doc;
-		else
-			return null;
+			doc.put( DB_FIELD_PASSPORT_NUMBER, passportNumber );
+		return doc;
 	}
 }

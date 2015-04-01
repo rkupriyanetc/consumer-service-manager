@@ -301,6 +301,7 @@ public class AdministrationTools extends Controller {
 				break;
 			case 3 :
 				f = CONFIGURATION.getStreetsFileXML();
+				break;
 			default :
 				LOGGER.error( "The parameter is invalid in viewXML" );
 				break;
@@ -821,10 +822,8 @@ public class AdministrationTools extends Controller {
 								typeStr = ".";
 							type.appendChild( document.createTextNode( typeStr ) );
 							street.appendChild( type );
-						} else {
-							final AddressPlace addr = AddressPlace.create( st, nameStr );
-							addr.save();
-						}
+						} else
+							AddressPlace.create( st, nameStr );
 					}
 					final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 					transformerFactory.setAttribute( "indent-number", 2 );
@@ -918,8 +917,7 @@ public class AdministrationTools extends Controller {
 									st = StreetType.UNCERTAIN;
 									break;
 							}
-							final AddressPlace addr = AddressPlace.create( st, name );
-							addr.save();
+							AddressPlace.create( st, name );
 						}
 					}
 				}

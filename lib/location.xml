@@ -11,6 +11,11 @@
     <type>обл., DISTRICT, м.</type>
   </location>
   <location>
+    <name>Львів</name>
+    <refId>0</refId>
+    <type>обл., DISTRICT, м.</type>
+  </location>
+  <location>
     <name>Маньківка</name>
     <references>Маньківський р-н</references>
     <type>смт., DISTRICT</type>

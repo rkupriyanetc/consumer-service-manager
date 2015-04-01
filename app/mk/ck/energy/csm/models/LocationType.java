@@ -72,7 +72,7 @@ public enum LocationType {
 		return vals;
 	}
 	
-	public String renamingLocationType( final String method ) {
+	public String toString( final String method ) {
 		return Messages.get( method + "." + name().toLowerCase() );
 	}
 }

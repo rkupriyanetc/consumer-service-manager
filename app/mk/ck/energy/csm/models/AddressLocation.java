@@ -8,8 +8,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import play.i18n.Messages;
-
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -127,7 +125,7 @@ public class AddressLocation {
 	private long getOrCreateId() {
 		long id = 1;
 		try {
-			final DBObject doc = new BasicDBObject( DB_FIELD_ID, id );
+			final DBObject doc = new BasicDBObject( DB_FIELD_ID, this.id );
 			final DBObject rec = getAddressCollection().find( doc ).one();
 			if ( rec != null && !rec.toMap().isEmpty() )
 				id = ( ( Long )rec.get( DB_FIELD_ID ) ).longValue();
@@ -171,8 +169,11 @@ public class AddressLocation {
 				throw new ImpossibleCreatingException( "One of the country's capital already exists in the database" );
 		}
 		final DBObject o = getDBObject();
-		o.put( DB_FIELD_ID, getOrCreateId() );
-		getAddressCollection().save( o );
+		if ( getAddressCollection().find( o ).count() < 1 ) {
+			id = getOrCreateId();
+			o.put( DB_FIELD_ID, id );
+			getAddressCollection().save( o );
+		}
 	}
 	
 	public static AddressLocation findById( final long id ) throws AddressNotFoundException {
@@ -290,8 +291,8 @@ public class AddressLocation {
 	public static Map< String, String > getMap( final long refId ) {
 		final Map< String, String > references = new LinkedHashMap< String, String >();
 		for ( final DBObject o : getAddressCollection().find( new BasicDBObject( DB_FIELD_REF_TO_TOP_ADDRESS, refId ) ) ) {
-			final String name = LocationType.valueOf( choiceFromLocationsTypes( ( BasicDBList )o.get( DB_FIELD_LOCATIONS_TYPES ) ) ).r
-					+ " " + ( String )o.get( DB_FIELD_LOCATION );
+			final String name = choiceFromLocationsTypes( ( BasicDBList )o.get( DB_FIELD_LOCATIONS_TYPES ) ) + " "
+					+ ( String )o.get( DB_FIELD_LOCATION );
 			final String _id = ( ( Long )o.get( DB_FIELD_ID ) ).toString();
 			references.put( _id, name );
 		}
@@ -313,15 +314,39 @@ public class AddressLocation {
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer();
-		sb.append( locationsTypes.renamingLocationType( Address.LOCATION_TYPE_SHORTNAME ) );
+		sb.append( choiceFromLocationsTypes( new ArrayList< Object >( locationsTypes ) ) );
 		if ( sb.length() > 0 )
 			sb.append( " " );
 		sb.append( location );
 		return sb.toString();
 	}
 	
-	protected static String choiceFromLocationsTypes( final BasicDBList dbList ) {
-		dbList.
+	protected static String choiceFromLocationsTypes( final ArrayList< Object > dbList ) {
+		String strRet = "";
+		for ( final Object typeO : dbList ) {
+			final String typeStr = ( String )typeO;
+			final LocationType type = LocationType.valueOf( typeStr );
+			switch ( type ) {
+				case CITY :
+					strRet = LocationType.CITY.toString( Address.LOCATION_TYPE_SHORTNAME );
+					break;
+				case TOWNSHIP :
+					strRet = LocationType.TOWNSHIP.toString( Address.LOCATION_TYPE_SHORTNAME );
+					break;
+				case VILLAGE :
+					strRet = LocationType.VILLAGE.toString( Address.LOCATION_TYPE_SHORTNAME );
+					break;
+				case HAMLET :
+					strRet = LocationType.HAMLET.toString( Address.LOCATION_TYPE_SHORTNAME );
+					break;
+				case BOWERY :
+					strRet = LocationType.BOWERY.toString( Address.LOCATION_TYPE_SHORTNAME );
+					break;
+				default :
+					break;
+			}
+		}
+		return strRet;
 	}
 	
 	public static DBCollection getAddressCollection() {
