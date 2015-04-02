@@ -1,5 +1,8 @@
 package mk.ck.energy.csm.models;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,6 +145,21 @@ public class AddressPlace {
 			}
 		else
 			throw new AddressNotFoundException( "ID must be greater than zero in AddressPlace.findById( id )" );
+	}
+	
+	public static Map< String, String > getMap() {
+		final Map< String, String > references = new LinkedHashMap< String, String >( 0 );
+		final DBObject sort = new BasicDBObject( DB_FIELD_STREET_TYPE, 1 );
+		sort.put( DB_FIELD_STREET_NAME, 1 );
+		final DBCursor cursor = getAddressCollection().find().sort( sort );
+		for ( final DBObject o : cursor ) {
+			final String name = Messages.get( Address.STREET_TYPE_SHORTNAME + "."
+					+ ( ( String )o.get( DB_FIELD_STREET_TYPE ) ).toLowerCase() )
+					+ " " + ( String )o.get( DB_FIELD_STREET_NAME );
+			final String _id = ( ( Long )o.get( DB_FIELD_ID ) ).toString();
+			references.put( _id, name );
+		}
+		return references;
 	}
 	
 	@Override

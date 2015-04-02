@@ -143,10 +143,19 @@ page.rates.title_rate_without_tax=Без ПДВ
 page.rates.title_place_village=В селі
 page.rates.title_place_city=В місті
 
+page.profile.user.id=ID користувача
 page.profile.consumer.description=Всі дані потрібно ввести точно такі, як в квитанції.
+page.profile.consumer.join=Приєднати
 page.profile.consumer.id=Ос. рахунок
 page.profile.consumer.fullname=Прізвище, ім'я та по батькові
 page.profile.consumer.addressTop=Основна адреса
+page.profile.consumer.addressTop.select=Вибрати райцентр
+page.profile.consumer.addressLocation=Населенний пункт
+page.profile.consumer.addressLocation.select=Вибрати населенний пункт
+page.profile.consumer.addressPlace=Вулиці
+page.profile.consumer.addressPlace.select=Вибрати вулицю
+page.profile.consumer.addressHouse=Будинок
+page.profile.consumer.addressApartment=Квартира
 
 button.admin.addUserOper=Створити оператора
 button.admin.addUserAdmin=Створити адміністратора

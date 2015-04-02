@@ -3,7 +3,7 @@ topAddrChanged = ->
   jsRoutes.mk.ck.energy.csm.controllers.Account.onChangeAddressTopSelect($('#topAddress').val()).ajax
     method: "get"
     success: (data) ->
-      $('#bottomSelect').html data
+      $('#locationAddress').html data
       return
     error: (err) ->
       alert "Error #{err}"

@@ -3,6 +3,7 @@
 @import helper._
 @import mk.ck.energy.csm.controllers._
 @import mk.ck.energy.csm.models.AddressTop
+@import mk.ck.energy.csm.models.AddressPlace
 
 @main(Messages("playauthenticate.profile.join_consumer.electricity"), "joinConsumer") {
   
@@ -36,29 +37,78 @@
               'class -> "form-control"
             )
           </div>
-          
-          <div class="col-md-3 col-sm-3">
-            <label>@Messages("page.profile.consumer.addressTop")</label>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-4 col-sm-4">
+            <label>@Messages("page.profile.consumer.addressTop")</label><br/>
             @defining(AddressTop.getMap(0)) { map =>
               @if(map != null) {
-                <select id="topAddress" name="topAddress.id" >
-                  <option value="0" selected>---select something---</option>
+                <select style="width: 100%" id="topAddress" name="topAddress" >
+                  <option value="0" selected>@Messages("page.profile.consumer.addressTop.select")</option>
                   @for((key,value) <- map) {
                     <option value="@key">@value</option>
                   }
                 </select>
               }
             }
-            
           </div>
           
-          <div class="col-md-3 col-sm-3">
-            <label>@Messages("page.profile.consumer.addressBottom")</label>
-                <select id="bottomSelect" name="bottomAddress.id" >
+          <div class="col-md-4 col-sm-4">
+            <label>@Messages("page.profile.consumer.addressLocation")</label>
+            <select style="width: 100%" id="locationAddress" name="locationAddress">
+              <option value="0" selected>@Messages("page.profile.consumer.addressLocation.select")</option>
+            </select>
+          </div>
+        </div><br/>
+        
+        <div class="row">
+          <div class="col-md-4 col-sm-4">
+            <label>@Messages("page.profile.consumer.addressPlace")</label>
+            @defining(AddressPlace.getMap()) { map =>
+              @if(map != null) {
+                <select style="width: 100%" id="placeAddress" name="placeAddress" >
+                  <option value="0" selected>@Messages("page.profile.consumer.addressPlace.select")</option>
+                  @for((key,value) <- map) {
+                    <option value="@key">@value</option>
+                  }
                 </select>
+              }
+            }
+          </div>
+          
+          <div class="col-md-2 col-sm-2">
+             @inputText(
+              joinForm("house"),
+              '_label -> Messages("page.profile.consumer.addressHouse"),
+              'size -> 4,
+              'class -> "form-control"
+            )
+          </div>
+          
+          <div class="col-md-2 col-sm-2">
+             @inputText(
+              joinForm("apartment"),
+              '_label -> Messages("page.profile.consumer.addressApartment"),
+              'size -> 4,
+              'class -> "form-control"
+            )
           </div>
         </div>
-        <hr/>
+        
+        <div class="row">
+          <div class="col-md-4 col-sm-4">
+            <input type="submit" value='@Messages("page.profile.consumer.join")' class="btn btn-default">
+          </div>
+          <div class="col-md-4 col-sm-4">
+            @inputText(
+              joinForm("userId"),
+              '_label -> Messages("page.profile.user.id"),
+              'readonly -> "readonly", 
+              'class -> "form-control"
+            )
+          </div>
+        </div>
       }
     </div>
     

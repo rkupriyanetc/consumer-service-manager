@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import mk.ck.energy.csm.models.AddressLocation;
+import mk.ck.energy.csm.models.Consumer;
+import mk.ck.energy.csm.models.ConsumerException;
 import mk.ck.energy.csm.models.auth.User;
+import mk.ck.energy.csm.models.auth.UserNotFoundException;
 import mk.ck.energy.csm.models.auth.UserRole;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthProvider;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthUser;
@@ -90,6 +93,9 @@ public class Account extends Controller {
 	public static class AppendConsumer {
 		
 		@Required
+		private String					userId;
+		
+		@Required
 		private String					id;
 		
 		@Required
@@ -111,6 +117,14 @@ public class Account extends Controller {
 		private String					apartment;
 		
 		public AppendConsumer() {}
+		
+		public String getUserId() {
+			return userId;
+		}
+		
+		public void setUserId( final String userId ) {
+			this.userId = userId;
+		}
 		
 		public String getId() {
 			return id;
@@ -298,6 +312,7 @@ public class Account extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< AppendConsumer > filledForm = APPEND_CONSUMER_FORM.bindFromRequest();
 		final AppendConsumer ac = new AppendConsumer();
+		ac.setUserId( User.getLocalUser( session() ).getId() );
 		Map< String, String > loc;
 		if ( idAddrTop != null && idAddrTop.longValue() != 0 )
 			loc = AddressLocation.getMap( idAddrTop, 1 );
@@ -315,12 +330,28 @@ public class Account extends Controller {
 			return badRequest( joinConsumer.render( filledForm, new HashMap< String, String >( 0 ) ) );
 		else {
 			final AppendConsumer u = filledForm.get();
+			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.id" ), u.getId() );
+			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.fullname" ), u.getFullName() );
+			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressTop" ), u.getTopAddress() );
+			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressLocation" ), u.getLocationAddress() );
+			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressPlace" ), u.getPlaceAddress() );
+			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressHouse" ), u.getHouse() );
+			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressApartment" ), u.getApartment() );
+			try {
+				final Consumer consumer = Consumer.findById( u.getId(), Consumer.UPDATING_READING_ALL );
+				consumer.joinConsumerElectricity( User.findById( u.getUserId() ) );
+			}
+			catch ( final ConsumerException ce ) {
+				LOGGER.error( "Sorry. Consumer {} not found", u.getId() );
+			}
+			catch ( final UserNotFoundException unfe ) {
+				LOGGER.error( "Sorry. User not found by Id {}", u.getUserId() );
+			}
 			return Application.profile();
 		}
 	}
 	
 	public static Result onChangeAddressTopSelect( final Long addrId ) {
-		LOGGER.trace( "Selected id is {}", addrId );
 		final Map< String, String > vals = AddressLocation.getMap( addrId, 1 );
 		final StringBuilder buf = new StringBuilder();
 		for ( final Map.Entry< String, String > entry : vals.entrySet() )

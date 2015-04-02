@@ -185,24 +185,6 @@ public class AddressTop {
 		}
 	}
 	
-	@Override
-	public String toString() {
-		final StringBuffer sb = new StringBuffer( name );
-		try {
-			AddressTop at = AddressTop.findById( refId );
-			while ( at != null ) {
-				sb.append( ", " );
-				sb.append( at.getName() );
-				at = AddressTop.findById( at.getRefId() );
-			}
-			return sb.toString();
-		}
-		catch ( final AddressNotFoundException anfe ) {
-			LOGGER.error( "AddressTop.toString() Exception: {}", anfe );
-			return null;
-		}
-	}
-	
 	/**
 	 * @param refId
 	 *          If equals zero then select all
@@ -228,6 +210,24 @@ public class AddressTop {
 		for ( final DBObject dbo : all )
 			result.add( AddressTop.create( dbo ) );
 		return result;
+	}
+	
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer( name );
+		try {
+			AddressTop at = AddressTop.findById( refId );
+			while ( at != null ) {
+				sb.append( ", " );
+				sb.append( at.getName() );
+				at = AddressTop.findById( at.getRefId() );
+			}
+			return sb.toString();
+		}
+		catch ( final AddressNotFoundException anfe ) {
+			LOGGER.error( "AddressTop.toString() Exception: {}", anfe );
+			return null;
+		}
 	}
 	
 	public static DBCollection getAddressCollection() {
