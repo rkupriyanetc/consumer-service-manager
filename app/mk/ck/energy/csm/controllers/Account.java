@@ -300,7 +300,7 @@ public class Account extends Controller {
 		final AppendConsumer ac = new AppendConsumer();
 		Map< String, String > loc;
 		if ( idAddrTop != null && idAddrTop.longValue() != 0 )
-			loc = AddressLocation.getMap( idAddrTop.longValue() );
+			loc = AddressLocation.getMap( idAddrTop, 1 );
 		else
 			loc = new HashMap< String, String >( 0 );
 		return ok( joinConsumer.render( filledForm.fill( ac ), loc ) );
@@ -321,10 +321,13 @@ public class Account extends Controller {
 	
 	public static Result onChangeAddressTopSelect( final Long addrId ) {
 		LOGGER.trace( "Selected id is {}", addrId );
-		final Map< String, String > vals = AddressLocation.getMap( addrId );
+		final Map< String, String > vals = AddressLocation.getMap( addrId, 1 );
 		final StringBuilder buf = new StringBuilder();
 		for ( final Map.Entry< String, String > entry : vals.entrySet() )
-			buf.append( "<option value='" ).append( entry.getKey() ).append( "'>" ).append( entry.getValue() ).append( "</option>" );
+			if ( entry.getValue().equals( "0" ) )
+				buf.append( "<option " ).append( "disabled>" ).append( "--------------------" ).append( "</option>" );
+			else
+				buf.append( "<option value='" ).append( entry.getKey() ).append( "'>" ).append( entry.getValue() ).append( "</option>" );
 		return ok( buf.toString() );
 	}
 }

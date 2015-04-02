@@ -39,7 +39,7 @@
           
           <div class="col-md-3 col-sm-3">
             <label>@Messages("page.profile.consumer.addressTop")</label>
-            @defining(AddressTop.getMap()) { map =>
+            @defining(AddressTop.getMap(0)) { map =>
               @if(map != null) {
                 <select id="topAddress" name="topAddress.id" >
                   <option value="0" selected>---select something---</option>

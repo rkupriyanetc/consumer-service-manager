@@ -203,9 +203,19 @@ public class AddressTop {
 		}
 	}
 	
-	public static Map< String, String > getMap() {
+	/**
+	 * @param refId
+	 *          If equals zero then select all
+	 * @return
+	 */
+	public static Map< String, String > getMap( final long refId ) {
 		final Map< String, String > references = new LinkedHashMap< String, String >( 0 );
-		for ( final DBObject o : getAddressCollection().find() ) {
+		DBCursor cursor;
+		if ( refId == 0 )
+			cursor = getAddressCollection().find();
+		else
+			cursor = getAddressCollection().find( new BasicDBObject( DB_FIELD_REF_TO_TOP, refId ) );
+		for ( final DBObject o : cursor ) {
 			final String name = ( String )o.get( DB_FIELD_NAME );
 			final String _id = ( ( Long )o.get( DB_FIELD_ID ) ).toString();
 			references.put( _id, name );

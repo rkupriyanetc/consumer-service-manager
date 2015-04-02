@@ -286,13 +286,27 @@ public class AddressLocation {
 		return false;
 	}
 	
-	public static Map< String, String > getMap( final long refId ) {
+	/**
+	 * @param refId
+	 *          Indicates reference id, who have to get the select to map
+	 * @param isAddrTop
+	 *          If equals zero then does not participate
+	 * @return
+	 */
+	public static Map< String, String > getMap( final long refId, final int isAddrTop ) {
 		final Map< String, String > references = new LinkedHashMap< String, String >();
 		for ( final DBObject o : getAddressCollection().find( new BasicDBObject( DB_FIELD_REF_TO_TOP_ADDRESS, refId ) ) ) {
 			final String name = choiceFromLocationsTypes( ( BasicDBList )o.get( DB_FIELD_LOCATIONS_TYPES ) ) + " "
 					+ ( String )o.get( DB_FIELD_LOCATION );
 			final String _id = ( ( Long )o.get( DB_FIELD_ID ) ).toString();
 			references.put( _id, name );
+		}
+		if ( isAddrTop != 0 ) {
+			int p = -1;
+			for ( final String keys : AddressTop.getMap( refId ).keySet() ) {
+				references.put( new Integer( p-- ).toString(), "0" );
+				references.putAll( getMap( new Long( keys ), 0 ) );
+			}
 		}
 		return references;
 	}

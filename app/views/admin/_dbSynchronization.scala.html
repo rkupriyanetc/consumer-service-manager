@@ -69,7 +69,7 @@
         <b>@Messages("page.admin.adminTab.tabDBSynchronization.selecting_locality", config.getMSSQLDBTablesAsScala().get("locations"))</b>
       </div>
       <div class="col-md-2 col-sm-2">
-        @defining(AddressTop.getMap()) { map =>
+        @defining(AddressTop.getMap(0)) { map =>
           @if(map != null) {
             @_selectPartial(step, "references", map, Messages("page.admin.adminTab.tabDBSynchronization.locations.references"))
           }
