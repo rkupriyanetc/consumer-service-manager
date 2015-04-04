@@ -5,17 +5,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
 import com.mongodb.WriteResult;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Sorts;
 
 public class AddressLocation {
 	
@@ -125,15 +128,15 @@ public class AddressLocation {
 	private long getOrCreateId() {
 		long id = 1;
 		try {
-			final DBObject doc = getDBObject();
-			final DBObject rec = getAddressCollection().find( doc ).one();
-			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( Long )rec.get( DB_FIELD_ID );
+			final Document doc = getDocument();
+			final Document rec = getAddressCollection().find( doc ).first();
+			if ( rec != null && !rec.isEmpty() )
+				id = rec.getLong( DB_FIELD_ID );
 			else {
-				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( DB_FIELD_ID, -1 ) ).limit( 1 );
+				final MongoCursor< Document > cursor = getAddressCollection().find()
+						.sort( Sorts.orderBy( Sorts.descending( DB_FIELD_ID ) ) ).iterator();
 				if ( cursor.hasNext() ) {
-					final Object o = cursor.next().get( DB_FIELD_ID );
-					final Long i = ( Long )o;
+					final Long i = cursor.next().getLong( DB_FIELD_ID );
 					id = i.longValue() + 1;
 				}
 			}
@@ -147,8 +150,8 @@ public class AddressLocation {
 		return id;
 	}
 	
-	DBObject getDBObject() {
-		final DBObject doc = new BasicDBObject();
+	Document getDocument() {
+		final Document doc = new Document();
 		if ( location != null && !location.isEmpty() )
 			doc.put( DB_FIELD_LOCATION, location );
 		final BasicDBList dbTypes = new BasicDBList();
@@ -169,8 +172,8 @@ public class AddressLocation {
 				throw new ImpossibleCreatingException( "One of the country's capital already exists in the database" );
 		}
 		id = getOrCreateId();
-		final DBObject o = new BasicDBObject( DB_FIELD_ID, id );
-		o.putAll( getDBObject() );
+		final Document o = new Document( DB_FIELD_ID, id );
+		o.putAll( getDocument() );
 		getAddressCollection().save( o );
 	}
 	
@@ -361,7 +364,7 @@ public class AddressLocation {
 		return strRet;
 	}
 	
-	public static DBCollection getAddressCollection() {
+	public static MongoCollection< org.bson.Document > getAddressCollection() {
 		return Database.getInstance().getDatabase().getCollection( "locationAddresses" );
 	}
 }

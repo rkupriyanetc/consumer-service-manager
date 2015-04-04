@@ -19,7 +19,7 @@ libraryDependencies ++= Seq(
   cache,
   "be.objectify"         %% "deadbolt-java"           % "2.3.2",
   "com.feth"             %% "play-authenticate"       % "0.6.8",
-  "org.mongodb"          %  "mongo-java-driver"       % "2.13.0",
+  "org.mongodb"          %  "mongo-java-driver"       % "3.0.0",
   "org.apache.poi"       %  "poi"                     % "3.11",
   "org.apache.poi"       %  "poi-ooxml"               % "3.11",
   "org.webjars"          %  "select2"                 % "4.0.0-rc.2"

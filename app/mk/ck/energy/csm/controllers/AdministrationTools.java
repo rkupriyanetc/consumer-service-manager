@@ -1034,12 +1034,12 @@ public class AdministrationTools extends Controller {
 									pasSeries = pasNumber;
 									pasNumber = passportTmp;
 								}
-							mk.ck.energy.csm.models.Document document;
+							mk.ck.energy.csm.models.Documents document;
 							if ( idCode != null && !idCode.isEmpty() && idCode.length() > 8 )
-								document = new mk.ck.energy.csm.models.Document( idCode, pasSeries, pasNumber );
+								document = new mk.ck.energy.csm.models.Documents( idCode, pasSeries, pasNumber );
 							else
 								if ( passBoll )
-									document = new mk.ck.energy.csm.models.Document( null, pasSeries, pasNumber );
+									document = new mk.ck.energy.csm.models.Documents( null, pasSeries, pasNumber );
 								else
 									document = null;
 							if ( document != null )

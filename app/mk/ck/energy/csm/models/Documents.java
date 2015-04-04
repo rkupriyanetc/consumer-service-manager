@@ -3,7 +3,7 @@ package mk.ck.energy.csm.models;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-public class Document {
+public class Documents {
 	
 	static final String	DB_FIELD_ID_CODE					= "id_code";
 	
@@ -17,7 +17,7 @@ public class Document {
 	
 	private String			idCode;
 	
-	public Document( final String id, final String passportSeries, final String passportNumber ) {
+	public Documents( final String id, final String passportSeries, final String passportNumber ) {
 		this.passportSeries = passportSeries;
 		this.passportNumber = passportNumber;
 		this.idCode = id;

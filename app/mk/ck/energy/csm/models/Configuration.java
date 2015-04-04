@@ -1,12 +1,12 @@
 package mk.ck.energy.csm.models;
 
 import java.io.File;
-import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +14,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mongodb.DB;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.MongoCredential;
 import com.mongodb.MongoURI;
+import com.mongodb.ServerAddress;
 
 public class Configuration {
 	
@@ -126,17 +126,18 @@ public class Configuration {
 	}
 	
 	public static String testConnection( final String keyURI ) {
-		try {
-			final MongoClient mongoClient = new MongoClient( new MongoClientURI( mongoURIs.get( keyURI ) ) );
-			final play.Configuration config = mongoConfigurations.get( keyURI );
-			final DB database = mongoClient.getDB( config.getString( "name" ) );
-			final play.Configuration credentials = config.getConfig( "credentials" );
-			if ( credentials != null )
-				if ( !database.authenticate( credentials.getString( "user" ), credentials.getString( "password" ).toCharArray() ) )
-					return "Cannot authenticate";
-		}
-		catch ( final UnknownHostException e ) {
-			return "Cannot connect to database. " + e;
+		final play.Configuration config = mongoConfigurations.get( keyURI );
+		final play.Configuration credentials = config.getConfig( "credentials" );
+		if ( credentials != null ) {
+			final String dbName = config.getString( "name" );
+			final MongoCredential credential = MongoCredential.createCredential( credentials.getString( "user" ), dbName, credentials
+					.getString( "password" ).toCharArray() );
+			final MongoClient mongoClient = new MongoClient( new ServerAddress( keyURI ), Arrays.asList( credential ) );
+			if ( !mongoClient.getDatabase( dbName ).getName().equals( dbName ) ) {
+				mongoClient.close();
+				return "Cannot authenticate";
+			}
+			mongoClient.close();
 		}
 		return "Connected";
 	}

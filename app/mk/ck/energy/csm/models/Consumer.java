@@ -94,7 +94,7 @@ public class Consumer implements AnyConsumer {
 	 */
 	private List< Meter >				meters;
 	
-	private Document						document;
+	private Documents						document;
 	
 	private ConsumerType				consumerType;
 	
@@ -162,7 +162,7 @@ public class Consumer implements AnyConsumer {
 			 * address.setPostalCode( ( String )dbo.get( "address.postal_code" ) );
 			 */
 			if ( UPDATING_READING_ALL == readingSet || ( readingSet & UPDATING_READING_DOCUMENTS ) == UPDATING_READING_DOCUMENTS )
-				document = ( Document )dbo.get( DB_FIELD_DOCUMENT );
+				document = ( Documents )dbo.get( DB_FIELD_DOCUMENT );
 			// ( String )dbo.get( "document.passport_series" ), ( String )dbo.get(
 			// "document.passport_number" ) );
 			if ( UPDATING_READING_ALL == readingSet || ( readingSet & UPDATING_READING_OTHER ) == UPDATING_READING_OTHER ) {
@@ -228,11 +228,11 @@ public class Consumer implements AnyConsumer {
 		return "M REM";
 	}
 	
-	public Document getDocument() {
+	public Documents getDocument() {
 		return document;
 	}
 	
-	public void setDocuments( final Document document ) {
+	public void setDocuments( final Documents document ) {
 		this.document = document;
 	}
 	
