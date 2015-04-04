@@ -53,7 +53,7 @@ public class AddressPlace {
 		final AddressPlace addr = new AddressPlace();
 		addr.streetType = StreetType.valueOf( ( String )dbo.get( DB_FIELD_STREET_TYPE ) );
 		addr.street = ( String )dbo.get( DB_FIELD_STREET_NAME );
-		addr.id = ( ( Long )dbo.get( DB_FIELD_ID ) ).longValue();
+		addr.id = ( Long )dbo.get( DB_FIELD_ID );
 		return addr;
 	}
 	
@@ -83,7 +83,7 @@ public class AddressPlace {
 			final DBObject doc = getDBObject();
 			final DBObject rec = getAddressCollection().find( doc ).one();
 			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( ( Long )rec.get( DB_FIELD_ID ) ).intValue();
+				id = ( Long )rec.get( DB_FIELD_ID );
 			else {
 				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( DB_FIELD_ID, -1 ) ).limit( 1 );
 				if ( cursor.hasNext() ) {

@@ -71,8 +71,8 @@ public class AddressLocation {
 		final BasicDBList getList = ( BasicDBList )dbo.get( DB_FIELD_LOCATIONS_TYPES );
 		for ( final Object o : getList )
 			addr.locationsTypes.add( LocationType.valueOf( ( String )o ) );
-		addr.id = ( ( Long )dbo.get( DB_FIELD_ID ) ).longValue();
-		addr.refId = ( ( Long )dbo.get( DB_FIELD_REF_TO_TOP_ADDRESS ) ).longValue();
+		addr.id = ( Long )dbo.get( DB_FIELD_ID );
+		addr.refId = ( Long )dbo.get( DB_FIELD_REF_TO_TOP_ADDRESS );
 		try {
 			addr.topAddress = AddressTop.findById( addr.refId );
 		}
@@ -128,7 +128,7 @@ public class AddressLocation {
 			final DBObject doc = getDBObject();
 			final DBObject rec = getAddressCollection().find( doc ).one();
 			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( ( Long )rec.get( DB_FIELD_ID ) ).longValue();
+				id = ( Long )rec.get( DB_FIELD_ID );
 			else {
 				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( DB_FIELD_ID, -1 ) ).limit( 1 );
 				if ( cursor.hasNext() ) {

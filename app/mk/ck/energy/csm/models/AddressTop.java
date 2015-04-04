@@ -59,8 +59,8 @@ public class AddressTop {
 	public static AddressTop create( final DBObject dbo ) {
 		final AddressTop addr = new AddressTop();
 		addr.name = ( String )dbo.get( DB_FIELD_NAME );
-		addr.refId = ( ( Long )dbo.get( DB_FIELD_REF_TO_TOP ) ).longValue();
-		addr.id = ( ( Long )dbo.get( DB_FIELD_ID ) ).longValue();
+		addr.refId = ( Long )dbo.get( DB_FIELD_REF_TO_TOP );
+		addr.id = ( Long )dbo.get( DB_FIELD_ID );
 		return addr;
 	}
 	
@@ -90,7 +90,7 @@ public class AddressTop {
 			final DBObject doc = getDBObject();
 			final DBObject rec = getAddressCollection().find( doc ).one();
 			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( ( Long )rec.get( DB_FIELD_ID ) ).longValue();
+				id = ( Long )rec.get( DB_FIELD_ID );
 			else {
 				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( DB_FIELD_ID, -1 ) ).limit( 1 );
 				if ( cursor.hasNext() ) {

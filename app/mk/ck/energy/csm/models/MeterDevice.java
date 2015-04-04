@@ -16,7 +16,23 @@ import com.mongodb.QueryBuilder;
 
 public class MeterDevice {
 	
-	private static final Logger	LOGGER	= LoggerFactory.getLogger( MeterDevice.class );
+	private static final Logger	LOGGER									= LoggerFactory.getLogger( MeterDevice.class );
+	
+	static final String					DB_FIELD_ID							= "_id";
+	
+	static final String					DB_FIELD_NAME						= "name";
+	
+	static final String					DB_FIELD_PHASING				= "phasing";
+	
+	static final String					DB_FIELD_METHOD_TYPE		= "method";
+	
+	static final String					DB_FIELD_INDUCTIVE_TYPE	= "inductive";
+	
+	static final String					DB_FIELD_REGISTER_TYPE	= "register";
+	
+	static final String					DB_FIELD_PRECISION			= "precision";
+	
+	static final String					DB_FIELD_INTERVAL				= "interval";
 	
 	public enum MethodType {
 		INDUCTION, ELECTRONIC,
@@ -71,20 +87,14 @@ public class MeterDevice {
 		if ( dbo == null )
 			return null;
 		final MeterDevice devices = new MeterDevice();
-		devices.id = ( ( Long )dbo.get( "_id" ) ).longValue();
-		devices.name = ( String )dbo.get( "name" );
-		String tmp = ( String )dbo.get( "inductive" );
-		devices.inductiveType = InductiveType.valueOf( tmp );
-		tmp = ( String )dbo.get( "method" );
-		devices.methodType = MethodType.valueOf( tmp );
-		tmp = ( String )dbo.get( "register" );
-		devices.registerType = RegisterType.valueOf( tmp );
-		Integer i = ( Integer )dbo.get( "phasing" );
-		devices.phasing = i.byteValue();
-		i = ( Integer )dbo.get( "interval" );
-		devices.interval = i.byteValue();
-		final Double d = ( Double )dbo.get( "precision" );
-		devices.precision = d.doubleValue();
+		devices.id = ( Long )dbo.get( DB_FIELD_ID );
+		devices.name = ( String )dbo.get( DB_FIELD_NAME );
+		devices.inductiveType = InductiveType.valueOf( ( String )dbo.get( DB_FIELD_INDUCTIVE_TYPE ) );
+		devices.methodType = MethodType.valueOf( ( String )dbo.get( DB_FIELD_METHOD_TYPE ) );
+		devices.registerType = RegisterType.valueOf( ( String )dbo.get( DB_FIELD_REGISTER_TYPE ) );
+		devices.phasing = ( Byte )dbo.get( DB_FIELD_PHASING );
+		devices.interval = ( Byte )dbo.get( DB_FIELD_INTERVAL );
+		devices.precision = ( Double )dbo.get( DB_FIELD_PRECISION );
 		return devices;
 	}
 	
@@ -151,7 +161,7 @@ public class MeterDevice {
 	public static MeterDevice findById( final long id ) throws MeterDeviceException {
 		if ( id > 0 )
 			try {
-				final DBObject doc = getMetersDevicesCollection().findOne( QueryBuilder.start( "_id" ).is( id ).get() );
+				final DBObject doc = getMetersDevicesCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
 				final MeterDevice device = MeterDevice.create( doc );
 				return device;
 			}
@@ -167,7 +177,7 @@ public class MeterDevice {
 			final Pattern pattern = Pattern.compile( name, Pattern.CASE_INSENSITIVE );
 			final List< MeterDevice > devices = new ArrayList< MeterDevice >( 0 );
 			try {
-				final DBCursor cur = getMetersDevicesCollection().find( new BasicDBObject( "name", pattern ) );
+				final DBCursor cur = getMetersDevicesCollection().find( new BasicDBObject( DB_FIELD_NAME, pattern ) );
 				if ( cur == null )
 					throw new MeterDeviceException( "MeterDevice by " + name + " not found" );
 				while ( cur.hasNext() ) {
@@ -184,40 +194,17 @@ public class MeterDevice {
 			throw new MeterDeviceException( "Name should not be null in MeterDevice.findByName( name )" );
 	}
 	
-	public void save() {
-		final DBObject doc = getDBObject();
-		doc.put( "_id", getOrCreateId() );
-		getMetersDevicesCollection().save( doc );
-	}
-	
-	DBObject getDBObject() {
-		final DBObject doc = new BasicDBObject( "name", name );
-		doc.put( "phasing", phasing );
-		if ( methodType != null )
-			doc.put( "method", methodType.name() );
-		if ( inductiveType != null )
-			doc.put( "inductive", inductiveType.name() );
-		if ( registerType != null )
-			doc.put( "register", registerType.name() );
-		if ( precision > 0 )
-			doc.put( "precision", precision );
-		if ( interval > 0 )
-			doc.put( "interval", interval );
-		return doc;
-	}
-	
 	private long getOrCreateId() {
 		long id = 1;
 		try {
-			final DBObject doc = new BasicDBObject( "_id", this.id );
-			// doc.put( "name", name );
+			final DBObject doc = new BasicDBObject( DB_FIELD_NAME, this.name );
 			final DBObject rec = getMetersDevicesCollection().find( doc ).one();
 			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( ( Long )rec.get( "_id" ) ).longValue();
+				id = ( Long )rec.get( DB_FIELD_ID );
 			else {
-				final DBCursor cursor = getMetersDevicesCollection().find().sort( new BasicDBObject( "_id", -1 ) ).limit( 1 );
+				final DBCursor cursor = getMetersDevicesCollection().find().sort( new BasicDBObject( DB_FIELD_ID, -1 ) ).limit( 1 );
 				if ( cursor.hasNext() ) {
-					final Object o = cursor.next().get( "_id" );
+					final Object o = cursor.next().get( DB_FIELD_ID );
 					final Long i = ( Long )o;
 					id = i.longValue() + 1;
 				}
@@ -232,14 +219,36 @@ public class MeterDevice {
 		return id;
 	}
 	
+	DBObject getDBObject() {
+		final DBObject doc = new BasicDBObject( DB_FIELD_NAME, name );
+		doc.put( DB_FIELD_PHASING, phasing );
+		if ( methodType != null )
+			doc.put( DB_FIELD_METHOD_TYPE, methodType.name() );
+		if ( inductiveType != null )
+			doc.put( DB_FIELD_INDUCTIVE_TYPE, inductiveType.name() );
+		if ( registerType != null )
+			doc.put( DB_FIELD_REGISTER_TYPE, registerType.name() );
+		if ( precision > 0 )
+			doc.put( DB_FIELD_PRECISION, precision );
+		if ( interval > 0 )
+			doc.put( DB_FIELD_INTERVAL, interval );
+		return doc;
+	}
+	
+	public void save() {
+		final DBObject doc = getDBObject();
+		doc.put( DB_FIELD_ID, getOrCreateId() );
+		getMetersDevicesCollection().save( doc );
+	}
+	
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer( "ID - " );
-		sb.append( Long.valueOf( id ).toString() );
+		sb.append( this.id );
 		sb.append( " " );
 		sb.append( this.name );
 		sb.append( " F - " );
-		sb.append( Byte.valueOf( phasing ).toString() );
+		sb.append( this.phasing );
 		return sb.toString();
 	}
 	
