@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import mk.ck.energy.csm.model.Database;
+import mk.ck.energy.csm.model.db.Identifier;
 import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ import com.mongodb.QueryBuilder;
  * 
  * @author KYL
  */
-public class User implements Subject {
+public class User implements Subject, Identifier {
 	
 	private static final Logger						LOGGER										= LoggerFactory.getLogger( User.class );
 	
@@ -147,6 +148,7 @@ public class User implements Subject {
 		return getId();
 	}
 	
+	@Override
 	public String getId() {
 		return id;
 	};
