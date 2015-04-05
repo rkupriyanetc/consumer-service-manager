@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.UUID;
 
 import mk.ck.energy.csm.controllers.routes;
-import mk.ck.energy.csm.models.auth.LinkedAccount;
-import mk.ck.energy.csm.models.auth.TokenAction;
-import mk.ck.energy.csm.models.auth.TokenType;
-import mk.ck.energy.csm.models.auth.User;
-import mk.ck.energy.csm.models.auth.UserNotFoundException;
+import mk.ck.energy.csm.model.auth.LinkedAccount;
+import mk.ck.energy.csm.model.auth.TokenAction;
+import mk.ck.energy.csm.model.auth.TokenType;
+import mk.ck.energy.csm.model.auth.User;
+import mk.ck.energy.csm.model.auth.UserNotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

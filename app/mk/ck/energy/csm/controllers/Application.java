@@ -22,11 +22,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import mk.ck.energy.csm.models.Configuration;
-import mk.ck.energy.csm.models.Database;
-import mk.ck.energy.csm.models.Employee;
-import mk.ck.energy.csm.models.auth.User;
-import mk.ck.energy.csm.models.auth.UserRole;
+import mk.ck.energy.csm.model.Configuration;
+import mk.ck.energy.csm.model.Database;
+import mk.ck.energy.csm.model.Employee;
+import mk.ck.energy.csm.model.auth.User;
+import mk.ck.energy.csm.model.auth.UserRole;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthProvider;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthProvider.MyLogin;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthProvider.MySignup;

@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import mk.ck.energy.csm.models.AddressLocation;
-import mk.ck.energy.csm.models.Consumer;
-import mk.ck.energy.csm.models.ConsumerException;
-import mk.ck.energy.csm.models.auth.User;
-import mk.ck.energy.csm.models.auth.UserNotFoundException;
-import mk.ck.energy.csm.models.auth.UserRole;
+import mk.ck.energy.csm.model.AddressLocation;
+import mk.ck.energy.csm.model.Consumer;
+import mk.ck.energy.csm.model.ConsumerException;
+import mk.ck.energy.csm.model.auth.User;
+import mk.ck.energy.csm.model.auth.UserNotFoundException;
+import mk.ck.energy.csm.model.auth.UserRole;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthProvider;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthUser;
 

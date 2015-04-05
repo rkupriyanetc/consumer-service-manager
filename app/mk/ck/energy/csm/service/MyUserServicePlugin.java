@@ -1,7 +1,7 @@
 package mk.ck.energy.csm.service;
 
-import mk.ck.energy.csm.models.auth.User;
-import mk.ck.energy.csm.models.auth.UserNotFoundException;
+import mk.ck.energy.csm.model.auth.User;
+import mk.ck.energy.csm.model.auth.UserNotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

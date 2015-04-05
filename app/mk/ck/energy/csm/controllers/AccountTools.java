@@ -5,14 +5,14 @@ import static play.data.Form.form;
 import java.util.ArrayList;
 import java.util.List;
 
-import mk.ck.energy.csm.models.AddressLocation;
-import mk.ck.energy.csm.models.AddressNotFoundException;
-import mk.ck.energy.csm.models.AddressPlace;
-import mk.ck.energy.csm.models.AddressTop;
-import mk.ck.energy.csm.models.ImpossibleCreatingException;
-import mk.ck.energy.csm.models.LocationType;
-import mk.ck.energy.csm.models.StreetType;
-import mk.ck.energy.csm.models.auth.UserRole;
+import mk.ck.energy.csm.model.AddressLocation;
+import mk.ck.energy.csm.model.AddressNotFoundException;
+import mk.ck.energy.csm.model.AddressPlace;
+import mk.ck.energy.csm.model.AddressTop;
+import mk.ck.energy.csm.model.ImpossibleCreatingException;
+import mk.ck.energy.csm.model.LocationType;
+import mk.ck.energy.csm.model.StreetType;
+import mk.ck.energy.csm.model.auth.UserRole;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

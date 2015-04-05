@@ -1,11 +1,11 @@
 package mk.ck.energy.csm.controllers;
 
 import static play.data.Form.form;
-import mk.ck.energy.csm.models.auth.InvalidTokenException;
-import mk.ck.energy.csm.models.auth.TokenAction;
-import mk.ck.energy.csm.models.auth.TokenType;
-import mk.ck.energy.csm.models.auth.User;
-import mk.ck.energy.csm.models.auth.UserNotFoundException;
+import mk.ck.energy.csm.model.auth.InvalidTokenException;
+import mk.ck.energy.csm.model.auth.TokenAction;
+import mk.ck.energy.csm.model.auth.TokenType;
+import mk.ck.energy.csm.model.auth.User;
+import mk.ck.energy.csm.model.auth.UserNotFoundException;
 import mk.ck.energy.csm.providers.MyLoginUsernamePasswordAuthUser;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthProvider;
 import mk.ck.energy.csm.providers.MyUsernamePasswordAuthProvider.MyIdentity;

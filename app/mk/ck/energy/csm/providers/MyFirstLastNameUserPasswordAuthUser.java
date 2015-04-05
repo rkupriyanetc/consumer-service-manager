@@ -1,6 +1,6 @@
 package mk.ck.energy.csm.providers;
 
-import mk.ck.energy.csm.models.auth.MyUser;
+import mk.ck.energy.csm.model.auth.MyUser;
 
 import com.feth.play.module.pa.user.FirstLastNameIdentity;
 

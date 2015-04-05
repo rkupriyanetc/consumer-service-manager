@@ -31,29 +31,29 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import mk.ck.energy.csm.models.Address;
-import mk.ck.energy.csm.models.AddressLocation;
-import mk.ck.energy.csm.models.AddressNotFoundException;
-import mk.ck.energy.csm.models.AddressPlace;
-import mk.ck.energy.csm.models.AddressTop;
-import mk.ck.energy.csm.models.Configuration;
-import mk.ck.energy.csm.models.Consumer;
-import mk.ck.energy.csm.models.ConsumerStatusType;
-import mk.ck.energy.csm.models.Database;
-import mk.ck.energy.csm.models.HouseType;
-import mk.ck.energy.csm.models.LocationType;
-import mk.ck.energy.csm.models.Meter;
-import mk.ck.energy.csm.models.MeterDevice;
-import mk.ck.energy.csm.models.PlaceMeterInstall;
-import mk.ck.energy.csm.models.Plumb;
-import mk.ck.energy.csm.models.PlumbType;
-import mk.ck.energy.csm.models.StreetType;
-import mk.ck.energy.csm.models.UndefinedConsumer;
-import mk.ck.energy.csm.models.UndefinedConsumerType;
-import mk.ck.energy.csm.models.auth.MyUser;
-import mk.ck.energy.csm.models.auth.User;
-import mk.ck.energy.csm.models.auth.UserNotFoundException;
-import mk.ck.energy.csm.models.auth.UserRole;
+import mk.ck.energy.csm.model.Address;
+import mk.ck.energy.csm.model.AddressLocation;
+import mk.ck.energy.csm.model.AddressNotFoundException;
+import mk.ck.energy.csm.model.AddressPlace;
+import mk.ck.energy.csm.model.AddressTop;
+import mk.ck.energy.csm.model.Configuration;
+import mk.ck.energy.csm.model.Consumer;
+import mk.ck.energy.csm.model.ConsumerStatusType;
+import mk.ck.energy.csm.model.Database;
+import mk.ck.energy.csm.model.HouseType;
+import mk.ck.energy.csm.model.LocationType;
+import mk.ck.energy.csm.model.Meter;
+import mk.ck.energy.csm.model.MeterDevice;
+import mk.ck.energy.csm.model.PlaceMeterInstall;
+import mk.ck.energy.csm.model.Plumb;
+import mk.ck.energy.csm.model.PlumbType;
+import mk.ck.energy.csm.model.StreetType;
+import mk.ck.energy.csm.model.UndefinedConsumer;
+import mk.ck.energy.csm.model.UndefinedConsumerType;
+import mk.ck.energy.csm.model.auth.MyUser;
+import mk.ck.energy.csm.model.auth.User;
+import mk.ck.energy.csm.model.auth.UserNotFoundException;
+import mk.ck.energy.csm.model.auth.UserRole;
 import mk.ck.energy.csm.providers.MyFirstLastNameUserPasswordAuthUser;
 
 import org.slf4j.Logger;
@@ -1034,12 +1034,12 @@ public class AdministrationTools extends Controller {
 									pasSeries = pasNumber;
 									pasNumber = passportTmp;
 								}
-							mk.ck.energy.csm.models.Documents document;
+							mk.ck.energy.csm.model.Documents document;
 							if ( idCode != null && !idCode.isEmpty() && idCode.length() > 8 )
-								document = new mk.ck.energy.csm.models.Documents( idCode, pasSeries, pasNumber );
+								document = new mk.ck.energy.csm.model.Documents( idCode, pasSeries, pasNumber );
 							else
 								if ( passBoll )
-									document = new mk.ck.energy.csm.models.Documents( null, pasSeries, pasNumber );
+									document = new mk.ck.energy.csm.model.Documents( null, pasSeries, pasNumber );
 								else
 									document = null;
 							if ( document != null )
