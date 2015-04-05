@@ -1,3 +1,8 @@
 package mk.ck.energy.csm.model.db;
 
-public interface MongoDB {}
+import org.bson.Document;
+
+public interface MongoDB {
+	
+	Document getDocument();
+}

@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import mk.ck.energy.csm.model.db.Identifier;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -17,7 +20,7 @@ import com.mongodb.QueryBuilder;
 import com.mongodb.WriteResult;
 import com.mongodb.client.MongoCollection;
 
-public class AddressTop {
+public class AddressTop implements Identifier {
 	
 	private static final Logger	LOGGER							= LoggerFactory.getLogger( AddressTop.class );
 	
@@ -30,7 +33,7 @@ public class AddressTop {
 	/**
 	 * Id of Region or District name
 	 */
-	private long								id;
+	private String							id;
 	
 	/**
 	 * Region or District name.
@@ -45,11 +48,11 @@ public class AddressTop {
 	 * For example : id = 3, name = Черкаська обл., refId = 0
 	 * But when the name is the District, then name = Маньківський р-н, refId = 3
 	 */
-	private long								refId;
+	private String							refId;
 	
 	private AddressTop() {}
 	
-	public static AddressTop create( final String name, final long refId ) {
+	public static AddressTop create( final String name, final String refId ) {
 		final AddressTop addr = new AddressTop();
 		addr.name = name;
 		addr.refId = refId;
@@ -57,15 +60,16 @@ public class AddressTop {
 		return addr;
 	}
 	
-	public static AddressTop create( final DBObject dbo ) {
+	public static AddressTop create( final Document dbo ) {
 		final AddressTop addr = new AddressTop();
 		addr.name = ( String )dbo.get( DB_FIELD_NAME );
-		addr.refId = ( Long )dbo.get( DB_FIELD_REF_TO_TOP );
-		addr.id = ( Long )dbo.get( DB_FIELD_ID );
+		addr.refId = ( String )dbo.get( DB_FIELD_REF_TO_TOP );
+		addr.id = ( String )dbo.get( DB_FIELD_ID );
 		return addr;
 	}
 	
-	public long getId() {
+	@Override
+	public String getId() {
 		return id;
 	}
 	
@@ -77,40 +81,22 @@ public class AddressTop {
 		this.name = name;
 	}
 	
-	public long getRefId() {
+	public String getRefId() {
 		return refId;
 	}
 	
-	public void setRefId( final long refId ) {
+	public void setRefId( final String refId ) {
 		this.refId = refId;
 	}
 	
-	private long getOrCreateId() {
-		long id = 1;
-		try {
-			final DBObject doc = getDBObject();
-			final DBObject rec = getAddressCollection().find( doc ).one();
-			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( Long )rec.get( DB_FIELD_ID );
-			else {
-				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( DB_FIELD_ID, -1 ) ).limit( 1 );
-				if ( cursor.hasNext() ) {
-					final Object o = cursor.next().get( DB_FIELD_ID );
-					final Long i = ( Long )o;
-					id = i.longValue() + 1;
-				}
-			}
-		}
-		catch ( final MongoException me ) {
-			LOGGER.debug( "Cannon find ID in AddressTop.getOrCreateId(). {}", me );
-		}
-		catch ( final NullPointerException npe ) {
-			LOGGER.debug( "Cannon find ID in AddressTop.getOrCreateId(). {}", npe );
-		}
+	private String getOrCreateId() {
+		if ( id == null )
+			id = UUID.randomUUID().toString().toLowerCase();
 		return id;
 	}
 	
-	Document getDBObject() {
+	@Override
+	public Document getDocument() {
 		final Document doc = new Document();
 		if ( name != null && !name.isEmpty() )
 			doc.put( DB_FIELD_NAME, name );
@@ -121,7 +107,7 @@ public class AddressTop {
 	public void save() {
 		id = getOrCreateId();
 		final Document o = new Document( DB_FIELD_ID, id );
-		o.putAll( getDBObject() );
+		o.putAll( getDocument() );
 		getAddressCollection().save( o );
 	}
 	

@@ -1,12 +1,12 @@
 package mk.ck.energy.csm.model;
 
+import mk.ck.energy.csm.model.db.MongoDB;
+
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-
-public class Address {
+public class Address implements MongoDB {
 	
 	public static final short		UPDATING_READING_ALL							= 0;
 	
@@ -71,7 +71,7 @@ public class Address {
 	
 	public Address() {}
 	
-	public Address( final DBObject doc ) {
+	public Address( final Document doc ) {
 		setAddressLocationId( ( ( Long )doc.get( DB_FIELD_ADDRESS_LOCATION_ID ) ).longValue() );
 		setAddressPlaceId( ( ( Long )doc.get( DB_FIELD_ADDRESS_PLACE_ID ) ).longValue() );
 		apartment = ( String )doc.get( DB_FIELD_ADDRESS_APARTMENT );
@@ -153,8 +153,8 @@ public class Address {
 		this.postalCode = postalCode;
 	}
 	
-	DBObject getDBObject( final short updateSet ) {
-		final DBObject doc = new BasicDBObject();
+	Document getDocument( final short updateSet ) {
+		final Document doc = new Document();
 		try {
 			if ( UPDATING_READING_ALL == updateSet
 					|| ( updateSet & UPDATING_READING_ADDRESS_LOCATION ) == UPDATING_READING_ADDRESS_LOCATION ) {
