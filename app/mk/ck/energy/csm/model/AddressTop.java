@@ -4,36 +4,23 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-import mk.ck.energy.csm.model.db.Identifier;
+import mk.ck.energy.csm.model.db.AbstractMongoCollection;
 
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoException;
-import com.mongodb.QueryBuilder;
-import com.mongodb.WriteResult;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 
-public class AddressTop implements Identifier {
+public class AddressTop extends AbstractMongoCollection {
 	
 	private static final Logger	LOGGER							= LoggerFactory.getLogger( AddressTop.class );
-	
-	static final String					DB_FIELD_ID					= "_id";
 	
 	static final String					DB_FIELD_NAME				= "name";
 	
 	static final String					DB_FIELD_REF_TO_TOP	= "ref_id";
-	
-	/**
-	 * Id of Region or District name
-	 */
-	private String							id;
 	
 	/**
 	 * Region or District name.
@@ -64,13 +51,8 @@ public class AddressTop implements Identifier {
 		final AddressTop addr = new AddressTop();
 		addr.name = ( String )dbo.get( DB_FIELD_NAME );
 		addr.refId = ( String )dbo.get( DB_FIELD_REF_TO_TOP );
-		addr.id = ( String )dbo.get( DB_FIELD_ID );
+		addr.setId( ( String )dbo.get( DB_FIELD_ID ) );
 		return addr;
-	}
-	
-	@Override
-	public String getId() {
-		return id;
 	}
 	
 	public String getName() {
@@ -89,78 +71,38 @@ public class AddressTop implements Identifier {
 		this.refId = refId;
 	}
 	
-	private String getOrCreateId() {
-		if ( id == null )
-			id = UUID.randomUUID().toString().toLowerCase();
-		return id;
-	}
-	
-	@Override
-	public Document getDocument() {
-		final Document doc = new Document();
-		if ( name != null && !name.isEmpty() )
-			doc.put( DB_FIELD_NAME, name );
-		doc.put( DB_FIELD_REF_TO_TOP, refId );
-		return doc;
-	}
-	
-	public void save() {
-		id = getOrCreateId();
-		final Document o = new Document( DB_FIELD_ID, id );
-		o.putAll( getDocument() );
-		getAddressCollection().save( o );
-	}
-	
-	public static AddressTop findById( final long id ) throws AddressNotFoundException {
-		if ( id > 0 )
-			try {
-				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
-				final AddressTop addr = AddressTop.create( doc );
-				return addr;
-			}
-			catch ( final MongoException me ) {
-				throw new AddressNotFoundException( "Exception in AddressTop.findById( id ) of DBCollection", me );
-			}
-		else
-			if ( id == 0 )
-				return null;
-			else
-				throw new AddressNotFoundException( "ID must be greater than zero in AddressTop.findById( id )" );
+	public static AddressTop findById( final String id ) throws AddressNotFoundException {
+		if ( id != null && !id.isEmpty() ) {
+			final Document doc = getCollection().find( new Document( DB_FIELD_ID, id ) ).first();
+			final AddressTop addr = AddressTop.create( doc );
+			return addr;
+		} else
+			throw new AddressNotFoundException( "ID must be greater than zero in AddressTop.findById( id )" );
 	}
 	
 	public static AddressTop findByName( final String name ) throws AddressNotFoundException {
 		if ( name == null || name.isEmpty() )
 			throw new AddressNotFoundException( "The parameter cannot be empty" );
-		try {
-			final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_NAME ).is( name ).get() );
-			if ( doc == null )
-				throw new AddressNotFoundException( "Address " + name + " not found" );
-			final AddressTop addr = AddressTop.create( doc );
-			return addr;
-		}
-		catch ( final MongoException me ) {
-			throw new AddressNotFoundException( "Exception in AddressTop.findByName( name ) of DBCollection", me );
-		}
+		final Document doc = getCollection().find( new Document( DB_FIELD_NAME, name ) ).first();
+		if ( doc == null )
+			throw new AddressNotFoundException( "Address " + name + " not found" );
+		final AddressTop addr = AddressTop.create( doc );
+		return addr;
 	}
 	
 	public static void remove( final AddressTop addr ) throws AddressNotFoundException, ForeignKeyException {
 		if ( hasChildren( addr ) )
 			throw new ForeignKeyException( "This record has dependencies" );
-		else
-			try {
-				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( addr.id ).get() );
-				final WriteResult wr = getAddressCollection().remove( doc );
-				LOGGER.debug( "AddressTop object removed {}", wr );
-			}
-			catch ( final MongoException me ) {
-				throw new AddressNotFoundException( "AddressTop not found" );
-			}
+		else {
+			final Document doc = getCollection().findOneAndDelete( new Document( DB_FIELD_ID, addr.getId() ) );
+			LOGGER.debug( "AddressTop object removed {}", doc );
+		}
 	}
 	
 	private static boolean hasChildren( final AddressTop addr ) {
-		final DBObject doc = new BasicDBObject( DB_FIELD_REF_TO_TOP, addr.id );
-		final DBObject rec = getAddressCollection().find( doc ).one();
-		final boolean b = rec != null && !rec.toMap().isEmpty();
+		final Document doc = new Document( DB_FIELD_REF_TO_TOP, addr.getId() );
+		final Document rec = getCollection().find( doc ).first();
+		final boolean b = rec != null && !rec.isEmpty();
 		if ( b )
 			return true;
 		try {
@@ -177,24 +119,25 @@ public class AddressTop implements Identifier {
 	 *          If equals zero then select all
 	 * @return
 	 */
-	public static Map< String, String > getMap( final long refId ) {
+	public static Map< String, String > getMap( final String refId ) {
 		final Map< String, String > references = new LinkedHashMap< String, String >( 0 );
-		DBCursor cursor;
-		if ( refId == 0 )
-			cursor = getAddressCollection().find();
+		MongoCursor< Document > cursor;
+		if ( refId == null || refId.isEmpty() || refId.equals( "0" ) )
+			cursor = getCollection().find().iterator();
 		else
-			cursor = getAddressCollection().find( new BasicDBObject( DB_FIELD_REF_TO_TOP, refId ) );
-		for ( final DBObject o : cursor ) {
+			cursor = getCollection().find( new Document( DB_FIELD_REF_TO_TOP, refId ) ).iterator();
+		while ( cursor.hasNext() ) {
+			final Document o = cursor.next();
 			final String name = ( String )o.get( DB_FIELD_NAME );
-			final String _id = ( ( Long )o.get( DB_FIELD_ID ) ).toString();
+			final String _id = ( String )o.get( DB_FIELD_ID );
 			references.put( _id, name );
 		}
 		return references;
 	}
 	
-	public static List< AddressTop > asClassType( final List< DBObject > all ) {
+	public static List< AddressTop > asClassType( final List< Document > all ) {
 		final List< AddressTop > result = new ArrayList< AddressTop >();
-		for ( final DBObject dbo : all )
+		for ( final Document dbo : all )
 			result.add( AddressTop.create( dbo ) );
 		return result;
 	}
@@ -217,7 +160,17 @@ public class AddressTop implements Identifier {
 		}
 	}
 	
-	public static MongoCollection< Document > getAddressCollection() {
+	@Override
+	public Document getDocument() {
+		final Document doc = new Document();
+		if ( name != null && !name.isEmpty() )
+			doc.put( DB_FIELD_NAME, name );
+		doc.put( DB_FIELD_REF_TO_TOP, refId );
+		return doc;
+	}
+	
+	@Override
+	public MongoCollection< Document > getCollection() {
 		return Database.getInstance().getDatabase().getCollection( "topAddresses" );
 	}
 }
