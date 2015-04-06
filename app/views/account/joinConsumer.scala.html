@@ -2,8 +2,8 @@
 
 @import helper._
 @import mk.ck.energy.csm.controllers._
-@import mk.ck.energy.csm.models.AddressTop
-@import mk.ck.energy.csm.models.AddressPlace
+@import mk.ck.energy.csm.model.AddressTop
+@import mk.ck.energy.csm.model.AddressPlace
 
 @main(Messages("playauthenticate.profile.join_consumer.electricity"), "joinConsumer") {
   
@@ -42,7 +42,7 @@
         <div class="row">
           <div class="col-md-4 col-sm-4">
             <label>@Messages("page.profile.consumer.addressTop")</label><br/>
-            @defining(AddressTop.getMap(0)) { map =>
+            @defining(AddressTop.getMap("0")) { map =>
               @if(map != null) {
                 <select style="width: 100%" id="topAddress" name="topAddress" >
                   <option value="0" selected>@Messages("page.profile.consumer.addressTop.select")</option>

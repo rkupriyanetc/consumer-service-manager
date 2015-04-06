@@ -75,6 +75,8 @@ page.admin.user.name=Ім''я користувача
 page.admin.user.firstName=Прізвище користувача
 page.admin.user.lastName=По батькові
 
+page.oper.script.title=Творить оператор РЕМ
+
 page.official.title=Офіційний сайт
 page.official.link=Зв''язок з офіційним сайтом
 

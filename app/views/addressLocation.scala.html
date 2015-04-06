@@ -1,4 +1,4 @@
-@(addrForm: Form[mk.ck.energy.csm.controllers.AccountTools.AddrLocation], items: Seq[mk.ck.energy.csm.models.AddressLocation] )
+@(addrForm: Form[mk.ck.energy.csm.controllers.AccountTools.AddrLocation], items: Seq[mk.ck.energy.csm.model.AddressLocation] )
 
 @import helper._
 
@@ -38,7 +38,7 @@
             )
           </div>
           <div class="col-md-3 col-xs-3">
-            @_selectPartial(addrForm, "locationsTypes", mk.ck.energy.csm.models.LocationType.optionsFullname(), Messages("LocationsTypes"), true)
+            @_selectPartial(addrForm, "locationsTypes", mk.ck.energy.csm.model.LocationType.optionsFullname(), Messages("LocationsTypes"), true)
           </div>
         </div>
         
