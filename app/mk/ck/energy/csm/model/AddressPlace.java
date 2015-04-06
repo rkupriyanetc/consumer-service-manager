@@ -3,29 +3,26 @@ package mk.ck.energy.csm.model;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import mk.ck.energy.csm.model.db.AbstractMongoCollection;
+
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import play.i18n.Messages;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
 
-public class AddressPlace {
+public class AddressPlace extends AbstractMongoCollection {
 	
 	private static final Logger	LOGGER								= LoggerFactory.getLogger( AddressPlace.class );
-	
-	static final String					DB_FIELD_ID						= "_id";
 	
 	static final String					DB_FIELD_STREET_NAME	= "street";
 	
 	static final String					DB_FIELD_STREET_TYPE	= "street_type";
-	
-	private long								id;
 	
 	/**
 	 * Вулиця
@@ -53,11 +50,12 @@ public class AddressPlace {
 		final AddressPlace addr = new AddressPlace();
 		addr.streetType = StreetType.valueOf( ( String )dbo.get( DB_FIELD_STREET_TYPE ) );
 		addr.street = ( String )dbo.get( DB_FIELD_STREET_NAME );
-		addr.id = ( Long )dbo.get( DB_FIELD_ID );
+		addr.id = ( String )dbo.get( DB_FIELD_ID );
 		return addr;
 	}
 	
-	public long getId() {
+	@Override
+	public String getId() {
 		return id;
 	}
 	
@@ -77,50 +75,26 @@ public class AddressPlace {
 		this.streetType = streetType;
 	}
 	
-	private long getOrCreateId() {
-		long id = 1;
-		try {
-			final DBObject doc = getDBObject();
-			final DBObject rec = getAddressCollection().find( doc ).one();
-			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( Long )rec.get( DB_FIELD_ID );
-			else {
-				final DBCursor cursor = getAddressCollection().find().sort( new BasicDBObject( DB_FIELD_ID, -1 ) ).limit( 1 );
-				if ( cursor.hasNext() ) {
-					final Object o = cursor.next().get( DB_FIELD_ID );
-					final Long i = ( Long )o;
-					id = i.longValue() + 1;
-				}
-			}
-			LOGGER.debug( "Finding ID in TRY block {}", id );
-		}
-		catch ( final MongoException me ) {
-			LOGGER.debug( "MongoException. Cannon finding ID in try block {}", me );
-		}
-		catch ( final NullPointerException npe ) {
-			LOGGER.debug( "NullPointerException. Cannon finding ID in try block {}", npe );
-		}
-		return id;
-	}
-	
-	DBObject getDBObject() {
-		final DBObject doc = new BasicDBObject();
+	@Override
+	Document getDocument() {
+		final Document doc = new Document();
 		if ( street != null && !street.isEmpty() )
 			doc.put( DB_FIELD_STREET_NAME, street );
 		doc.put( DB_FIELD_STREET_TYPE, streetType.name() );
 		return doc;
 	}
 	
+	@Override
 	public void save() {
 		id = getOrCreateId();
-		final DBObject o = new BasicDBObject( DB_FIELD_ID, id );
-		o.putAll( getDBObject() );
+		final Document o = new Document( DB_FIELD_ID, id );
+		o.putAll( getDocument() );
 		getAddressCollection().save( o );
 	}
 	
 	public static AddressPlace find( final String streetName, final StreetType streetType ) throws AddressNotFoundException {
 		try {
-			final DBObject doc = getAddressCollection().findOne(
+			final Document doc = getAddressCollection().findOne(
 					QueryBuilder.start( DB_FIELD_STREET_NAME ).is( streetName ).and( DB_FIELD_STREET_TYPE ).is( streetType.name() ).get() );
 			if ( doc == null )
 				throw new AddressNotFoundException( StreetType.optionsShortname().get( streetType.name() ) + " " + streetName
@@ -136,7 +110,7 @@ public class AddressPlace {
 	public static AddressPlace findById( final long id ) throws AddressNotFoundException {
 		if ( id > 0 )
 			try {
-				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
+				final Document doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
 				final AddressPlace addr = AddressPlace.create( doc );
 				return addr;
 			}
@@ -149,7 +123,7 @@ public class AddressPlace {
 	
 	public static Map< String, String > getMap() {
 		final Map< String, String > references = new LinkedHashMap< String, String >( 0 );
-		final DBObject sort = new BasicDBObject( DB_FIELD_STREET_TYPE, 1 );
+		final Document sort = new Document( DB_FIELD_STREET_TYPE, 1 );
 		sort.put( DB_FIELD_STREET_NAME, 1 );
 		final DBCursor cursor = getAddressCollection().find().sort( sort );
 		for ( final DBObject o : cursor ) {
@@ -170,9 +144,5 @@ public class AddressPlace {
 			sb.append( " " );
 		sb.append( street );
 		return sb.toString();
-	}
-	
-	public static DBCollection getAddressCollection() {
-		return Database.getInstance().getDatabase().getCollection( "placeAddresses" );
 	}
 }

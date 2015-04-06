@@ -308,13 +308,13 @@ public class Account extends Controller {
 	}
 	
 	@Restrict( @Group( UserRole.USER_ROLE_NAME ) )
-	public static Result joinConsumerElectricity( final Long idAddrTop ) {
+	public static Result joinConsumerElectricity( final String idAddrTop ) {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< AppendConsumer > filledForm = APPEND_CONSUMER_FORM.bindFromRequest();
 		final AppendConsumer ac = new AppendConsumer();
 		ac.setUserId( User.getLocalUser( session() ).getId() );
 		Map< String, String > loc;
-		if ( idAddrTop != null && idAddrTop.longValue() != 0 )
+		if ( idAddrTop != null && !idAddrTop.isEmpty() )
 			loc = AddressLocation.getMap( idAddrTop, 1 );
 		else
 			loc = new HashMap< String, String >( 0 );
@@ -351,7 +351,7 @@ public class Account extends Controller {
 		}
 	}
 	
-	public static Result onChangeAddressTopSelect( final Long addrId ) {
+	public static Result onChangeAddressTopSelect( final String addrId ) {
 		final Map< String, String > vals = AddressLocation.getMap( addrId, 1 );
 		final StringBuilder buf = new StringBuilder();
 		for ( final Map.Entry< String, String > entry : vals.entrySet() )

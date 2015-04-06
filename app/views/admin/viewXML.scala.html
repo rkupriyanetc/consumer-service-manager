@@ -33,7 +33,7 @@
            @if(fileNumber > 0 && fileNumber < 3) {
              @select(
                xmlFile("locationsTypes"),
-               options(mk.ck.energy.csm.models.LocationType.optionsShortname()),
+               options(mk.ck.energy.csm.model.LocationType.optionsShortname()),
                '_label -> Messages("LocationsTypes"),
                'size -> 10,
                'multiple -> "multiple",
@@ -43,7 +43,7 @@
              @if(fileNumber > 2) {
                @select(
                  xmlFile("streetTypes"),
-                 options(mk.ck.energy.csm.models.StreetType.optionsShortname()),
+                 options(mk.ck.energy.csm.model.StreetType.optionsShortname()),
                  '_label -> Messages("StreetType"),
                  'size -> 10,
                  'multiple -> "multiple",
@@ -56,7 +56,7 @@
            @if(fileNumber > 0 && fileNumber < 3) {
              @select(
                xmlFile("locationsTypes"),
-               options(mk.ck.energy.csm.models.LocationType.optionsValues()),
+               options(mk.ck.energy.csm.model.LocationType.optionsValues()),
                '_label -> Messages("LocationsTypes"),
                'size -> 10,
                'multiple -> "multiple",
@@ -66,7 +66,7 @@
              @if(fileNumber > 2) {
                @select(
                  xmlFile("streetTypes"),
-                 options(mk.ck.energy.csm.models.StreetType.optionsValues()),
+                 options(mk.ck.energy.csm.model.StreetType.optionsValues()),
                  '_label -> Messages("StreetType"),
                  'size -> 10,
                  'multiple -> "multiple",

@@ -11,7 +11,6 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 
 public class AddressTop extends AbstractMongoCollection {
@@ -43,14 +42,14 @@ public class AddressTop extends AbstractMongoCollection {
 		final AddressTop addr = new AddressTop();
 		addr.name = name;
 		addr.refId = refId;
-		addr.save();
+		addr.save( COLLECTION_NAME_TOP_ADDRESS );
 		return addr;
 	}
 	
 	public static AddressTop create( final Document dbo ) {
 		final AddressTop addr = new AddressTop();
-		addr.name = ( String )dbo.get( DB_FIELD_NAME );
-		addr.refId = ( String )dbo.get( DB_FIELD_REF_TO_TOP );
+		addr.setName( ( String )dbo.get( DB_FIELD_NAME ) );
+		addr.setRefId( ( String )dbo.get( DB_FIELD_REF_TO_TOP ) );
 		addr.setId( ( String )dbo.get( DB_FIELD_ID ) );
 		return addr;
 	}
@@ -73,7 +72,9 @@ public class AddressTop extends AbstractMongoCollection {
 	
 	public static AddressTop findById( final String id ) throws AddressNotFoundException {
 		if ( id != null && !id.isEmpty() ) {
-			final Document doc = getCollection().find( new Document( DB_FIELD_ID, id ) ).first();
+			final Document doc = getCollection( COLLECTION_NAME_TOP_ADDRESS ).find( new Document( DB_FIELD_ID, id ) ).first();
+			if ( doc == null )
+				throw new AddressNotFoundException( "Address not found in AddressTop.findById( " + id + " )" );
 			final AddressTop addr = AddressTop.create( doc );
 			return addr;
 		} else
@@ -83,7 +84,7 @@ public class AddressTop extends AbstractMongoCollection {
 	public static AddressTop findByName( final String name ) throws AddressNotFoundException {
 		if ( name == null || name.isEmpty() )
 			throw new AddressNotFoundException( "The parameter cannot be empty" );
-		final Document doc = getCollection().find( new Document( DB_FIELD_NAME, name ) ).first();
+		final Document doc = getCollection( COLLECTION_NAME_TOP_ADDRESS ).find( new Document( DB_FIELD_NAME, name ) ).first();
 		if ( doc == null )
 			throw new AddressNotFoundException( "Address " + name + " not found" );
 		final AddressTop addr = AddressTop.create( doc );
@@ -94,14 +95,15 @@ public class AddressTop extends AbstractMongoCollection {
 		if ( hasChildren( addr ) )
 			throw new ForeignKeyException( "This record has dependencies" );
 		else {
-			final Document doc = getCollection().findOneAndDelete( new Document( DB_FIELD_ID, addr.getId() ) );
+			final Document doc = getCollection( COLLECTION_NAME_TOP_ADDRESS ).findOneAndDelete(
+					new Document( DB_FIELD_ID, addr.getId() ) );
 			LOGGER.debug( "AddressTop object removed {}", doc );
 		}
 	}
 	
 	private static boolean hasChildren( final AddressTop addr ) {
 		final Document doc = new Document( DB_FIELD_REF_TO_TOP, addr.getId() );
-		final Document rec = getCollection().find( doc ).first();
+		final Document rec = getCollection( COLLECTION_NAME_TOP_ADDRESS ).find( doc ).first();
 		final boolean b = rec != null && !rec.isEmpty();
 		if ( b )
 			return true;
@@ -123,9 +125,9 @@ public class AddressTop extends AbstractMongoCollection {
 		final Map< String, String > references = new LinkedHashMap< String, String >( 0 );
 		MongoCursor< Document > cursor;
 		if ( refId == null || refId.isEmpty() || refId.equals( "0" ) )
-			cursor = getCollection().find().iterator();
+			cursor = getCollection( COLLECTION_NAME_TOP_ADDRESS ).find().iterator();
 		else
-			cursor = getCollection().find( new Document( DB_FIELD_REF_TO_TOP, refId ) ).iterator();
+			cursor = getCollection( COLLECTION_NAME_TOP_ADDRESS ).find( new Document( DB_FIELD_REF_TO_TOP, refId ) ).iterator();
 		while ( cursor.hasNext() ) {
 			final Document o = cursor.next();
 			final String name = ( String )o.get( DB_FIELD_NAME );
@@ -167,10 +169,5 @@ public class AddressTop extends AbstractMongoCollection {
 			doc.put( DB_FIELD_NAME, name );
 		doc.put( DB_FIELD_REF_TO_TOP, refId );
 		return doc;
-	}
-	
-	@Override
-	public MongoCollection< Document > getCollection() {
-		return Database.getInstance().getDatabase().getCollection( "topAddresses" );
 	}
 }

@@ -5,6 +5,9 @@ import static play.data.Form.form;
 import java.util.ArrayList;
 import java.util.List;
 
+import mk.ck.energy.csm.controllers.AccountTools.AddrLocation;
+import mk.ck.energy.csm.controllers.AccountTools.AddrPlace;
+import mk.ck.energy.csm.controllers.AccountTools.AddrTop;
 import mk.ck.energy.csm.model.AddressLocation;
 import mk.ck.energy.csm.model.AddressNotFoundException;
 import mk.ck.energy.csm.model.AddressPlace;
@@ -21,8 +24,6 @@ import play.data.Form;
 import play.data.validation.Constraints.Required;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.addressLocation;
-import views.html.addressPlace;
 import views.html.addressTop;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
@@ -40,28 +41,28 @@ public class AccountTools extends Controller {
 		private String	name;
 		
 		@Required
-		private long		refId;
+		private String	refId;
 		
 		@Required
-		private long		id;
+		private String	id;
 		
 		public AddrTop() {
-			id = 0;
+			id = "0";
 		}
 		
-		public long getId() {
+		public String getId() {
 			return id;
 		}
 		
-		public void setId( final long id ) {
+		public void setId( final String id ) {
 			this.id = id;
 		}
 		
-		public long getRefId() {
+		public String getRefId() {
 			return refId;
 		}
 		
-		public void setRefId( final long refId ) {
+		public void setRefId( final String refId ) {
 			this.refId = refId;
 		}
 		
@@ -77,10 +78,10 @@ public class AccountTools extends Controller {
 	public static class AddrLocation {
 		
 		@Required
-		private long						id;
+		private String					id;
 		
 		@Required
-		private long						refId;
+		private String					refId;
 		
 		@Required
 		private String					location;
@@ -89,16 +90,16 @@ public class AccountTools extends Controller {
 		private List< String >	locationsTypes;
 		
 		public AddrLocation() {
-			id = 0;
-			refId = 0;
+			id = "0";
+			refId = "0";
 			locationsTypes = new ArrayList< String >( 0 );
 		}
 		
-		public long getId() {
+		public String getId() {
 			return id;
 		}
 		
-		public void setId( final long id ) {
+		public void setId( final String id ) {
 			this.id = id;
 		}
 		
@@ -118,11 +119,11 @@ public class AccountTools extends Controller {
 			this.locationsTypes = locationsTypes;
 		}
 		
-		public long getRefId() {
+		public String getRefId() {
 			return refId;
 		}
 		
-		public void setRefId( final long refId ) {
+		public void setRefId( final String refId ) {
 			this.refId = refId;
 		}
 	}
@@ -130,7 +131,7 @@ public class AccountTools extends Controller {
 	public static class AddrPlace {
 		
 		@Required
-		private long		id;
+		private String	id;
 		
 		@Required
 		private String	streetType;
@@ -139,14 +140,14 @@ public class AccountTools extends Controller {
 		private String	street;
 		
 		public AddrPlace() {
-			id = 0;
+			id = "0";
 		}
 		
-		public long getId() {
+		public String getId() {
 			return id;
 		}
 		
-		public void setId( final long id ) {
+		public void setId( final String id ) {
 			this.id = id;
 		}
 		
@@ -306,7 +307,7 @@ public class AccountTools extends Controller {
 	}
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
-	public static Result removeTopAddress( final long id ) {
+	public static Result removeTopAddress( final String id ) {
 		try {
 			AddressTop.remove( AddressTop.findById( id ) );
 			return ok( addressTop.render(
@@ -326,7 +327,7 @@ public class AccountTools extends Controller {
 	}
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
-	public static Result removeLocationAddress( final long id ) {
+	public static Result removeLocationAddress( final String id ) {
 		try {
 			AddressLocation.remove( AddressLocation.findById( id ) );
 			return ok( addressLocation.render(

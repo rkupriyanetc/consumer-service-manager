@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import mk.ck.energy.csm.model.db.AbstractMongoCollection;
+
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,15 +18,10 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
 import com.mongodb.WriteResult;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.model.Sorts;
 
-public class AddressLocation {
+public class AddressLocation extends AbstractMongoCollection {
 	
 	private static final Logger		LOGGER											= LoggerFactory.getLogger( AddressLocation.class );
-	
-	static final String						DB_FIELD_ID									= "_id";
 	
 	static final String						DB_FIELD_LOCATIONS_TYPES		= "locations_types";
 	
@@ -32,9 +29,7 @@ public class AddressLocation {
 	
 	static final String						DB_FIELD_REF_TO_TOP_ADDRESS	= "ref_id";
 	
-	private long									id;
-	
-	private long									refId;
+	private String								refId;
 	
 	/**
 	 * Типи населенних пунктів: столиця, обласний центр, районний, місто, село,
@@ -74,8 +69,8 @@ public class AddressLocation {
 		final BasicDBList getList = ( BasicDBList )dbo.get( DB_FIELD_LOCATIONS_TYPES );
 		for ( final Object o : getList )
 			addr.locationsTypes.add( LocationType.valueOf( ( String )o ) );
-		addr.id = ( Long )dbo.get( DB_FIELD_ID );
-		addr.refId = ( Long )dbo.get( DB_FIELD_REF_TO_TOP_ADDRESS );
+		addr.id = ( String )dbo.get( DB_FIELD_ID );
+		addr.refId = ( String )dbo.get( DB_FIELD_REF_TO_TOP_ADDRESS );
 		try {
 			addr.topAddress = AddressTop.findById( addr.refId );
 		}
@@ -85,15 +80,17 @@ public class AddressLocation {
 		return addr;
 	}
 	
-	public long getId() {
+	@Override
+	public String getId() {
 		return id;
 	}
 	
-	public void setId( final long id ) {
+	@Override
+	public void setId( final String id ) {
 		this.id = id;
 	}
 	
-	public long getRefId() {
+	public String getRefId() {
 		return refId;
 	}
 	
@@ -122,59 +119,7 @@ public class AddressLocation {
 		if ( topAddress != null )
 			this.refId = topAddress.getId();
 		else
-			this.refId = 0;
-	}
-	
-	private long getOrCreateId() {
-		long id = 1;
-		try {
-			final Document doc = getDocument();
-			final Document rec = getAddressCollection().find( doc ).first();
-			if ( rec != null && !rec.isEmpty() )
-				id = rec.getLong( DB_FIELD_ID );
-			else {
-				final MongoCursor< Document > cursor = getAddressCollection().find()
-						.sort( Sorts.orderBy( Sorts.descending( DB_FIELD_ID ) ) ).iterator();
-				if ( cursor.hasNext() ) {
-					final Long i = cursor.next().getLong( DB_FIELD_ID );
-					id = i.longValue() + 1;
-				}
-			}
-		}
-		catch ( final MongoException me ) {
-			LOGGER.debug( "Cannon find ID in AddressLocation.getOrCreateId(). {}", me );
-		}
-		catch ( final NullPointerException npe ) {
-			LOGGER.debug( "Cannon find ID in AddressLocation.getOrCreateId(). {}", npe );
-		}
-		return id;
-	}
-	
-	Document getDocument() {
-		final Document doc = new Document();
-		if ( location != null && !location.isEmpty() )
-			doc.put( DB_FIELD_LOCATION, location );
-		final BasicDBList dbTypes = new BasicDBList();
-		for ( final LocationType type : locationsTypes )
-			dbTypes.add( type.name() );
-		if ( !dbTypes.isEmpty() )
-			doc.put( DB_FIELD_LOCATIONS_TYPES, dbTypes );
-		doc.put( DB_FIELD_REF_TO_TOP_ADDRESS, refId );
-		return doc;
-	}
-	
-	public void save() throws ImpossibleCreatingException {
-		if ( locationsTypes.contains( LocationType.CAPITAL ) ) {
-			final BasicDBList dbo = new BasicDBList();
-			dbo.add( LocationType.CAPITAL.name() );
-			final DBObject qu = new BasicDBObject( DB_FIELD_LOCATIONS_TYPES, new BasicDBObject( "$in", dbo ) );
-			if ( getAddressCollection().find( qu ).hasNext() )
-				throw new ImpossibleCreatingException( "One of the country's capital already exists in the database" );
-		}
-		id = getOrCreateId();
-		final Document o = new Document( DB_FIELD_ID, id );
-		o.putAll( getDocument() );
-		getAddressCollection().save( o );
+			this.refId = null;
 	}
 	
 	public static AddressLocation findById( final long id ) throws AddressNotFoundException {
@@ -296,7 +241,7 @@ public class AddressLocation {
 	 *          If equals zero then does not participate
 	 * @return
 	 */
-	public static Map< String, String > getMap( final long refId, final int isAddrTop ) {
+	public static Map< String, String > getMap( final String refId, final int isAddrTop ) {
 		final Map< String, String > references = new LinkedHashMap< String, String >();
 		for ( final DBObject o : getAddressCollection().find( new BasicDBObject( DB_FIELD_REF_TO_TOP_ADDRESS, refId ) ) ) {
 			final String name = choiceFromLocationsTypes( ( BasicDBList )o.get( DB_FIELD_LOCATIONS_TYPES ) ) + " "
@@ -364,7 +309,36 @@ public class AddressLocation {
 		return strRet;
 	}
 	
-	public static MongoCollection< Document > getAddressCollection() {
-		return Database.getInstance().getDatabase().getCollection( "locationAddresses" );
+	@Override
+	public Document getDocument() {
+		final Document doc = new Document();
+		if ( location != null && !location.isEmpty() )
+			doc.put( DB_FIELD_LOCATION, location );
+		final BasicDBList dbTypes = new BasicDBList();
+		for ( final LocationType type : locationsTypes )
+			dbTypes.add( type.name() );
+		if ( !dbTypes.isEmpty() )
+			doc.put( DB_FIELD_LOCATIONS_TYPES, dbTypes );
+		doc.put( DB_FIELD_REF_TO_TOP_ADDRESS, refId );
+		return doc;
+	}
+	
+	@Override
+	public void save( final String coolectionName ) {
+		try {
+			save();
+		}
+		catch ( final ImpossibleCreatingException ice ) {}
+	}
+	
+	private void save() throws ImpossibleCreatingException {
+		if ( locationsTypes.contains( LocationType.CAPITAL ) ) {
+			final BasicDBList dbo = new BasicDBList();
+			dbo.add( LocationType.CAPITAL.name() );
+			final Document qu = new Document( DB_FIELD_LOCATIONS_TYPES, new Document( "$in", dbo ) );
+			if ( getCollection( COLLECTION_NAME_LOCATION_ADDRESS ).find( qu ).iterator().hasNext() )
+				throw new ImpossibleCreatingException( "One of the country's capital already exists in the database" );
+		}
+		super.save( COLLECTION_NAME_LOCATION_ADDRESS );
 	}
 }

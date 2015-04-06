@@ -274,7 +274,8 @@ public class User implements Subject, Identifier {
 		}
 	}
 	
-	private DBObject getDBObject() {
+	@Override
+	private Document getDocument() {
 		final BasicDBList dbRoles = new BasicDBList();
 		for ( final UserRole role : roles )
 			dbRoles.add( role.getDBObject() );
