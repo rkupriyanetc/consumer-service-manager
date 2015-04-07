@@ -3,6 +3,7 @@ package mk.ck.energy.csm.controllers;
 import static play.data.Form.form;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import mk.ck.energy.csm.controllers.AccountTools.AddrLocation;
@@ -17,6 +18,7 @@ import mk.ck.energy.csm.model.LocationType;
 import mk.ck.energy.csm.model.StreetType;
 import mk.ck.energy.csm.model.auth.UserRole;
 
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,8 @@ import be.objectify.deadbolt.java.actions.Restrict;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 
 public class AccountTools extends Controller {
 	
@@ -196,10 +200,13 @@ public class AccountTools extends Controller {
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
 	public static Result testTopAddress() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
-		return ok( addressTop.render(
-				ADDRTOP_FORM,
-				scala.collection.JavaConversions.asScalaBuffer( AddressTop.asClassType( AddressTop.getAddressCollection().find()
-						.sort( new BasicDBObject( "_id", 1 ) ).toArray() ) ) ) );
+		FindIterable< AddressTop > iterable = AddressTop.getMongoCollection().find().sort( new Document( "_id", 1 ) );
+		final List< AddressTop > list = new LinkedList< AddressTop >();
+		for ( MongoCursor< AddressTop > iterator = iterable.iterator(); iterator.hasNext(); ) {
+			final AddressTop at = iterator.next();
+			list.add( at );
+		}
+		return ok( addressTop.render( ADDRTOP_FORM, scala.collection.JavaConversions.asScalaBuffer( list ) ) );
 	}
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
@@ -213,7 +220,7 @@ public class AccountTools extends Controller {
 							.toArray() ) ) ) );
 		else {
 			final AddrTop u = filledForm.get();
-			final AddressTop at = AddressTop.create( u.getName(), u.getRefId() );
+			final AddressTop at = new AddressTop( u.getName(), u.getRefId() ).save();
 			filledForm.data().put( "id", String.valueOf( at.getId() ) );
 			LOGGER.info( "Address top saved {}", at );
 			final List< AddressTop > items = AddressTop.asClassType( AddressTop.getAddressCollection().find()

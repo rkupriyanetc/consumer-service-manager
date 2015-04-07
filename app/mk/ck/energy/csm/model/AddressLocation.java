@@ -2,10 +2,11 @@ package mk.ck.energy.csm.model;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import mk.ck.energy.csm.model.db.AbstractMongoCollection;
+import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -13,101 +14,78 @@ import org.slf4j.LoggerFactory;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.MongoException;
-import com.mongodb.QueryBuilder;
-import com.mongodb.WriteResult;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 
-public class AddressLocation extends AbstractMongoCollection {
+public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	
-	private static final Logger		LOGGER											= LoggerFactory.getLogger( AddressLocation.class );
+	private static final long		serialVersionUID									= 1L;
 	
-	static final String						DB_FIELD_LOCATIONS_TYPES		= "locations_types";
+	private static final Logger	LOGGER														= LoggerFactory.getLogger( AddressLocation.class );
 	
-	static final String						DB_FIELD_LOCATION						= "location";
+	public static final String	COLLECTION_NAME_LOCATION_ADDRESS	= "locationAddresses";
 	
-	static final String						DB_FIELD_REF_TO_TOP_ADDRESS	= "ref_id";
+	static final String					DB_FIELD_LOCATION									= "location";
 	
-	private String								refId;
+	static final String					DB_FIELD_LOCATIONS_TYPES					= "locations_types";
+	
+	static final String					DB_FIELD_REF_TO_TOP_ADDRESS				= "ref_id";
+	
+	private AddressTop					topAddress;
+	
+	public AddressLocation( final AddressTop topId, final String location, final List< LocationType > locationsTypes ) {
+		setLocation( location );
+		setTopAddress( topId );
+		setLocationsTypes( locationsTypes );
+	}
+	
+	public String getRefId() {
+		return getString( DB_FIELD_REF_TO_TOP_ADDRESS );
+	}
+	
+	public void setRefId( final String refId ) {
+		if ( getRefId() != refId )
+			try {
+				topAddress = AddressTop.findById( refId );
+				put( DB_FIELD_REF_TO_TOP_ADDRESS, refId );
+			}
+			catch ( final AddressNotFoundException anfe ) {
+				remove( DB_FIELD_REF_TO_TOP_ADDRESS );
+			}
+	}
+	
+	/**
+	 * Населенний пункт
+	 */
+	public String getLocation() {
+		return getString( DB_FIELD_LOCATION );
+	}
+	
+	public void setLocation( final String location ) {
+		put( DB_FIELD_LOCATION, location );
+	}
 	
 	/**
 	 * Типи населенних пунктів: столиця, обласний центр, районний, місто, село,
 	 * хутір
 	 */
-	private List< LocationType >	locationsTypes;
-	
-	/**
-	 * Населенний пункт
-	 */
-	private String								location;
-	
-	private AddressTop						topAddress;
-	
-	private AddressLocation() {}
-	
-	public static AddressLocation create( final AddressTop topId, final String location, final List< LocationType > locationsTypes ) {
-		final AddressLocation addr = new AddressLocation();
-		addr.setLocation( location );
-		addr.setTopAddress( topId );
-		addr.setLocationsTypes( locationsTypes );
-		try {
-			addr.save();
-		}
-		catch ( final ImpossibleCreatingException ice ) {
-			LOGGER.debug( "Create error in AddressLocation.create( addr, location, type ). {}", ice );
-		}
-		return addr;
-	}
-	
-	public static AddressLocation create( final DBObject dbo ) throws ImpossibleCreatingException {
-		if ( dbo == null )
-			return null;
-		final AddressLocation addr = new AddressLocation();
-		addr.locationsTypes = new ArrayList< LocationType >( 0 );
-		addr.location = ( String )dbo.get( DB_FIELD_LOCATION );
-		final BasicDBList getList = ( BasicDBList )dbo.get( DB_FIELD_LOCATIONS_TYPES );
-		for ( final Object o : getList )
-			addr.locationsTypes.add( LocationType.valueOf( ( String )o ) );
-		addr.id = ( String )dbo.get( DB_FIELD_ID );
-		addr.refId = ( String )dbo.get( DB_FIELD_REF_TO_TOP_ADDRESS );
-		try {
-			addr.topAddress = AddressTop.findById( addr.refId );
-		}
-		catch ( final AddressNotFoundException anfe ) {
-			throw new ImpossibleCreatingException( "Cannot AddressLocation.create( DBObject dbo ) because could not find AddressTop" );
-		}
-		return addr;
-	}
-	
-	@Override
-	public String getId() {
-		return id;
-	}
-	
-	@Override
-	public void setId( final String id ) {
-		this.id = id;
-	}
-	
-	public String getRefId() {
-		return refId;
-	}
-	
-	public String getLocation() {
-		return location;
-	}
-	
-	public void setLocation( final String location ) {
-		this.location = location;
-	}
-	
 	public List< LocationType > getLocationsTypes() {
-		return locationsTypes;
+		final BasicDBList list = ( BasicDBList )get( DB_FIELD_LOCATIONS_TYPES );
+		final List< LocationType > lts = new ArrayList< LocationType >( list.size() );
+		for ( final String key : list.keySet() ) {
+			final LocationType lt = LocationType.valueOf( ( String )list.get( key ) );
+			lts.add( lt );
+		}
+		return lts;
 	}
 	
 	public void setLocationsTypes( final List< LocationType > locationsTypes ) {
-		this.locationsTypes = locationsTypes;
+		final BasicDBList dbList = new BasicDBList();
+		for ( final LocationType lt : locationsTypes )
+			dbList.add( lt.name() );
+		put( DB_FIELD_LOCATIONS_TYPES, dbList );
 	}
 	
 	public AddressTop getTopAddress() {
@@ -117,117 +95,94 @@ public class AddressLocation extends AbstractMongoCollection {
 	public void setTopAddress( final AddressTop topAddress ) {
 		this.topAddress = topAddress;
 		if ( topAddress != null )
-			this.refId = topAddress.getId();
+			put( DB_FIELD_REF_TO_TOP_ADDRESS, topAddress.getRefId() );
 		else
-			this.refId = null;
+			remove( DB_FIELD_REF_TO_TOP_ADDRESS );
 	}
 	
-	public static AddressLocation findById( final long id ) throws AddressNotFoundException {
-		if ( id > 0 )
-			try {
-				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
-				try {
-					final AddressLocation addr = AddressLocation.create( doc );
-					return addr;
-				}
-				catch ( final ImpossibleCreatingException ice ) {
-					return null;
-				}
-			}
-			catch ( final MongoException me ) {
-				throw new AddressNotFoundException( "Exception in AddressLocation.findById( id ) of DBCollection", me );
-			}
-		else
-			throw new AddressNotFoundException( "ID must be greater than zero in AddressLocation.findById( id )" );
+	public static AddressLocation findById( final String id ) throws AddressNotFoundException {
+		if ( id != null && !id.isEmpty() ) {
+			final MongoCollection< AddressLocation > addressCollection = getMongoCollection();
+			final AddressLocation doc = addressCollection.find( new Document( DB_FIELD_ID, id ) ).first();
+			if ( doc == null )
+				throw new AddressNotFoundException( "Cannot find address-location by " + id );
+			return doc;
+		} else
+			throw new IllegalArgumentException( "ID must be greater than zero in AddressLocation.findById( id )" );
 	}
 	
 	public static List< AddressLocation > findByAddressTop( final AddressTop topAddr ) throws AddressNotFoundException {
-		final List< AddressLocation > locations = new ArrayList< AddressLocation >( 0 );
-		try {
-			final DBCursor cur = getAddressCollection().find( new BasicDBObject( DB_FIELD_REF_TO_TOP_ADDRESS, topAddr.getId() ) );
-			if ( cur == null )
-				throw new AddressNotFoundException( "Addresses in the " + topAddr + " not found" );
-			while ( cur.hasNext() ) {
-				final DBObject o = cur.next();
-				final AddressLocation addr = AddressLocation.create( o );
-				locations.add( addr );
-			}
-			return locations;
+		final List< AddressLocation > locations = new LinkedList< AddressLocation >();
+		final MongoCollection< AddressLocation > addressCollection = getMongoCollection();
+		final MongoCursor< AddressLocation > cursor = addressCollection.find(
+				new Document( DB_FIELD_REF_TO_TOP_ADDRESS, topAddr.getId() ) ).iterator();
+		if ( cursor == null )
+			throw new AddressNotFoundException( "Cannot find address-location by " + topAddr.getId() );
+		while ( cursor.hasNext() ) {
+			final AddressLocation o = cursor.next();
+			locations.add( o );
 		}
-		catch ( final MongoException me ) {
-			return null;
-		}
-		catch ( final ImpossibleCreatingException ice ) {
-			throw new AddressNotFoundException(
-					"ImpossibleCreatingException in AddressLocation.findByAddressTop( addressTop ) in AddressLocation.create( doc )", ice );
-		}
+		return locations;
 	}
 	
-	public static List< AddressLocation > findByAddress( final DBObject address ) throws AddressNotFoundException {
-		final List< AddressLocation > locations = new ArrayList< AddressLocation >( 0 );
-		final BasicDBList lts = ( BasicDBList )address.get( DB_FIELD_LOCATIONS_TYPES );
-		final DBObject qu = new BasicDBObject();
-		if ( lts != null )
-			qu.put( DB_FIELD_LOCATIONS_TYPES, new BasicDBObject( "$in", lts ) );
-		final String name = ( String )address.get( DB_FIELD_LOCATION );
-		if ( name != null )
-			qu.put( DB_FIELD_LOCATION, name );
-		qu.put( DB_FIELD_REF_TO_TOP_ADDRESS, ( ( Long )address.get( DB_FIELD_REF_TO_TOP_ADDRESS ) ).longValue() );
-		try {
-			final DBCursor cursor = getAddressCollection().find( qu );
-			if ( cursor == null )
-				throw new AddressNotFoundException( "AddressLocation by " + address + " not found" );
-			while ( cursor.hasNext() ) {
-				final DBObject o = cursor.next();
-				final AddressLocation addr = AddressLocation.create( o );
-				locations.add( addr );
-			}
-			return locations;
-		}
-		catch ( final MongoException me ) {
-			return null;
-		}
-		catch ( final ImpossibleCreatingException ice ) {
-			throw new AddressNotFoundException(
-					"ImpossibleCreatingException in AddressLocation.findByAddress( address ) in AddressLocation.create( doc )", ice );
-		}
-	}
-	
+	/**
+	 * public static List< AddressLocation > findByAddress( final DBObject address
+	 * ) throws AddressNotFoundException {
+	 * final List< AddressLocation > locations = new ArrayList< AddressLocation >(
+	 * 0 );
+	 * final BasicDBList lts = ( BasicDBList )address.get(
+	 * DB_FIELD_LOCATIONS_TYPES );
+	 * final DBObject qu = new BasicDBObject();
+	 * if ( lts != null )
+	 * qu.put( DB_FIELD_LOCATIONS_TYPES, new BasicDBObject( "$in", lts ) );
+	 * final String name = ( String )address.get( DB_FIELD_LOCATION );
+	 * if ( name != null )
+	 * qu.put( DB_FIELD_LOCATION, name );
+	 * qu.put( DB_FIELD_REF_TO_TOP_ADDRESS, ( ( Long )address.get(
+	 * DB_FIELD_REF_TO_TOP_ADDRESS ) ).longValue() );
+	 * try {
+	 * final DBCursor cursor = getAddressCollection().find( qu );
+	 * if ( cursor == null )
+	 * throw new AddressNotFoundException( "AddressLocation by " + address +
+	 * " not found" );
+	 * while ( cursor.hasNext() ) {
+	 * final DBObject o = cursor.next();
+	 * final AddressLocation addr = AddressLocation.create( o );
+	 * locations.add( addr );
+	 * }
+	 * return locations;
+	 * }
+	 * catch ( final MongoException me ) {
+	 * return null;
+	 * }
+	 * catch ( final ImpossibleCreatingException ice ) {
+	 * throw new AddressNotFoundException(
+	 * "ImpossibleCreatingException in AddressLocation.findByAddress( address ) in AddressLocation.create( doc )"
+	 * , ice );
+	 * }
+	 * }
+	 */
 	public static List< AddressLocation > findByLocationName( final String locationName ) throws AddressNotFoundException {
-		final List< AddressLocation > locations = new ArrayList< AddressLocation >( 0 );
-		try {
-			final DBCursor cursor = getAddressCollection().find( QueryBuilder.start( DB_FIELD_LOCATION ).is( locationName ).get() );
-			if ( cursor == null )
-				throw new AddressNotFoundException( "Location by " + locationName + " not found" );
-			while ( cursor.hasNext() ) {
-				final DBObject o = cursor.next();
-				final AddressLocation addr = AddressLocation.create( o );
-				locations.add( addr );
-			}
-			return locations;
+		final List< AddressLocation > locations = new LinkedList< AddressLocation >();
+		final MongoCollection< AddressLocation > addressCollection = getMongoCollection();
+		final MongoCursor< AddressLocation > cursor = addressCollection.find( new Document( DB_FIELD_LOCATION, locationName ) )
+				.iterator();
+		if ( cursor == null )
+			throw new AddressNotFoundException( "Cannot find address-location by " + locationName );
+		while ( cursor.hasNext() ) {
+			final AddressLocation o = cursor.next();
+			locations.add( o );
 		}
-		catch ( final MongoException me ) {
-			return null;
-		}
-		catch ( final ImpossibleCreatingException ice ) {
-			throw new AddressNotFoundException(
-					"ImpossibleCreatingException in AddressLocation.findByLocationName( locationName ) in AddressLocation.create( doc )",
-					ice );
-		}
+		return locations;
 	}
 	
-	public static void remove( final AddressLocation addr ) throws AddressNotFoundException, ForeignKeyException {
+	public static void remove( final AddressLocation addr ) throws ForeignKeyException {
 		if ( hasChildren( addr ) )
 			throw new ForeignKeyException( "This record has dependencies" );
-		else
-			try {
-				final DBObject doc = getAddressCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( addr.id ).get() );
-				final WriteResult wr = getAddressCollection().remove( doc );
-				LOGGER.debug( "AddressLocation object removed {}", wr );
-			}
-			catch ( final MongoException me ) {
-				throw new AddressNotFoundException( "AddressTop not found" );
-			}
+		else {
+			final Document doc = getMongoCollection().findOneAndDelete( new Document( DB_FIELD_ID, addr.getId() ) );
+			LOGGER.debug( "AddressLocation object removed {}", doc );
+		}
 	}
 	
 	private static boolean hasChildren( final AddressLocation addr ) {
@@ -259,29 +214,17 @@ public class AddressLocation extends AbstractMongoCollection {
 		return references;
 	}
 	
-	public static List< AddressLocation > asClassType( final List< DBObject > all ) {
-		final List< AddressLocation > result = new ArrayList< AddressLocation >();
-		for ( final DBObject dbo : all )
-			try {
-				result.add( AddressLocation.create( dbo ) );
-			}
-			catch ( final ImpossibleCreatingException ice ) {
-				LOGGER.debug( "Error in converter AddressLocation {}", ice );
-			}
-		return result;
-	}
-	
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer();
-		sb.append( choiceFromLocationsTypes( new ArrayList< Object >( locationsTypes ) ) );
+		final StringBuilder sb = new StringBuilder();
+		sb.append( choiceFromLocationsTypes( ( BasicDBList )get( DB_FIELD_LOCATIONS_TYPES ) ) );
 		if ( sb.length() > 0 )
 			sb.append( " " );
-		sb.append( location );
+		sb.append( getString( DB_FIELD_LOCATION ) );
 		return sb.toString();
 	}
 	
-	protected static String choiceFromLocationsTypes( final ArrayList< Object > dbList ) {
+	protected static String choiceFromLocationsTypes( final BasicDBList dbList ) {
 		String strRet = "";
 		for ( final Object typeO : dbList ) {
 			final String typeStr = ( String )typeO;
@@ -309,36 +252,31 @@ public class AddressLocation extends AbstractMongoCollection {
 		return strRet;
 	}
 	
-	@Override
-	public Document getDocument() {
-		final Document doc = new Document();
-		if ( location != null && !location.isEmpty() )
-			doc.put( DB_FIELD_LOCATION, location );
-		final BasicDBList dbTypes = new BasicDBList();
-		for ( final LocationType type : locationsTypes )
-			dbTypes.add( type.name() );
-		if ( !dbTypes.isEmpty() )
-			doc.put( DB_FIELD_LOCATIONS_TYPES, dbTypes );
-		doc.put( DB_FIELD_REF_TO_TOP_ADDRESS, refId );
-		return doc;
+	/**
+	 * @Override
+	 *           private void save() throws ImpossibleCreatingException {
+	 *           if ( locationsTypes.contains( LocationType.CAPITAL ) ) {
+	 *           final BasicDBList dbo = new BasicDBList();
+	 *           dbo.add( LocationType.CAPITAL.name() );
+	 *           final Document qu = new Document( DB_FIELD_LOCATIONS_TYPES, new
+	 *           Document( "$in", dbo ) );
+	 *           if ( getCollection( COLLECTION_NAME_LOCATION_ADDRESS ).find( qu
+	 *           ).iterator().hasNext() )
+	 *           throw new ImpossibleCreatingException(
+	 *           "One of the country's capital already exists in the database" );
+	 *           }
+	 *           super.save( COLLECTION_NAME_LOCATION_ADDRESS );
+	 *           }
+	 */
+	public static MongoCollection< AddressLocation > getMongoCollection() {
+		final MongoDatabase db = Database.getInstance().getDatabase();
+		final MongoCollection< AddressLocation > collection = db.getCollection( COLLECTION_NAME_LOCATION_ADDRESS,
+				AddressLocation.class );
+		return collection;
 	}
 	
 	@Override
-	public void save( final String coolectionName ) {
-		try {
-			save();
-		}
-		catch ( final ImpossibleCreatingException ice ) {}
-	}
-	
-	private void save() throws ImpossibleCreatingException {
-		if ( locationsTypes.contains( LocationType.CAPITAL ) ) {
-			final BasicDBList dbo = new BasicDBList();
-			dbo.add( LocationType.CAPITAL.name() );
-			final Document qu = new Document( DB_FIELD_LOCATIONS_TYPES, new Document( "$in", dbo ) );
-			if ( getCollection( COLLECTION_NAME_LOCATION_ADDRESS ).find( qu ).iterator().hasNext() )
-				throw new ImpossibleCreatingException( "One of the country's capital already exists in the database" );
-		}
-		super.save( COLLECTION_NAME_LOCATION_ADDRESS );
+	protected MongoCollection< AddressLocation > getCollection() {
+		return getMongoCollection();
 	}
 }

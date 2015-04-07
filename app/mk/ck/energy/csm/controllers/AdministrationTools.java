@@ -31,6 +31,8 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import mk.ck.energy.csm.controllers.AdministrationTools.StepByStep;
+import mk.ck.energy.csm.controllers.AdministrationTools.XMLText;
 import mk.ck.energy.csm.model.Address;
 import mk.ck.energy.csm.model.AddressLocation;
 import mk.ck.energy.csm.model.AddressNotFoundException;
@@ -71,8 +73,6 @@ import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.admin.index;
-import views.html.admin.userAdd;
-import views.html.admin.viewXML;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 
@@ -428,7 +428,7 @@ public class AdministrationTools extends Controller {
 								case "references" :
 									try {
 										final AddressTop addr = AddressTop.findByName( id );
-										AddressTop.create( name, addr.getId() );
+										new AddressTop( name, addr.getId() ).save();
 									}
 									catch ( final AddressNotFoundException anfe ) {
 										LOGGER.error( "Cannot find addressTop", anfe );

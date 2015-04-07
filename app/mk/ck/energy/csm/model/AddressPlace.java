@@ -3,7 +3,7 @@ package mk.ck.energy.csm.model;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import mk.ck.energy.csm.model.db.AbstractMongoCollection;
+import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -15,24 +15,20 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
-public class AddressPlace extends AbstractMongoCollection {
+public class AddressPlace extends AbstractMongoDocument< AddressPlace > {
 	
-	private static final Logger	LOGGER								= LoggerFactory.getLogger( AddressPlace.class );
+	private static final long		serialVersionUID							= 1L;
 	
-	static final String					DB_FIELD_STREET_NAME	= "street";
+	private static final Logger	LOGGER												= LoggerFactory.getLogger( AddressPlace.class );
 	
-	static final String					DB_FIELD_STREET_TYPE	= "street_type";
+	public static final String	COLLECTION_NAME_PLACE_ADDRESS	= "placeAddresses";
 	
-	/**
-	 * Вулиця
-	 */
-	private String							street;
+	static final String					DB_FIELD_STREET_NAME					= "street";
 	
-	/**
-	 * Тип вулиці
-	 */
-	private StreetType					streetType;
+	static final String					DB_FIELD_STREET_TYPE					= "street_type";
 	
 	private AddressPlace() {}
 	
@@ -59,6 +55,9 @@ public class AddressPlace extends AbstractMongoCollection {
 		return id;
 	}
 	
+	/**
+	 * Вулиця
+	 */
 	public String getStreet() {
 		return street;
 	}
@@ -67,6 +66,9 @@ public class AddressPlace extends AbstractMongoCollection {
 		this.street = street;
 	}
 	
+	/**
+	 * Тип вулиці
+	 */
 	public StreetType getStreetType() {
 		return streetType;
 	}
@@ -144,5 +146,16 @@ public class AddressPlace extends AbstractMongoCollection {
 			sb.append( " " );
 		sb.append( street );
 		return sb.toString();
+	}
+	
+	public static MongoCollection< AddressPlace > getMongoCollection() {
+		final MongoDatabase db = Database.getInstance().getDatabase();
+		final MongoCollection< AddressPlace > collection = db.getCollection( COLLECTION_NAME_PLACE_ADDRESS, AddressPlace.class );
+		return collection;
+	}
+	
+	@Override
+	protected MongoCollection< AddressPlace > getCollection() {
+		return getMongoCollection();
 	}
 }
