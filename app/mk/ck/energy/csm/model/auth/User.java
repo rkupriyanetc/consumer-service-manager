@@ -2,19 +2,17 @@ package mk.ck.energy.csm.model.auth;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 
-import mk.ck.energy.csm.model.AddressTop;
 import mk.ck.energy.csm.model.Database;
 import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.bson.conversions.Bson;
 
 import play.cache.Cache;
 import play.mvc.Http;
@@ -30,15 +28,10 @@ import com.feth.play.module.pa.user.AuthUserIdentity;
 import com.feth.play.module.pa.user.EmailIdentity;
 import com.feth.play.module.pa.user.FirstLastNameIdentity;
 import com.feth.play.module.pa.user.NameIdentity;
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoException;
-import com.mongodb.QueryBuilder;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 
 /**
  * Authenticated user.
@@ -48,8 +41,6 @@ import com.mongodb.client.MongoDatabase;
 public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	private static final long							serialVersionUID					= 1L;
-	
-	private static final Logger						LOGGER										= LoggerFactory.getLogger( User.class );
 	
 	private static final String						COLLECTION_NAME_USERS			= "users";
 	
@@ -212,15 +203,17 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	public static boolean existsByAuthUserIdentity( final AuthUserIdentity identity ) {
 		if ( identity instanceof UsernamePasswordAuthUser )
-			return getMongoCollection().count( getUsernamePasswordAuthUserFind( ( UsernamePasswordAuthUser )identity ).get() ) > 0;
+			return getMongoCollection().count( getUsernamePasswordAuthUserFind( ( UsernamePasswordAuthUser )identity ) ) > 0;
 		else
-			return getCollection().count( getAuthUserFind( identity ).get() ) > 0;
+			return getMongoCollection().count( getAuthUserFind( identity ) ) > 0;
 	}
 	
-	private static QueryBuilder getAuthUserFind( final AuthUserIdentity identity ) {
-		getMongoCollection().find( new Document( DB_FIELD_ACTIVE, true ).put( DB_FIELD_LINKED_ACCOUNTS, new Document( "$in", LinkedAccount.getInstance( identity ). ) ) ).
-		return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_LINKED_ACCOUNTS )
-				.elemMatch( LinkedAccount.getInstance( identity ).getDBObject() );
+	private static Bson getAuthUserFind( final AuthUserIdentity identity ) {
+		return Filters.and( new Document( DB_FIELD_ACTIVE, true ),
+				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, LinkedAccount.getInstance( identity ).getDocument() ) );
+		// return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and(
+		// DB_FIELD_LINKED_ACCOUNTS ).elemMatch( LinkedAccount.getInstance( identity
+		// ).getDBObject() );
 	}
 	
 	private static class ByIdentityFinder implements Callable< User > {
@@ -237,12 +230,12 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 			if ( identity instanceof UsernamePasswordAuthUser )
 				return findByUsernamePasswordIdentity( ( UsernamePasswordAuthUser )identity );
 			else {
-				final DBObject doc = getMongoCollection().findOne( getAuthUserFind( identity ).get() );
+				final User doc = getMongoCollection().find( getAuthUserFind( identity ) ).first();
 				if ( doc == null ) {
 					LOGGER.warn( "Could not find user by identity {}", identity );
 					throw new UserNotFoundException();
 				} else
-					return new User( doc );
+					return doc;
 			}
 		}
 	}
@@ -266,34 +259,35 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	}
 	
 	public static User findByUsernamePasswordIdentity( final UsernamePasswordAuthUser identity ) throws UserNotFoundException {
-		final Document doc = getMongoCollection().findOne( getUsernamePasswordAuthUserFind( identity ).get() );
+		final User doc = getMongoCollection().find( getUsernamePasswordAuthUserFind( identity ) ).first();
 		if ( doc == null ) {
 			LOGGER.warn( "Could not finr user by user and password {}", identity );
 			throw new UserNotFoundException();
 		} else
-			return new User( doc );
+			return doc;
 	}
 	
-	private static Document getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {
-		return getEmailUserFind( identity.getEmail() ).and( DB_FIELD_LINKED_ACCOUNTS ).elemMatch(
-				new BasicDBObject( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) );
+	private static Bson getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {
+		return Filters.and( getEmailUserFind( identity.getEmail() ),
+				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, new Document( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) ) );
+		// return getEmailUserFind( identity.getEmail() ).and(
+		// DB_FIELD_LINKED_ACCOUNTS ).elemMatch( new BasicDBObject(
+		// LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) );
 	}
 	
 	public static List< User > findByRole( final UserRole role ) throws UserNotFoundException {
-		final DBObject sort = new BasicDBObject();
-		sort.put( DB_FIELD_ROLES, 1 );
-		final DBCursor cursor = getMongoCollection().find(
-				QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_ROLES ).elemMatch( role.getDBObject() ).get() )
-				.sort( sort );
+		final MongoCursor< User > cursor = getMongoCollection()
+				.find( Filters.and( new Document( DB_FIELD_ACTIVE, true ), Filters.elemMatch( DB_FIELD_ROLES, role.getDocument() ) ) )
+				.sort( new Document( DB_FIELD_ROLES, 1 ) ).iterator();
+		// QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_ROLES
+		// ).elemMatch( role.getDBObject() ).get() ).sort( sort );
 		if ( cursor == null ) {
 			LOGGER.warn( "Could not find users by role {}", role );
 			throw new UserNotFoundException();
 		} else {
-			final List< User > users = new ArrayList<>( 0 );
-			while ( cursor.hasNext() ) {
-				final DBObject o = cursor.next();
-				users.add( new User( o ) );
-			}
+			final List< User > users = new LinkedList< User >();
+			while ( cursor.hasNext() )
+				users.add( cursor.next() );
 			return users;
 		}
 	}
@@ -329,21 +323,20 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 		for ( final LinkedAccount acc : otherUser.linkedAccounts )
 			this.linkedAccounts.add( LinkedAccount.getInstance( acc ) );
 		// do all other merging stuff here - like resources, etc.
-		if ( email == null )
-			email = otherUser.email;
-		if ( name == null )
-			name = otherUser.name;
+		if ( getEmail() == null )
+			setEmail( otherUser.getEmail() );
+		if ( getName() == null )
+			setName( otherUser.getName() );
 		// deactivate the merged user that got added to this one
-		otherUser.active = false;
-		final MongoCollection< User > users = getCollection();
-		users.save( getDocument() );
-		users.update( new Document( DB_FIELD_ID, otherUser.getId() ), otherUser.getDocument() );
+		otherUser.setActive( false );
+		// Зберегти лише linkedAccounts, Email, Name. А також otherUser.Active
+		save();
+		otherUser.save();
 	}
 	
 	public static User create( final AuthUser authUser ) {
 		final User user = new User( authUser );
-		getCollection().save( user.getDocument() );
-		return user;
+		return user.save();
 	}
 	
 	public static void merge( final AuthUser oldAuthUser, final AuthUser newAuthUser ) {
@@ -368,7 +361,8 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 		try {
 			final User u = User.findByAuthUserIdentity( oldUser );
 			u.linkedAccounts.add( LinkedAccount.getInstance( newUser ) );
-			getCollection().save( u.getDocument() );
+			// Зберегти лише u.linkedAccounts
+			u.save();
 		}
 		catch ( final UserNotFoundException e ) {
 			LOGGER.warn( "Cannot link {} to {}", newUser, oldUser );
@@ -382,12 +376,14 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 		catch ( final UnsupportedOperationException uoe ) {
 			LOGGER.warn( "Exception: {}. ", uoe );
 		}
-		getCollection().save( getDocument() );
+		// Зберегти лише roles
+		save();
 	}
 	
 	public void updateLastLoginDate() {
-		lastLogin = System.currentTimeMillis();
-		getCollection().save( getDocument() );
+		setLastLogin( System.currentTimeMillis() );
+		// Зберегти лише LastLogin
+		save();
 	}
 	
 	public static String getCollectorId() {
@@ -405,20 +401,20 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	}
 	
 	public static User findById( final String userId ) throws UserNotFoundException {
-		final DBObject doc = getCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( userId ).get() );
+		final User doc = getMongoCollection().find( new Document( DB_FIELD_ID, userId ) ).first();
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", userId );
 			throw new UserNotFoundException();
 		} else
-			return new User( doc );
+			return doc;
 	}
 	
 	public static User findByEmail( final String email ) throws UserNotFoundException {
 		// there is out RuntimeException
 		try {
-			final DBObject doc = getCollection().findOne( getEmailUserFind( email ).get() );
+			final User doc = getMongoCollection().find( getEmailUserFind( email ) ).first();
 			if ( doc != null )
-				return new User( doc );
+				return doc;
 			else {
 				LOGGER.warn( "Could not find user by email {}", email );
 				throw new UserNotFoundException();
@@ -430,8 +426,10 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 		}
 	}
 	
-	private static QueryBuilder getEmailUserFind( final String email ) {
-		return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_EMAIL ).is( email );
+	private static Bson getEmailUserFind( final String email ) {
+		return Filters.and( new Document( DB_FIELD_ACTIVE, true ), new Document( DB_FIELD_EMAIL, email ) );
+		// return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and(
+		// DB_FIELD_EMAIL ).is( email );
 	}
 	
 	public LinkedAccount getAccountByProvider( final String providerKey ) {
@@ -456,20 +454,22 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	public void verify() {
 		// You might want to wrap this into a transaction
-		this.emailValidated = true;
-		getCollection().save( getDocument() );
+		setEmailValidated( true );
+		// Зберегти лише EmailValidated
+		save();
 		TokenAction.deleteByUser( this, TokenType.EMAIL_VERIFICATION );
 	}
 	
 	public void changePassword( final UsernamePasswordAuthUser authUser, final boolean create ) {
-		final LinkedAccount existing = this.getAccountByProvider( authUser.getProvider() );
+		final LinkedAccount existing = getAccountByProvider( authUser.getProvider() );
 		if ( existing == null ) {
 			if ( !create )
 				throw new RuntimeException( "Account not enabled for password usage" );
 		} else
 			linkedAccounts.remove( existing );
 		linkedAccounts.add( LinkedAccount.getInstance( authUser ) );
-		getCollection().save( getDocument() );
+		// Зберегти лише LinkedAccount
+		save();
 	}
 	
 	public void resetPassword( final UsernamePasswordAuthUser authUser, final boolean create ) {
@@ -479,19 +479,13 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	}
 	
 	public static User remove( final String id ) throws UserNotFoundException {
-		final DBObject doc = getCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
+		final User doc = getMongoCollection().findOneAndDelete( new Document( DB_FIELD_ID, id ) );
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", id );
 			throw new UserNotFoundException();
-		} else {
-			try {
-				getCollection().remove( doc );
-			}
-			catch ( final MongoException me ) {
-				LOGGER.warn( "Could not remove user. Id is {}", id );
-			}
-			return new User( doc );
-		}
+		} else
+			LOGGER.debug( "User {} was removed.", id );
+		return doc;
 	}
 	
 	public boolean isAdmin() {

@@ -56,8 +56,7 @@ public class AddressTop extends AbstractMongoDocument< AddressTop > {
 	
 	public static AddressTop findById( final String id ) throws AddressNotFoundException {
 		if ( id != null && !id.isEmpty() ) {
-			final MongoCollection< AddressTop > addressTopCollection = getMongoCollection();
-			final AddressTop doc = addressTopCollection.find( new Document( DB_FIELD_ID, id ) ).first();
+			final AddressTop doc = getMongoCollection().find( new Document( DB_FIELD_ID, id ) ).first();
 			if ( doc == null )
 				throw new AddressNotFoundException( "Cannot find address-top by " + id );
 			return doc;
@@ -68,8 +67,7 @@ public class AddressTop extends AbstractMongoDocument< AddressTop > {
 	public static AddressTop findByName( final String name ) throws AddressNotFoundException {
 		if ( name == null || name.isEmpty() )
 			throw new IllegalArgumentException( "The parameter cannot be empty" );
-		final MongoCollection< AddressTop > addressTopCollection = getMongoCollection();
-		final AddressTop doc = addressTopCollection.find( new Document( DB_FIELD_NAME, name ) ).first();
+		final AddressTop doc = getMongoCollection().find( new Document( DB_FIELD_NAME, name ) ).first();
 		if ( doc == null )
 			throw new AddressNotFoundException( "Address " + name + " not found" );
 		return doc;

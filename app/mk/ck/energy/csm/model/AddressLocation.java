@@ -9,12 +9,8 @@ import java.util.Map;
 import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -23,15 +19,13 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	
 	private static final long		serialVersionUID									= 1L;
 	
-	private static final Logger	LOGGER														= LoggerFactory.getLogger( AddressLocation.class );
+	private static final String	COLLECTION_NAME_LOCATION_ADDRESS	= "locationAddresses";
 	
-	public static final String	COLLECTION_NAME_LOCATION_ADDRESS	= "locationAddresses";
+	private static final String	DB_FIELD_LOCATION									= "location";
 	
-	static final String					DB_FIELD_LOCATION									= "location";
+	private static final String	DB_FIELD_LOCATIONS_TYPES					= "locations_types";
 	
-	static final String					DB_FIELD_LOCATIONS_TYPES					= "locations_types";
-	
-	static final String					DB_FIELD_REF_TO_TOP_ADDRESS				= "ref_id";
+	private static final String	DB_FIELD_REF_TO_TOP_ADDRESS				= "ref_id";
 	
 	private AddressTop					topAddress;
 	
@@ -113,8 +107,7 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	
 	public static List< AddressLocation > findByAddressTop( final AddressTop topAddr ) throws AddressNotFoundException {
 		final List< AddressLocation > locations = new LinkedList< AddressLocation >();
-		final MongoCollection< AddressLocation > addressCollection = getMongoCollection();
-		final MongoCursor< AddressLocation > cursor = addressCollection.find(
+		final MongoCursor< AddressLocation > cursor = getMongoCollection().find(
 				new Document( DB_FIELD_REF_TO_TOP_ADDRESS, topAddr.getId() ) ).iterator();
 		if ( cursor == null )
 			throw new AddressNotFoundException( "Cannot find address-location by " + topAddr.getId() );
@@ -164,8 +157,7 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	 */
 	public static List< AddressLocation > findByLocationName( final String locationName ) throws AddressNotFoundException {
 		final List< AddressLocation > locations = new LinkedList< AddressLocation >();
-		final MongoCollection< AddressLocation > addressCollection = getMongoCollection();
-		final MongoCursor< AddressLocation > cursor = addressCollection.find( new Document( DB_FIELD_LOCATION, locationName ) )
+		final MongoCursor< AddressLocation > cursor = getMongoCollection().find( new Document( DB_FIELD_LOCATION, locationName ) )
 				.iterator();
 		if ( cursor == null )
 			throw new AddressNotFoundException( "Cannot find address-location by " + locationName );
@@ -180,8 +172,8 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 		if ( hasChildren( addr ) )
 			throw new ForeignKeyException( "This record has dependencies" );
 		else {
-			final Document doc = getMongoCollection().findOneAndDelete( new Document( DB_FIELD_ID, addr.getId() ) );
-			LOGGER.debug( "AddressLocation object removed {}", doc );
+			final AddressLocation doc = getMongoCollection().findOneAndDelete( new Document( DB_FIELD_ID, addr.getId() ) );
+			LOGGER.debug( "AddressLocation was removed {}", doc );
 		}
 	}
 	
@@ -198,17 +190,20 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	 */
 	public static Map< String, String > getMap( final String refId, final int isAddrTop ) {
 		final Map< String, String > references = new LinkedHashMap< String, String >();
-		for ( final DBObject o : getAddressCollection().find( new BasicDBObject( DB_FIELD_REF_TO_TOP_ADDRESS, refId ) ) ) {
-			final String name = choiceFromLocationsTypes( ( BasicDBList )o.get( DB_FIELD_LOCATIONS_TYPES ) ) + " "
-					+ ( String )o.get( DB_FIELD_LOCATION );
-			final String _id = ( ( Long )o.get( DB_FIELD_ID ) ).toString();
+		final MongoCursor< AddressLocation > o = getMongoCollection().find( new Document( DB_FIELD_REF_TO_TOP_ADDRESS, refId ) )
+				.iterator();
+		while ( o.hasNext() ) {
+			final AddressLocation addr = o.next();
+			final String name = choiceFromLocationsTypes( ( BasicDBList )addr.get( DB_FIELD_LOCATIONS_TYPES ) ) + " "
+					+ addr.getString( DB_FIELD_LOCATION );
+			final String _id = addr.getString( DB_FIELD_ID );
 			references.put( _id, name );
 		}
 		if ( isAddrTop != 0 ) {
 			int p = -1;
-			for ( final String keys : AddressTop.getMap( refId ).keySet() ) {
+			for ( final String key : AddressTop.getMap( refId ).keySet() ) {
 				references.put( new Integer( p-- ).toString(), "0" );
-				references.putAll( getMap( new Long( keys ), 0 ) );
+				references.putAll( getMap( key, 0 ) );
 			}
 		}
 		return references;

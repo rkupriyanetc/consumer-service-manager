@@ -9,13 +9,13 @@ import com.feth.play.module.pa.user.AuthUserIdentity;
  */
 public class LinkedAccount {
 	
-	private static final String	DB_FIELD_PROVIDER	= "provider";
+	protected static final String	DB_FIELD_PROVIDER	= "provider";
 	
-	private static final String	DB_FIELD_USER_ID	= "user_id";
+	protected static final String	DB_FIELD_USER_ID	= "user_id";
 	
-	private final String				provider;
+	private final String					provider;
 	
-	private final String				userId;
+	private final String					userId;
 	
 	private LinkedAccount( final String provider, final String userId ) {
 		this.provider = provider;
