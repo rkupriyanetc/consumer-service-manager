@@ -7,12 +7,17 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import mk.ck.energy.csm.model.AddressTop;
 import mk.ck.energy.csm.model.Database;
-import mk.ck.energy.csm.model.db.Identifier;
 import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 
 import play.cache.Cache;
 import play.mvc.Http;
@@ -39,12 +44,12 @@ import com.mongodb.QueryBuilder;
 /**
  * Authenticated user.
  * 
- * @author KYL
+ * @author KYL 
  */
-public class User implements Subject, Identifier {
+public class User implements Subject {
 	
 	private static final Logger						LOGGER										= LoggerFactory.getLogger( User.class );
-	
+	private static final String	COLLECTION_NAME_USERS	= "users";
 	static final String										DB_FIELD_ID								= "_id";
 	
 	static final String										DB_FIELD_EMAIL						= "email";
@@ -148,7 +153,6 @@ public class User implements Subject, Identifier {
 		return getId();
 	}
 	
-	@Override
 	public String getId() {
 		return id;
 	};
@@ -189,9 +193,9 @@ public class User implements Subject, Identifier {
 	
 	public static boolean existsByAuthUserIdentity( final AuthUserIdentity identity ) {
 		if ( identity instanceof UsernamePasswordAuthUser )
-			return getUsersCollection().count( getUsernamePasswordAuthUserFind( ( UsernamePasswordAuthUser )identity ).get() ) > 0;
+			return getCollection().count( getUsernamePasswordAuthUserFind( ( UsernamePasswordAuthUser )identity ).get() ) > 0;
 		else
-			return getUsersCollection().count( getAuthUserFind( identity ).get() ) > 0;
+			return getCollection().count( getAuthUserFind( identity ).get() ) > 0;
 	}
 	
 	private static QueryBuilder getAuthUserFind( final AuthUserIdentity identity ) {
@@ -213,7 +217,7 @@ public class User implements Subject, Identifier {
 			if ( identity instanceof UsernamePasswordAuthUser )
 				return findByUsernamePasswordIdentity( ( UsernamePasswordAuthUser )identity );
 			else {
-				final DBObject doc = getUsersCollection().findOne( getAuthUserFind( identity ).get() );
+				final DBObject doc = getCollection().findOne( getAuthUserFind( identity ).get() );
 				if ( doc == null ) {
 					LOGGER.warn( "Could not find user by identity {}", identity );
 					throw new UserNotFoundException();
@@ -242,7 +246,7 @@ public class User implements Subject, Identifier {
 	}
 	
 	public static User findByUsernamePasswordIdentity( final UsernamePasswordAuthUser identity ) throws UserNotFoundException {
-		final DBObject doc = getUsersCollection().findOne( getUsernamePasswordAuthUserFind( identity ).get() );
+		final DBObject doc = getCollection().findOne( getUsernamePasswordAuthUserFind( identity ).get() );
 		if ( doc == null ) {
 			LOGGER.warn( "Could not finr user by user and password {}", identity );
 			throw new UserNotFoundException();
@@ -258,7 +262,7 @@ public class User implements Subject, Identifier {
 	public static List< User > findByRole( final UserRole role ) throws UserNotFoundException {
 		final DBObject sort = new BasicDBObject();
 		sort.put( DB_FIELD_ROLES, 1 );
-		final DBCursor cursor = getUsersCollection().find(
+		final DBCursor cursor = getCollection().find(
 				QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_ROLES ).elemMatch( role.getDBObject() ).get() )
 				.sort( sort );
 		if ( cursor == null ) {
@@ -274,7 +278,6 @@ public class User implements Subject, Identifier {
 		}
 	}
 	
-	@Override
 	private Document getDocument() {
 		final BasicDBList dbRoles = new BasicDBList();
 		for ( final UserRole role : roles )
@@ -317,14 +320,14 @@ public class User implements Subject, Identifier {
 			name = otherUser.name;
 		// deactivate the merged user that got added to this one
 		otherUser.active = false;
-		final DBCollection users = getUsersCollection();
-		users.save( getDBObject() );
-		users.update( new BasicDBObject( DB_FIELD_ID, otherUser.getId() ), otherUser.getDBObject() );
+		final DBCollection users = getCollection();
+		users.save( getDocument() );
+		users.update( new Document( DB_FIELD_ID, otherUser.getId() ), otherUser.getDocument() );
 	}
 	
 	public static User create( final AuthUser authUser ) {
 		final User user = new User( authUser );
-		getUsersCollection().save( user.getDBObject() );
+		getCollection().save( user.getDocument() );
 		return user;
 	}
 	
@@ -350,7 +353,7 @@ public class User implements Subject, Identifier {
 		try {
 			final User u = User.findByAuthUserIdentity( oldUser );
 			u.linkedAccounts.add( LinkedAccount.getInstance( newUser ) );
-			getUsersCollection().save( u.getDBObject() );
+			getCollection().save( u.getDocument() );
 		}
 		catch ( final UserNotFoundException e ) {
 			LOGGER.warn( "Cannot link {} to {}", newUser, oldUser );
@@ -364,12 +367,12 @@ public class User implements Subject, Identifier {
 		catch ( final UnsupportedOperationException uoe ) {
 			LOGGER.warn( "Exception: {}. ", uoe );
 		}
-		getUsersCollection().save( getDBObject() );
+		getCollection().save( getDocument() );
 	}
 	
 	public void updateLastLoginDate() {
 		lastLogin = System.currentTimeMillis();
-		getUsersCollection().save( getDBObject() );
+		getCollection().save( getDocument() );
 	}
 	
 	public static String getCollectorId() {
@@ -387,7 +390,7 @@ public class User implements Subject, Identifier {
 	}
 	
 	public static User findById( final String userId ) throws UserNotFoundException {
-		final DBObject doc = getUsersCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( userId ).get() );
+		final DBObject doc = getCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( userId ).get() );
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", userId );
 			throw new UserNotFoundException();
@@ -398,7 +401,7 @@ public class User implements Subject, Identifier {
 	public static User findByEmail( final String email ) throws UserNotFoundException {
 		// there is out RuntimeException
 		try {
-			final DBObject doc = getUsersCollection().findOne( getEmailUserFind( email ).get() );
+			final DBObject doc = getCollection().findOne( getEmailUserFind( email ).get() );
 			if ( doc != null )
 				return new User( doc );
 			else {
@@ -439,7 +442,7 @@ public class User implements Subject, Identifier {
 	public void verify() {
 		// You might want to wrap this into a transaction
 		this.emailValidated = true;
-		getUsersCollection().save( getDBObject() );
+		getCollection().save( getDocument() );
 		TokenAction.deleteByUser( this, TokenType.EMAIL_VERIFICATION );
 	}
 	
@@ -451,7 +454,7 @@ public class User implements Subject, Identifier {
 		} else
 			linkedAccounts.remove( existing );
 		linkedAccounts.add( LinkedAccount.getInstance( authUser ) );
-		getUsersCollection().save( getDBObject() );
+		getCollection().save( getDocument() );
 	}
 	
 	public void resetPassword( final UsernamePasswordAuthUser authUser, final boolean create ) {
@@ -461,13 +464,13 @@ public class User implements Subject, Identifier {
 	}
 	
 	public static User remove( final String id ) throws UserNotFoundException {
-		final DBObject doc = getUsersCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
+		final DBObject doc = getCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", id );
 			throw new UserNotFoundException();
 		} else {
 			try {
-				getUsersCollection().remove( doc );
+				getCollection().remove( doc );
 			}
 			catch ( final MongoException me ) {
 				LOGGER.warn( "Could not remove user. Id is {}", id );
@@ -489,8 +492,15 @@ public class User implements Subject, Identifier {
 				return true;
 		return false;
 	}
+
+	public static MongoCollection< User > getMongoCollection() {
+		final MongoDatabase db = Database.getInstance().getDatabase();
+		final MongoCollection< User > collection = db.getCollection( COLLECTION_NAME_USERS, User.class );
+		return collection;
+	}
 	
-	private static DBCollection getUsersCollection() {
-		return Database.getInstance().getDatabase().getCollection( "users" );
+	@Override
+	protected MongoCollection< User > getCollection() {
+		return getMongoCollection();
 	}
 }
