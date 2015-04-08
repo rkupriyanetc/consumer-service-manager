@@ -1,118 +1,118 @@
 package mk.ck.energy.csm.model.auth;
 
 import mk.ck.energy.csm.model.Database;
+import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.bson.Document;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
-import com.mongodb.WriteResult;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 /**
  * @author KYL
  */
-public class TokenAction {
+public class TokenAction extends AbstractMongoDocument< TokenAction > {
 	
-	private static final Logger	LOGGER								= LoggerFactory.getLogger( TokenAction.class );
+	private static final long		serialVersionUID				= 1L;
+	
+	private static final String	COLLECTION_NAME_TOKENS	= "tokens";
 	
 	/**
 	 * Verification time frame (until the user clicks on the link in the email) in
 	 * seconds Defaults to one week
 	 */
-	private final static long		VERIFICATION_TIME			= 7 * 24 * 3600;
+	private final static long		VERIFICATION_TIME				= 7 * 24 * 3600;
 	
-	static final String					DB_FIELD_TOKEN				= "token";
+	static final String					DB_FIELD_TOKEN					= "token";
 	
-	static final String					DB_FIELD_USER_ID			= "user_id";
+	static final String					DB_FIELD_USER_ID				= "user_id";
 	
-	static final String					DB_FIELD_TOKEN_TYPE		= "type";
+	static final String					DB_FIELD_TOKEN_TYPE			= "type";
 	
-	static final String					DB_FIELD_DATE_CREATED	= "created";
+	static final String					DB_FIELD_DATE_CREATED		= "created";
 	
-	static final String					DB_FIELD_DATE_EXPIRES	= "expires";
-	
-	private final String				token;
-	
-	private final String				userId;
-	
-	private final TokenType			type;
-	
-	private final long					created;
-	
-	private final long					expires;
+	static final String					DB_FIELD_DATE_EXPIRES		= "expires";
 	
 	private TokenAction( final TokenType type, final String token, final String userId ) {
-		this.token = token;
-		this.userId = userId;
-		this.type = type;
-		this.created = System.currentTimeMillis();
-		this.expires = this.created + VERIFICATION_TIME * 1000;
-	}
-	
-	private TokenAction( final DBObject doc ) {
-		this.token = ( String )doc.get( DB_FIELD_TOKEN );
-		this.userId = ( String )doc.get( DB_FIELD_USER_ID );
-		this.type = TokenType.valueOf( ( String )doc.get( DB_FIELD_TOKEN_TYPE ) );
-		this.created = ( Long )doc.get( DB_FIELD_DATE_CREATED );
-		this.expires = ( Long )doc.get( DB_FIELD_DATE_EXPIRES );
+		setToken( token );
+		setUserId( userId );
+		setTokenType( type );
+		setCreated( System.currentTimeMillis() );
+		setExpires( getCreated() + VERIFICATION_TIME * 1000 );
 	}
 	
 	public String getToken() {
-		return token;
+		return getString( DB_FIELD_TOKEN );
 	}
 	
-	public String getTargetUser() {
-		return userId;
+	public void setToken( final String token ) {
+		put( DB_FIELD_TOKEN, token );
+	}
+	
+	public String getUserId() {
+		return getString( DB_FIELD_USER_ID );
+	}
+	
+	public void setUserId( final String userId ) {
+		put( DB_FIELD_USER_ID, userId );
 	}
 	
 	public TokenType getTokenType() {
-		return type;
+		return TokenType.valueOf( getString( DB_FIELD_TOKEN_TYPE ) );
 	}
 	
-	public double getCreated() {
-		return created;
+	public void setTokenType( final TokenType type ) {
+		put( DB_FIELD_TOKEN_TYPE, type.name() );
+	}
+	
+	public long getCreated() {
+		return getLong( DB_FIELD_DATE_CREATED );
+	}
+	
+	public void setCreated( final long created ) {
+		put( DB_FIELD_DATE_CREATED, created );
+	}
+	
+	public long getExpires() {
+		return getLong( DB_FIELD_DATE_EXPIRES );
+	}
+	
+	public void setExpires( final long expires ) {
+		put( DB_FIELD_DATE_EXPIRES, expires );
 	}
 	
 	public boolean isValid() {
-		return this.expires > System.currentTimeMillis();
+		return getExpires() > System.currentTimeMillis();
 	}
 	
 	public static TokenAction findByToken( final String token, final TokenType type ) throws InvalidTokenException {
-		final DBObject query = QueryBuilder.start( DB_FIELD_TOKEN ).is( token ).and( DB_FIELD_TOKEN_TYPE ).is( type.name() ).get();
-		final DBObject doc = getTokensCollection().findOne( query );
+		final TokenAction doc = getMongoCollection().find(
+				new Document( DB_FIELD_TOKEN, token ).append( DB_FIELD_TOKEN_TYPE, type.name() ) ).first();
 		if ( doc == null )
 			throw new InvalidTokenException( type, token );
 		else
-			return new TokenAction( doc );
+			return doc;
 	}
 	
 	public static void deleteByUser( final User u, final TokenType type ) {
-		final DBObject query = QueryBuilder.start( DB_FIELD_USER_ID ).is( u.getId() ).and( DB_FIELD_TOKEN_TYPE ).is( type.name() )
-				.get();
-		final WriteResult removed = getTokensCollection().remove( query );
+		final TokenAction removed = getMongoCollection().findOneAndDelete(
+				new Document( DB_FIELD_USER_ID, u.getId() ).append( DB_FIELD_TOKEN_TYPE, type.name() ) );
 		LOGGER.debug( "Removed {}", removed );
 	}
 	
-	private DBObject getDBObject() {
-		return new BasicDBObject( DB_FIELD_TOKEN, token )//
-				.append( DB_FIELD_USER_ID, userId )//
-				.append( DB_FIELD_TOKEN_TYPE, type.name() )//
-				.append( DB_FIELD_DATE_CREATED, created )//
-				.append( DB_FIELD_DATE_EXPIRES, expires )//
-		;
-	}
-	
 	public static TokenAction create( final TokenType type, final String token, final User targetUser ) {
-		final TokenAction ua = new TokenAction( type, token, targetUser.getId() );
-		final WriteResult saved = getTokensCollection().save( ua.getDBObject() );
-		LOGGER.debug( "Saved token {}", saved );
+		final TokenAction ua = new TokenAction( type, token, targetUser.getId() ).save();
 		return ua;
 	}
 	
-	private static DBCollection getTokensCollection() {
-		return Database.getInstance().getDatabase().getCollection( "tokens" );
+	public static MongoCollection< TokenAction > getMongoCollection() {
+		final MongoDatabase db = Database.getInstance().getDatabase();
+		final MongoCollection< TokenAction > collection = db.getCollection( COLLECTION_NAME_TOKENS, TokenAction.class );
+		return collection;
+	}
+	
+	@Override
+	protected MongoCollection< TokenAction > getCollection() {
+		return getMongoCollection();
 	}
 }

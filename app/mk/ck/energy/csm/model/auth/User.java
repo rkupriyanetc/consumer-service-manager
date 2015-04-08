@@ -9,15 +9,12 @@ import java.util.concurrent.Callable;
 
 import mk.ck.energy.csm.model.AddressTop;
 import mk.ck.energy.csm.model.Database;
+import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 
 import play.cache.Cache;
 import play.mvc.Http;
@@ -40,51 +37,39 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 /**
  * Authenticated user.
  * 
- * @author KYL 
+ * @author KYL
  */
-public class User implements Subject {
+public class User extends AbstractMongoDocument< User > implements Subject {
+	
+	private static final long							serialVersionUID					= 1L;
 	
 	private static final Logger						LOGGER										= LoggerFactory.getLogger( User.class );
-	private static final String	COLLECTION_NAME_USERS	= "users";
-	static final String										DB_FIELD_ID								= "_id";
 	
-	static final String										DB_FIELD_EMAIL						= "email";
+	private static final String						COLLECTION_NAME_USERS			= "users";
 	
-	static final String										DB_FIELD_NAME							= "name";
+	private static final String						DB_FIELD_EMAIL						= "email";
 	
-	static final String										DB_FIELD_FIRST_NAME				= "first_name";
+	private static final String						DB_FIELD_NAME							= "name";
 	
-	static final String										DB_FIELD_LAST_NAME				= "last_name";
+	private static final String						DB_FIELD_FIRST_NAME				= "first_name";
 	
-	static final String										DB_FIELD_LAST_LOGIN				= "last_login";
+	private static final String						DB_FIELD_LAST_NAME				= "last_name";
 	
-	static final String										DB_FIELD_ACTIVE						= "active";
+	private static final String						DB_FIELD_LAST_LOGIN				= "last_login";
 	
-	static final String										DB_FIELD_EMAIL_VALIDATED	= "validated";
+	private static final String						DB_FIELD_ACTIVE						= "active";
 	
-	static final String										DB_FIELD_ROLES						= "roles";
+	private static final String						DB_FIELD_EMAIL_VALIDATED	= "validated";
 	
-	static final String										DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
+	private static final String						DB_FIELD_ROLES						= "roles";
 	
-	private String												id;
-	
-	private String												email;
-	
-	private String												name;
-	
-	private String												firstName;
-	
-	private String												lastName;
-	
-	private long													lastLogin;
-	
-	private boolean												active;
-	
-	private boolean												emailValidated;
+	private static final String						DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
 	
 	private final List< UserRole >				roles											= new ArrayList< UserRole >( 0 );
 	
@@ -93,8 +78,8 @@ public class User implements Subject {
 	private final List< UserPermission >	permissions								= new ArrayList< UserPermission >( 0 );
 	
 	private User( final AuthUser authUser ) {
-		lastLogin = System.currentTimeMillis();
-		active = true;
+		setLastLogin( System.currentTimeMillis() );
+		setActive( true );
 		if ( authUser.getProvider().equals( MyStupidBasicAuthProvider.GUEST_PROVIDER )
 				&& authUser.getId().equals( MyStupidBasicAuthProvider.GUEST_ID ) )
 			roles.add( UserRole.GUEST );
@@ -108,73 +93,107 @@ public class User implements Subject {
 			// Remember, even when getting them from FB & Co., emails should be
 			// verified within the application as a security breach there might
 			// break your security as well!
-			email = identity.getEmail();
+			setEmail( identity.getEmail() );
 		}
 		if ( authUser instanceof NameIdentity ) {
 			final NameIdentity identity = ( NameIdentity )authUser;
 			final String name = identity.getName();
 			if ( name != null )
-				this.name = name;
+				setName( name );
 		}
 		if ( authUser instanceof FirstLastNameIdentity ) {
 			final FirstLastNameIdentity identity = ( FirstLastNameIdentity )authUser;
 			final String firstName = identity.getFirstName();
 			if ( firstName != null )
-				this.firstName = firstName;
+				setFirstName( firstName );
 			final String lastName = identity.getLastName();
 			if ( lastName != null )
-				this.lastName = lastName;
+				setLastName( lastName );
 		}
 	}
 	
 	protected User( final String id ) {
-		this.id = id;
+		setId( id );
 	}
 	
-	private User( final DBObject doc ) {
-		this.id = ( String )doc.get( DB_FIELD_ID );
-		this.email = ( String )doc.get( DB_FIELD_EMAIL );
-		this.name = ( String )doc.get( DB_FIELD_NAME );
-		this.firstName = ( String )doc.get( DB_FIELD_FIRST_NAME );
-		this.lastName = ( String )doc.get( DB_FIELD_LAST_NAME );
-		this.lastLogin = ( Long )doc.get( DB_FIELD_LAST_LOGIN );
-		this.active = ( Boolean )doc.get( DB_FIELD_ACTIVE );
-		this.emailValidated = ( Boolean )doc.get( DB_FIELD_EMAIL_VALIDATED );
-		final BasicDBList dbRoles = ( BasicDBList )doc.get( DB_FIELD_ROLES );
-		for ( final Object elm : dbRoles )
-			roles.add( UserRole.getInstance( ( DBObject )elm ) );
-		final BasicDBList dbAccounts = ( BasicDBList )doc.get( DB_FIELD_LINKED_ACCOUNTS );
-		for ( final Object elm : dbAccounts )
-			linkedAccounts.add( LinkedAccount.getInstance( ( DBObject )elm ) );
-	}
-	
+	/**
+	 * private User( final DBObject doc ) {
+	 * setId( ( String )doc.get( DB_FIELD_ID ) );
+	 * this.email = ( String )doc.get( DB_FIELD_EMAIL );
+	 * this.name = ( String )doc.get( DB_FIELD_NAME );
+	 * this.firstName = ( String )doc.get( DB_FIELD_FIRST_NAME );
+	 * this.lastName = ( String )doc.get( DB_FIELD_LAST_NAME );
+	 * this.lastLogin = ( Long )doc.get( DB_FIELD_LAST_LOGIN );
+	 * this.active = ( Boolean )doc.get( DB_FIELD_ACTIVE );
+	 * this.emailValidated = ( Boolean )doc.get( DB_FIELD_EMAIL_VALIDATED );
+	 * final BasicDBList dbRoles = ( BasicDBList )doc.get( DB_FIELD_ROLES );
+	 * for ( final Object elm : dbRoles )
+	 * roles.add( UserRole.getInstance( ( DBObject )elm ) );
+	 * final BasicDBList dbAccounts = ( BasicDBList )doc.get(
+	 * DB_FIELD_LINKED_ACCOUNTS );
+	 * for ( final Object elm : dbAccounts )
+	 * linkedAccounts.add( LinkedAccount.getInstance( ( DBObject )elm ) );
+	 * }
+	 */
 	@Override
 	public String getIdentifier() {
 		return getId();
 	}
 	
-	public String getId() {
-		return id;
-	};
-	
 	public String getEmail() {
-		return email;
+		return getString( DB_FIELD_EMAIL );
+	}
+	
+	public void setEmail( final String email ) {
+		put( DB_FIELD_EMAIL, email );
 	}
 	
 	public boolean isEmailValidated() {
-		return emailValidated;
+		return getBoolean( DB_FIELD_EMAIL_VALIDATED );
+	}
+	
+	public void setEmailValidated( final boolean emailValidated ) {
+		put( DB_FIELD_EMAIL_VALIDATED, emailValidated );
 	}
 	
 	public String getName() {
-		return name;
+		return getString( DB_FIELD_NAME );
+	}
+	
+	public void setName( final String name ) {
+		put( DB_FIELD_NAME, name );
 	}
 	
 	public String getFirstName() {
-		return firstName;
+		return getString( DB_FIELD_FIRST_NAME );
+	}
+	
+	public void setFirstName( final String firstName ) {
+		put( DB_FIELD_FIRST_NAME, firstName );
 	}
 	
 	public String getLastName() {
-		return lastName;
+		return getString( DB_FIELD_LAST_NAME );
+	}
+	
+	public void setLastName( final String lastName ) {
+		put( DB_FIELD_LAST_NAME, lastName );
+	}
+	
+	public long getLastLogin() {
+		return getLong( DB_FIELD_LAST_LOGIN );
+	}
+	
+	public void setLastLogin( final long lastLogin ) {
+		put( DB_FIELD_LAST_LOGIN, lastLogin );
+	}
+	
+	public boolean isActive() {
+		return getBoolean( DB_FIELD_ACTIVE );
+	}
+	
+	public void setActive( final boolean active ) {
+		put( DB_FIELD_ACTIVE, active );
 	}
 	
 	@Override
@@ -193,12 +212,13 @@ public class User implements Subject {
 	
 	public static boolean existsByAuthUserIdentity( final AuthUserIdentity identity ) {
 		if ( identity instanceof UsernamePasswordAuthUser )
-			return getCollection().count( getUsernamePasswordAuthUserFind( ( UsernamePasswordAuthUser )identity ).get() ) > 0;
+			return getMongoCollection().count( getUsernamePasswordAuthUserFind( ( UsernamePasswordAuthUser )identity ).get() ) > 0;
 		else
 			return getCollection().count( getAuthUserFind( identity ).get() ) > 0;
 	}
 	
 	private static QueryBuilder getAuthUserFind( final AuthUserIdentity identity ) {
+		getMongoCollection().find( new Document( DB_FIELD_ACTIVE, true ).put( DB_FIELD_LINKED_ACCOUNTS, new Document( "$in", LinkedAccount.getInstance( identity ). ) ) ).
 		return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_LINKED_ACCOUNTS )
 				.elemMatch( LinkedAccount.getInstance( identity ).getDBObject() );
 	}
@@ -217,7 +237,7 @@ public class User implements Subject {
 			if ( identity instanceof UsernamePasswordAuthUser )
 				return findByUsernamePasswordIdentity( ( UsernamePasswordAuthUser )identity );
 			else {
-				final DBObject doc = getCollection().findOne( getAuthUserFind( identity ).get() );
+				final DBObject doc = getMongoCollection().findOne( getAuthUserFind( identity ).get() );
 				if ( doc == null ) {
 					LOGGER.warn( "Could not find user by identity {}", identity );
 					throw new UserNotFoundException();
@@ -246,7 +266,7 @@ public class User implements Subject {
 	}
 	
 	public static User findByUsernamePasswordIdentity( final UsernamePasswordAuthUser identity ) throws UserNotFoundException {
-		final DBObject doc = getCollection().findOne( getUsernamePasswordAuthUserFind( identity ).get() );
+		final Document doc = getMongoCollection().findOne( getUsernamePasswordAuthUserFind( identity ).get() );
 		if ( doc == null ) {
 			LOGGER.warn( "Could not finr user by user and password {}", identity );
 			throw new UserNotFoundException();
@@ -254,7 +274,7 @@ public class User implements Subject {
 			return new User( doc );
 	}
 	
-	private static QueryBuilder getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {
+	private static Document getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {
 		return getEmailUserFind( identity.getEmail() ).and( DB_FIELD_LINKED_ACCOUNTS ).elemMatch(
 				new BasicDBObject( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) );
 	}
@@ -262,7 +282,7 @@ public class User implements Subject {
 	public static List< User > findByRole( final UserRole role ) throws UserNotFoundException {
 		final DBObject sort = new BasicDBObject();
 		sort.put( DB_FIELD_ROLES, 1 );
-		final DBCursor cursor = getCollection().find(
+		final DBCursor cursor = getMongoCollection().find(
 				QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_ROLES ).elemMatch( role.getDBObject() ).get() )
 				.sort( sort );
 		if ( cursor == null ) {
@@ -278,38 +298,33 @@ public class User implements Subject {
 		}
 	}
 	
-	private Document getDocument() {
-		final BasicDBList dbRoles = new BasicDBList();
-		for ( final UserRole role : roles )
-			dbRoles.add( role.getDBObject() );
-		final BasicDBList dbAccounts = new BasicDBList();
-		for ( final LinkedAccount acc : linkedAccounts )
-			dbAccounts.add( acc.getDBObject() );
-		final DBObject doc = new BasicDBObject( DB_FIELD_ID, getOrCreateId() );
-		if ( email != null )
-			doc.put( DB_FIELD_EMAIL, email );
-		if ( firstName != null )
-			doc.put( DB_FIELD_FIRST_NAME, firstName );
-		if ( name != null )
-			doc.put( DB_FIELD_NAME, name );
-		if ( lastName != null )
-			doc.put( DB_FIELD_LAST_NAME, lastName );
-		doc.put( DB_FIELD_ACTIVE, active );
-		doc.put( DB_FIELD_EMAIL_VALIDATED, emailValidated );
-		if ( !dbRoles.isEmpty() )
-			doc.put( DB_FIELD_ROLES, dbRoles );
-		if ( !dbAccounts.isEmpty() )
-			doc.put( DB_FIELD_LINKED_ACCOUNTS, dbAccounts );
-		doc.put( DB_FIELD_LAST_LOGIN, lastLogin );
-		return doc;
-	}
-	
-	private String getOrCreateId() {
-		if ( id == null )
-			id = UUID.randomUUID().toString().toLowerCase();
-		return id;
-	}
-	
+	/**
+	 * private Document getDocument() {
+	 * final BasicDBList dbRoles = new BasicDBList();
+	 * for ( final UserRole role : roles )
+	 * dbRoles.add( role.getDBObject() );
+	 * final BasicDBList dbAccounts = new BasicDBList();
+	 * for ( final LinkedAccount acc : linkedAccounts )
+	 * dbAccounts.add( acc.getDBObject() );
+	 * final DBObject doc = new BasicDBObject( DB_FIELD_ID, getOrCreateId() );
+	 * if ( email != null )
+	 * doc.put( DB_FIELD_EMAIL, email );
+	 * if ( firstName != null )
+	 * doc.put( DB_FIELD_FIRST_NAME, firstName );
+	 * if ( name != null )
+	 * doc.put( DB_FIELD_NAME, name );
+	 * if ( lastName != null )
+	 * doc.put( DB_FIELD_LAST_NAME, lastName );
+	 * doc.put( DB_FIELD_ACTIVE, active );
+	 * doc.put( DB_FIELD_EMAIL_VALIDATED, emailValidated );
+	 * if ( !dbRoles.isEmpty() )
+	 * doc.put( DB_FIELD_ROLES, dbRoles );
+	 * if ( !dbAccounts.isEmpty() )
+	 * doc.put( DB_FIELD_LINKED_ACCOUNTS, dbAccounts );
+	 * doc.put( DB_FIELD_LAST_LOGIN, lastLogin );
+	 * return doc;
+	 * }
+	 */
 	public void merge( final User otherUser ) {
 		for ( final LinkedAccount acc : otherUser.linkedAccounts )
 			this.linkedAccounts.add( LinkedAccount.getInstance( acc ) );
@@ -320,7 +335,7 @@ public class User implements Subject {
 			name = otherUser.name;
 		// deactivate the merged user that got added to this one
 		otherUser.active = false;
-		final DBCollection users = getCollection();
+		final MongoCollection< User > users = getCollection();
 		users.save( getDocument() );
 		users.update( new Document( DB_FIELD_ID, otherUser.getId() ), otherUser.getDocument() );
 	}
@@ -492,7 +507,7 @@ public class User implements Subject {
 				return true;
 		return false;
 	}
-
+	
 	public static MongoCollection< User > getMongoCollection() {
 		final MongoDatabase db = Database.getInstance().getDatabase();
 		final MongoCollection< User > collection = db.getCollection( COLLECTION_NAME_USERS, User.class );

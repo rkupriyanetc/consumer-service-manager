@@ -1,16 +1,15 @@
 package mk.ck.energy.csm.model.auth;
 
-import be.objectify.deadbolt.core.models.Role;
+import org.bson.Document;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import be.objectify.deadbolt.core.models.Role;
 
 /**
  * @author RVK
  */
 public class UserRole implements Role {
 	
-	static final String						DB_FIELD_ROLE_NAME	= "name";
+	private static final String		DB_FIELD_ROLE_NAME	= "name";
 	
 	public static final String		GUEST_ROLE_NAME			= "GUEST";
 	
@@ -39,11 +38,11 @@ public class UserRole implements Role {
 		return name;
 	}
 	
-	DBObject getDBObject() {
-		return new BasicDBObject( DB_FIELD_ROLE_NAME, name );
+	Document getDocument() {
+		return new Document( DB_FIELD_ROLE_NAME, name );
 	}
 	
-	public static UserRole getInstance( final DBObject doc ) {
+	public static UserRole getInstance( final Document doc ) {
 		final String name = ( String )doc.get( DB_FIELD_ROLE_NAME );
 		if ( name.compareTo( USER_ROLE_NAME ) == 0 )
 			return USER;

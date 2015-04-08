@@ -1,21 +1,21 @@
 package mk.ck.energy.csm.model.auth;
 
+import org.bson.Document;
+
 import com.feth.play.module.pa.user.AuthUserIdentity;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 
 /**
  * @author KYL
  */
 public class LinkedAccount {
 	
-	static final String		DB_FIELD_PROVIDER	= "provider";
+	private static final String	DB_FIELD_PROVIDER	= "provider";
 	
-	static final String		DB_FIELD_USER_ID	= "user_id";
+	private static final String	DB_FIELD_USER_ID	= "user_id";
 	
-	private final String	provider;
+	private final String				provider;
 	
-	private final String	userId;
+	private final String				userId;
 	
 	private LinkedAccount( final String provider, final String userId ) {
 		this.provider = provider;
@@ -30,7 +30,7 @@ public class LinkedAccount {
 		return new LinkedAccount( linkedAccount.provider, linkedAccount.userId );
 	}
 	
-	public static LinkedAccount getInstance( final DBObject doc ) {
+	public static LinkedAccount getInstance( final Document doc ) {
 		return new LinkedAccount( ( String )doc.get( DB_FIELD_PROVIDER ), ( String )doc.get( DB_FIELD_USER_ID ) );
 	}
 	
@@ -42,7 +42,7 @@ public class LinkedAccount {
 		return userId;
 	}
 	
-	DBObject getDBObject() {
-		return new BasicDBObject( DB_FIELD_PROVIDER, provider ).append( DB_FIELD_USER_ID, userId );
+	Document getDocument() {
+		return new Document( DB_FIELD_PROVIDER, provider ).append( DB_FIELD_USER_ID, userId );
 	}
 }

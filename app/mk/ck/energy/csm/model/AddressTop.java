@@ -7,8 +7,6 @@ import java.util.Map;
 import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -18,13 +16,11 @@ public class AddressTop extends AbstractMongoDocument< AddressTop > {
 	
 	private static final long		serialVersionUID						= 1L;
 	
-	private static final Logger	LOGGER											= LoggerFactory.getLogger( AddressTop.class );
-	
 	private static final String	COLLECTION_NAME_TOP_ADDRESS	= "topAddresses";
 	
-	static final String					DB_FIELD_NAME								= "name";
+	private static final String	DB_FIELD_NAME								= "name";
 	
-	static final String					DB_FIELD_REF_TO_TOP					= "ref_id";
+	private static final String	DB_FIELD_REF_TO_TOP					= "ref_id";
 	
 	public AddressTop( final String name, final String refId ) {
 		put( DB_FIELD_NAME, name );
@@ -83,7 +79,7 @@ public class AddressTop extends AbstractMongoDocument< AddressTop > {
 		if ( hasChildren( addr ) )
 			throw new ForeignKeyException( "This record has dependencies" );
 		else {
-			final Document doc = getMongoCollection().findOneAndDelete( new Document( DB_FIELD_ID, addr.getId() ) );
+			final AddressTop doc = getMongoCollection().findOneAndDelete( new Document( DB_FIELD_ID, addr.getId() ) );
 			LOGGER.debug( "AddressTop object removed {}", doc );
 		}
 	}
