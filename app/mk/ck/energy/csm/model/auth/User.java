@@ -209,7 +209,7 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	}
 	
 	private static Bson getAuthUserFind( final AuthUserIdentity identity ) {
-		return Filters.and( new Document( DB_FIELD_ACTIVE, true ),
+		return Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
 				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, LinkedAccount.getInstance( identity ).getDocument() ) );
 		// return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and(
 		// DB_FIELD_LINKED_ACCOUNTS ).elemMatch( LinkedAccount.getInstance( identity
@@ -269,7 +269,7 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	private static Bson getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {
 		return Filters.and( getEmailUserFind( identity.getEmail() ),
-				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, new Document( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) ) );
+				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, Filters.eq( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) ) );
 		// return getEmailUserFind( identity.getEmail() ).and(
 		// DB_FIELD_LINKED_ACCOUNTS ).elemMatch( new BasicDBObject(
 		// LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) );
@@ -277,8 +277,8 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	public static List< User > findByRole( final UserRole role ) throws UserNotFoundException {
 		final MongoCursor< User > cursor = getMongoCollection()
-				.find( Filters.and( new Document( DB_FIELD_ACTIVE, true ), Filters.elemMatch( DB_FIELD_ROLES, role.getDocument() ) ) )
-				.sort( new Document( DB_FIELD_ROLES, 1 ) ).iterator();
+				.find( Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ), Filters.elemMatch( DB_FIELD_ROLES, role.getDocument() ) ) )
+				.sort( Filters.eq( DB_FIELD_ROLES, 1 ) ).iterator();
 		// QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_ROLES
 		// ).elemMatch( role.getDBObject() ).get() ).sort( sort );
 		if ( cursor == null ) {
