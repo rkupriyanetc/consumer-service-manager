@@ -62,6 +62,8 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	private static final String						DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
 	
+	private final List< UserRole >				roles											= new ArrayList< UserRole >( 0 );
+	
 	private final List< LinkedAccount >		linkedAccounts						= new ArrayList< LinkedAccount >( 0 );
 	
 	private final List< UserPermission >	permissions								= new ArrayList< UserPermission >( 0 );
@@ -187,13 +189,7 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	@Override
 	public List< ? extends Role > getRoles() {
-		final BsonArray list = ( BsonArray )get( DB_FIELD_ROLES );
-		final List< Role > lts = new ArrayList<>( list.size() );
-		for ( final BsonValue key : list.getValues() ) {
-			final Role lt = UserRole.getInstance( ( ( BsonString )key ).getValue() );
-			lts.add( lt );
-		}
-		return lts;
+		return roles;
 	}
 	
 	public List< LinkedAccount > getLinkedAccounts() {
@@ -213,7 +209,7 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	}
 	
 	private static Bson getAuthUserFind( final AuthUserIdentity identity ) {
-		return Filters.and( new Document( DB_FIELD_ACTIVE, true ),
+		return Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
 				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, LinkedAccount.getInstance( identity ).getDocument() ) );
 		// return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and(
 		// DB_FIELD_LINKED_ACCOUNTS ).elemMatch( LinkedAccount.getInstance( identity
@@ -273,7 +269,7 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	private static Bson getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {
 		return Filters.and( getEmailUserFind( identity.getEmail() ),
-				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, new Document( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) ) );
+				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, Filters.eq( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) ) );
 		// return getEmailUserFind( identity.getEmail() ).and(
 		// DB_FIELD_LINKED_ACCOUNTS ).elemMatch( new BasicDBObject(
 		// LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) );
@@ -281,9 +277,7 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	public static List< User > findByRole( final UserRole role ) throws UserNotFoundException {
 		final MongoCursor< User > cursor = getMongoCollection()
-				.find(
-						Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
-								Filters.elemMatch( DB_FIELD_ROLES, Filters.eq( DB_FIELD_ROLES, role.getDocument() ) ) ) )
+				.find( Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ), Filters.elemMatch( DB_FIELD_ROLES, role.getDocument() ) ) )
 				.sort( Filters.eq( DB_FIELD_ROLES, 1 ) ).iterator();
 		// QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_ROLES
 		// ).elemMatch( role.getDBObject() ).get() ).sort( sort );
@@ -375,7 +369,7 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 		}
 	}
 	
-	public void addRole( final Role role ) {
+	public void addRole( final UserRole role ) {
 		try {
 			roles.add( role );
 		}
