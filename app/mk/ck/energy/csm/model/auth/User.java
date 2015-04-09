@@ -11,6 +11,9 @@ import mk.ck.energy.csm.model.Database;
 import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
+import org.bson.BsonArray;
+import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -62,8 +65,6 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	private static final String						DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
 	
-	private final List< UserRole >				roles											= new ArrayList< UserRole >( 0 );
-	
 	private final List< LinkedAccount >		linkedAccounts						= new ArrayList< LinkedAccount >( 0 );
 	
 	private final List< UserPermission >	permissions								= new ArrayList< UserPermission >( 0 );
@@ -73,9 +74,9 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 		setActive( true );
 		if ( authUser.getProvider().equals( MyStupidBasicAuthProvider.GUEST_PROVIDER )
 				&& authUser.getId().equals( MyStupidBasicAuthProvider.GUEST_ID ) )
-			roles.add( UserRole.GUEST );
+			addRole( UserRole.GUEST );
 		else
-			roles.add( UserRole.USER );
+			addRole( UserRole.USER );
 		// user.permissions = new ArrayList<UserPermission>();
 		// user.permissions.add(UserPermission.findByValue("printers.edit"));
 		linkedAccounts.add( LinkedAccount.getInstance( authUser ) );
@@ -189,7 +190,13 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	@Override
 	public List< ? extends Role > getRoles() {
-		return roles;
+		final BsonArray list = ( BsonArray )get( DB_FIELD_ROLES );
+		final List< Role > lts = new ArrayList<>( list.size() );
+		for ( final BsonValue key : list.getValues() ) {
+			final Role lt = UserRole.getInstance( ( ( BsonString )key ).getValue() );
+			lts.add( lt );
+		}
+		return lts;
 	}
 	
 	public List< LinkedAccount > getLinkedAccounts() {
@@ -277,7 +284,9 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	
 	public static List< User > findByRole( final UserRole role ) throws UserNotFoundException {
 		final MongoCursor< User > cursor = getMongoCollection()
-				.find( Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ), Filters.elemMatch( DB_FIELD_ROLES, role.getDocument() ) ) )
+				.find(
+						Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
+								Filters.elemMatch( DB_FIELD_ROLES, Filters.eq( DB_FIELD_ROLES, role.getName() ) ) ) )
 				.sort( Filters.eq( DB_FIELD_ROLES, 1 ) ).iterator();
 		// QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_ROLES
 		// ).elemMatch( role.getDBObject() ).get() ).sort( sort );
@@ -369,13 +378,8 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 		}
 	}
 	
-	public void addRole( final UserRole role ) {
-		try {
-			roles.add( role );
-		}
-		catch ( final UnsupportedOperationException uoe ) {
-			LOGGER.warn( "Exception: {}. ", uoe );
-		}
+	public void addRole( final Role role ) {
+		( ( BsonArray )get( DB_FIELD_ROLES ) ).add( new BsonString( role.getName() ) );
 		// Зберегти лише roles
 		save();
 	}
@@ -489,17 +493,11 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	}
 	
 	public boolean isAdmin() {
-		for ( final UserRole r : roles )
-			if ( r.equals( UserRole.ADMIN ) )
-				return true;
-		return false;
+		return ( ( BsonArray )get( DB_FIELD_ROLES ) ).contains( new BsonString( UserRole.ADMIN_ROLE_NAME ) );
 	}
 	
 	public boolean isOper() {
-		for ( final UserRole r : roles )
-			if ( r.equals( UserRole.OPER ) )
-				return true;
-		return false;
+		return ( ( BsonArray )get( DB_FIELD_ROLES ) ).contains( new BsonString( UserRole.OPER_ROLE_NAME ) );
 	}
 	
 	public static MongoCollection< User > getMongoCollection() {
