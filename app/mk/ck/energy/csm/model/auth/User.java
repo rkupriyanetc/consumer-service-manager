@@ -11,9 +11,6 @@ import mk.ck.energy.csm.model.Database;
 import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
-import org.bson.BsonArray;
-import org.bson.BsonString;
-import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -282,7 +279,7 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 		// LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) );
 	}
 	
-	public static List< User > findByRole( final Role role ) throws UserNotFoundException {
+	public static List< User > findByRole( final UserRole role ) throws UserNotFoundException {
 		final MongoCursor< User > cursor = getMongoCollection()
 				.find(
 						Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
@@ -379,7 +376,12 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	}
 	
 	public void addRole( final Role role ) {
-		( ( BsonArray )get( DB_FIELD_ROLES ) ).add( new BsonString( role.getName() ) );
+		try {
+			roles.add( role );
+		}
+		catch ( final UnsupportedOperationException uoe ) {
+			LOGGER.warn( "Exception: {}. ", uoe );
+		}
 		// Зберегти лише roles
 		save();
 	}
@@ -493,11 +495,17 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	}
 	
 	public boolean isAdmin() {
-		return ( ( BsonArray )get( DB_FIELD_ROLES ) ).contains( new BsonString( UserRole.ADMIN_ROLE_NAME ) );
+		for ( final UserRole r : roles )
+			if ( r.equals( UserRole.ADMIN ) )
+				return true;
+		return false;
 	}
 	
 	public boolean isOper() {
-		return ( ( BsonArray )get( DB_FIELD_ROLES ) ).contains( new BsonString( UserRole.OPER_ROLE_NAME ) );
+		for ( final UserRole r : roles )
+			if ( r.equals( UserRole.OPER ) )
+				return true;
+		return false;
 	}
 	
 	public static MongoCollection< User > getMongoCollection() {
