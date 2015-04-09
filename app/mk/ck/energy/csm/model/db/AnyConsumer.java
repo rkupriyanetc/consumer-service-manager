@@ -6,7 +6,7 @@ import mk.ck.energy.csm.model.Address;
 import mk.ck.energy.csm.model.Meter;
 import mk.ck.energy.csm.model.auth.User;
 
-public interface AnyConsumer extends Identifier {
+public interface AnyConsumer {
 	
 	User getUser();
 	

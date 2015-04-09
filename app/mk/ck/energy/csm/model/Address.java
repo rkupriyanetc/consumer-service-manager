@@ -1,12 +1,10 @@
 package mk.ck.energy.csm.model;
 
-import mk.ck.energy.csm.model.db.MongoDB;
-
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Address implements MongoDB {
+public class Address {
 	
 	public static final short		UPDATING_READING_ALL							= 0;
 	
@@ -45,14 +43,14 @@ public class Address implements MongoDB {
 	 */
 	private AddressLocation			addressLocation;
 	
-	private long								addressLocationId;
+	private String							addressLocationId;
 	
 	/**
 	 * Деяка частина адреси: вулиця.
 	 */
 	private AddressPlace				addressPlace;
 	
-	private long								addressPlaceId;
+	private String							addressPlaceId;
 	
 	/**
 	 * Будинок
@@ -72,8 +70,8 @@ public class Address implements MongoDB {
 	public Address() {}
 	
 	public Address( final Document doc ) {
-		setAddressLocationId( ( ( Long )doc.get( DB_FIELD_ADDRESS_LOCATION_ID ) ).longValue() );
-		setAddressPlaceId( ( ( Long )doc.get( DB_FIELD_ADDRESS_PLACE_ID ) ).longValue() );
+		setAddressLocationId( ( String )doc.get( DB_FIELD_ADDRESS_LOCATION_ID ) );
+		setAddressPlaceId( ( String )doc.get( DB_FIELD_ADDRESS_PLACE_ID ) );
 		apartment = ( String )doc.get( DB_FIELD_ADDRESS_APARTMENT );
 		house = ( String )doc.get( DB_FIELD_ADDRESS_HOUSE );
 		postalCode = ( String )doc.get( DB_FIELD_ADDRESS_POSTAL_CODE );
@@ -84,22 +82,24 @@ public class Address implements MongoDB {
 	}
 	
 	public void setAddressLocation( final AddressLocation address ) {
-		this.addressLocation = address;
-		this.addressLocationId = address.getId();
+		if ( !this.addressLocation.equals( address.getLocation() ) ) {
+			this.addressLocation = address;
+			this.addressLocationId = address.getId();
+		}
 	}
 	
-	public long getAddressLocationId() {
+	public String getAddressLocationId() {
 		return addressLocationId;
 	}
 	
-	public void setAddressLocationId( final long addressLocationId ) {
-		if ( this.addressLocationId != addressLocationId )
+	public void setAddressLocationId( final String addressLocationId ) {
+		if ( !this.addressLocationId.equals( addressLocationId ) )
 			try {
 				this.addressLocation = AddressLocation.findById( addressLocationId );
 				this.addressLocationId = addressLocationId;
 			}
 			catch ( final AddressNotFoundException anfe ) {
-				this.addressLocationId = 0;
+				this.addressLocationId = null;
 				LOGGER.trace( "Sorry. Cannot find address location by {}", addressLocationId );
 			}
 	}
@@ -113,18 +113,18 @@ public class Address implements MongoDB {
 		this.addressPlaceId = address.getId();
 	}
 	
-	public long getAddressPlaceId() {
+	public String getAddressPlaceId() {
 		return addressPlaceId;
 	}
 	
-	public void setAddressPlaceId( final long addressPlaceId ) {
+	public void setAddressPlaceId( final String addressPlaceId ) {
 		if ( this.addressPlaceId != addressPlaceId )
 			try {
 				this.addressPlace = AddressPlace.findById( addressPlaceId );
 				this.addressPlaceId = addressPlaceId;
 			}
 			catch ( final AddressNotFoundException anfe ) {
-				this.addressPlaceId = 0;
+				this.addressPlaceId = null;
 				LOGGER.trace( "Sorry. Cannot find address place by {}", addressPlaceId );
 			}
 	}
@@ -155,36 +155,30 @@ public class Address implements MongoDB {
 	
 	Document getDocument( final short updateSet ) {
 		final Document doc = new Document();
-		try {
-			if ( UPDATING_READING_ALL == updateSet
-					|| ( updateSet & UPDATING_READING_ADDRESS_LOCATION ) == UPDATING_READING_ADDRESS_LOCATION ) {
-				addressLocation.save();
-				doc.put( DB_FIELD_ADDRESS_LOCATION_ID, addressLocation.getId() );
-			}
-			if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_ADDRESS_PLACE ) == UPDATING_READING_ADDRESS_PLACE ) {
-				addressPlace.save();
-				doc.put( DB_FIELD_ADDRESS_PLACE_ID, addressPlace.getId() );
-			}
-			if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_HOUSE ) == UPDATING_READING_HOUSE )
-				if ( house != null && !house.isEmpty() )
-					doc.put( DB_FIELD_ADDRESS_HOUSE, house );
-			if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_APARTMENT ) == UPDATING_READING_APARTMENT )
-				if ( apartment != null && !apartment.isEmpty() )
-					doc.put( DB_FIELD_ADDRESS_APARTMENT, apartment );
-			if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_POSTAL_CODE ) == UPDATING_READING_POSTAL_CODE )
-				if ( postalCode != null && postalCode.isEmpty() )
-					doc.put( DB_FIELD_ADDRESS_POSTAL_CODE, postalCode );
-			return doc;
+		if ( UPDATING_READING_ALL == updateSet
+				|| ( updateSet & UPDATING_READING_ADDRESS_LOCATION ) == UPDATING_READING_ADDRESS_LOCATION ) {
+			addressLocation.save();
+			doc.put( DB_FIELD_ADDRESS_LOCATION_ID, addressLocation.getId() );
 		}
-		catch ( final ImpossibleCreatingException ice ) {
-			LOGGER.error( "Can not write locationAdress in a global address" );
-			return null;
+		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_ADDRESS_PLACE ) == UPDATING_READING_ADDRESS_PLACE ) {
+			addressPlace.save();
+			doc.put( DB_FIELD_ADDRESS_PLACE_ID, addressPlace.getId() );
 		}
+		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_HOUSE ) == UPDATING_READING_HOUSE )
+			if ( house != null && !house.isEmpty() )
+				doc.put( DB_FIELD_ADDRESS_HOUSE, house );
+		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_APARTMENT ) == UPDATING_READING_APARTMENT )
+			if ( apartment != null && !apartment.isEmpty() )
+				doc.put( DB_FIELD_ADDRESS_APARTMENT, apartment );
+		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_POSTAL_CODE ) == UPDATING_READING_POSTAL_CODE )
+			if ( postalCode != null && postalCode.isEmpty() )
+				doc.put( DB_FIELD_ADDRESS_POSTAL_CODE, postalCode );
+		return doc;
 	}
 	
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer();
+		final StringBuilder sb = new StringBuilder();
 		if ( postalCode != null && postalCode.isEmpty() ) {
 			sb.append( postalCode );
 			sb.append( ", " );
