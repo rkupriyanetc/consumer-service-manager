@@ -285,9 +285,9 @@ public class User extends AbstractMongoDocument< User > implements Subject {
 	public static List< User > findByRole( final Role role ) throws UserNotFoundException {
 		final MongoCursor< User > cursor = getMongoCollection()
 				.find(
-						Filters.and( new Document( DB_FIELD_ACTIVE, true ),
-								Filters.elemMatch( DB_FIELD_ROLES, Filters.eq( DB_FIELD_ROLES, role.getName() ) ) ) )
-				.sort( new Document( DB_FIELD_ROLES, 1 ) ).iterator();
+						Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
+								Filters.elemMatch( DB_FIELD_ROLES, Filters.eq( DB_FIELD_ROLES, role.getDocument() ) ) ) )
+				.sort( Filters.eq( DB_FIELD_ROLES, 1 ) ).iterator();
 		// QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_ROLES
 		// ).elemMatch( role.getDBObject() ).get() ).sort( sort );
 		if ( cursor == null ) {
