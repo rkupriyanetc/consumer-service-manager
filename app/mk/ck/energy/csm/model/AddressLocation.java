@@ -8,6 +8,9 @@ import java.util.Map;
 
 import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 
+import org.bson.BsonArray;
+import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.bson.Document;
 
 import com.mongodb.BasicDBList;
@@ -66,19 +69,19 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	 * хутір
 	 */
 	public List< LocationType > getLocationsTypes() {
-		final BasicDBList list = ( BasicDBList )get( DB_FIELD_LOCATIONS_TYPES );
+		final BsonArray list = ( BsonArray )get( DB_FIELD_LOCATIONS_TYPES );
 		final List< LocationType > lts = new ArrayList< LocationType >( list.size() );
-		for ( final String key : list.keySet() ) {
-			final LocationType lt = LocationType.valueOf( ( String )list.get( key ) );
+		for ( final BsonValue key : list.getValues() ) {
+			final LocationType lt = LocationType.valueOf( ( ( BsonString )key ).getValue() );
 			lts.add( lt );
 		}
 		return lts;
 	}
 	
 	public void setLocationsTypes( final List< LocationType > locationsTypes ) {
-		final BasicDBList dbList = new BasicDBList();
+		final BsonArray dbList = new BsonArray();
 		for ( final LocationType lt : locationsTypes )
-			dbList.add( lt.name() );
+			dbList.add( new BsonString( lt.name() ) );
 		put( DB_FIELD_LOCATIONS_TYPES, dbList );
 	}
 	

@@ -16,6 +16,7 @@
         <p>@Messages("page.home.description_3")</p>
       }
     	
+    	@restrict(la(as("OPER"),as("ADMIN"))) {
       <div class="row">
         <div class="col-md-4 col-xs-4">
           <a href="@mk.ck.energy.csm.controllers.routes.AccountTools.doTestTopAddress()" class="list-group-item">Test Top Address</a>
@@ -27,6 +28,7 @@
           <a href="@mk.ck.energy.csm.controllers.routes.AccountTools.doTestPlaceAddress()" class="list-group-item">Test Place Address</a>
         </div>
       </div>
+      }
       
     </div>
   </div>
