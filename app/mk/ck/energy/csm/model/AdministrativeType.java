@@ -5,45 +5,37 @@ import java.util.Map;
 
 import play.i18n.Messages;
 
-public enum LocationType {
+public enum AdministrativeType {
 	/**
-	 * Місто
+	 * Столиця
 	 */
-	CITY,
+	CAPITAL,
 	/**
-	 * Невелике місто, селище, селище міського типу
+	 * Обласний центр
 	 */
-	TOWNSHIP,
+	REGIONAL,
 	/**
-	 * Село
+	 * Районний центр
 	 */
-	VILLAGE,
-	/**
-	 * Хутір
-	 */
-	HAMLET,
-	/**
-	 * Окрема садиба
-	 */
-	BOWERY;
+	DISTRICT;
 	
 	public static Map< String, String > optionsFullname() {
 		final Map< String, String > vals = new LinkedHashMap<>();
-		for ( final LocationType lType : LocationType.values() )
-			vals.put( lType.name(), Messages.get( Address.LOCATION_TYPE_FULLNAME + "." + lType.name().toLowerCase() ) );
+		for ( final AdministrativeType lType : AdministrativeType.values() )
+			vals.put( lType.name(), Messages.get( Address.ADMINISTRATIVE_TYPE_FULLNAME + "." + lType.name().toLowerCase() ) );
 		return vals;
 	}
 	
 	public static Map< String, String > optionsShortname() {
 		final Map< String, String > vals = new LinkedHashMap<>();
-		for ( final LocationType lType : LocationType.values() )
-			vals.put( lType.name(), Messages.get( Address.LOCATION_TYPE_SHORTNAME + "." + lType.name().toLowerCase() ) );
+		for ( final AdministrativeType lType : AdministrativeType.values() )
+			vals.put( lType.name(), Messages.get( Address.ADMINISTRATIVE_TYPE_SHORTNAME + "." + lType.name().toLowerCase() ) );
 		return vals;
 	}
 	
 	public static Map< String, String > optionsValues() {
 		final Map< String, String > vals = new LinkedHashMap<>();
-		for ( final LocationType lType : LocationType.values() )
+		for ( final AdministrativeType lType : AdministrativeType.values() )
 			vals.put( lType.name(), lType.name() );
 		return vals;
 	}

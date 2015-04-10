@@ -11,12 +11,12 @@ import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 import org.bson.BsonArray;
 import org.bson.BsonString;
 import org.bson.BsonValue;
-import org.bson.Document;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 
 public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	
@@ -26,7 +26,7 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	
 	private static final String	DB_FIELD_LOCATION									= "location";
 	
-	private static final String	DB_FIELD_LOCATIONS_TYPES					= "locations_types";
+	private static final String	DB_FIELD_LOCATION_TYPE						= "location_type";
 	
 	private static final String	DB_FIELD_REF_TO_TOP_ADDRESS				= "ref_id";
 	
@@ -35,7 +35,7 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	public AddressLocation( final AddressTop topId, final String location, final List< LocationType > locationsTypes ) {
 		setLocation( location );
 		setTopAddress( topId );
-		setLocationsTypes( locationsTypes );
+		setLocationType( locationsTypes );
 	}
 	
 	public String getRefId() {
@@ -68,9 +68,9 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	 * Типи населенних пунктів: столиця, обласний центр, районний, місто, село,
 	 * хутір
 	 */
-	public List< LocationType > getLocationsTypes() {
-		final BsonArray list = ( BsonArray )get( DB_FIELD_LOCATIONS_TYPES );
-		final List< LocationType > lts = new ArrayList< LocationType >( list.size() );
+	public List< LocationType > getLocationType() {
+		final BsonArray list = ( BsonArray )get( DB_FIELD_LOCATION_TYPE );
+		final List< LocationType > lts = new ArrayList<>( list.size() );
 		for ( final BsonValue key : list.getValues() ) {
 			final LocationType lt = LocationType.valueOf( ( ( BsonString )key ).getValue() );
 			lts.add( lt );
@@ -78,11 +78,11 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 		return lts;
 	}
 	
-	public void setLocationsTypes( final List< LocationType > locationsTypes ) {
+	public void setLocationsTypes( final List< LocationType > locationType ) {
 		final BsonArray dbList = new BsonArray();
-		for ( final LocationType lt : locationsTypes )
+		for ( final LocationType lt : locationType )
 			dbList.add( new BsonString( lt.name() ) );
-		put( DB_FIELD_LOCATIONS_TYPES, dbList );
+		put( DB_FIELD_LOCATION_TYPE, dbList );
 	}
 	
 	public AddressTop getTopAddress() {
@@ -99,8 +99,7 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	
 	public static AddressLocation findById( final String id ) throws AddressNotFoundException {
 		if ( id != null && !id.isEmpty() ) {
-			final MongoCollection< AddressLocation > addressCollection = getMongoCollection();
-			final AddressLocation doc = addressCollection.find( new Document( DB_FIELD_ID, id ) ).first();
+			final AddressLocation doc = getMongoCollection().find( Filters.eq( DB_FIELD_ID, id ) ).first();
 			if ( doc == null )
 				throw new AddressNotFoundException( "Cannot find address-location by " + id );
 			return doc;
@@ -109,9 +108,9 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	}
 	
 	public static List< AddressLocation > findByAddressTop( final AddressTop topAddr ) throws AddressNotFoundException {
-		final List< AddressLocation > locations = new LinkedList< AddressLocation >();
+		final List< AddressLocation > locations = new LinkedList<>();
 		final MongoCursor< AddressLocation > cursor = getMongoCollection().find(
-				new Document( DB_FIELD_REF_TO_TOP_ADDRESS, topAddr.getId() ) ).iterator();
+				Filters.eq( DB_FIELD_REF_TO_TOP_ADDRESS, topAddr.getId() ) ).iterator();
 		if ( cursor == null )
 			throw new AddressNotFoundException( "Cannot find address-location by " + topAddr.getId() );
 		while ( cursor.hasNext() ) {
@@ -159,8 +158,8 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	 * }
 	 */
 	public static List< AddressLocation > findByLocationName( final String locationName ) throws AddressNotFoundException {
-		final List< AddressLocation > locations = new LinkedList< AddressLocation >();
-		final MongoCursor< AddressLocation > cursor = getMongoCollection().find( new Document( DB_FIELD_LOCATION, locationName ) )
+		final List< AddressLocation > locations = new LinkedList<>();
+		final MongoCursor< AddressLocation > cursor = getMongoCollection().find( Filters.eq( DB_FIELD_LOCATION, locationName ) )
 				.iterator();
 		if ( cursor == null )
 			throw new AddressNotFoundException( "Cannot find address-location by " + locationName );
@@ -175,7 +174,7 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 		if ( hasChildren( addr ) )
 			throw new ForeignKeyException( "This record has dependencies" );
 		else {
-			final AddressLocation doc = getMongoCollection().findOneAndDelete( new Document( DB_FIELD_ID, addr.getId() ) );
+			final AddressLocation doc = getMongoCollection().findOneAndDelete( Filters.eq( DB_FIELD_ID, addr.getId() ) );
 			LOGGER.debug( "AddressLocation was removed {}", doc );
 		}
 	}
@@ -192,12 +191,12 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	 * @return
 	 */
 	public static Map< String, String > getMap( final String refId, final int isAddrTop ) {
-		final Map< String, String > references = new LinkedHashMap< String, String >();
-		final MongoCursor< AddressLocation > o = getMongoCollection().find( new Document( DB_FIELD_REF_TO_TOP_ADDRESS, refId ) )
+		final Map< String, String > references = new LinkedHashMap<>();
+		final MongoCursor< AddressLocation > o = getMongoCollection().find( Filters.eq( DB_FIELD_REF_TO_TOP_ADDRESS, refId ) )
 				.iterator();
 		while ( o.hasNext() ) {
 			final AddressLocation addr = o.next();
-			final String name = choiceFromLocationsTypes( ( BasicDBList )addr.get( DB_FIELD_LOCATIONS_TYPES ) ) + " "
+			final String name = choiceFromLocationsTypes( ( BasicDBList )addr.get( DB_FIELD_LOCATION_TYPE ) ) + " "
 					+ addr.getString( DB_FIELD_LOCATION );
 			final String _id = addr.getString( DB_FIELD_ID );
 			references.put( _id, name );
@@ -215,7 +214,7 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
-		sb.append( choiceFromLocationsTypes( ( BasicDBList )get( DB_FIELD_LOCATIONS_TYPES ) ) );
+		sb.append( choiceFromLocationsTypes( ( BasicDBList )get( DB_FIELD_LOCATION_TYPE ) ) );
 		if ( sb.length() > 0 )
 			sb.append( " " );
 		sb.append( getString( DB_FIELD_LOCATION ) );

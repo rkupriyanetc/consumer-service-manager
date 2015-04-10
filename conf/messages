@@ -115,19 +115,21 @@ location.type.full.city=City
 location.type.full.hamlet=Hamlet
 location.type.full.township=Township
 location.type.full.village=Village
-location.type.full.capital=Capital center
-location.type.full.regional=Regional center
-location.type.full.district=District center
 location.type.full.bowery=Bowery
+
+administrative.type.full.capital=Capital center
+administrative.type.full.regional=Regional center
+administrative.type.full.district=District center
 
 location.type.short.city=c.
 location.type.short.hamlet=h.
 location.type.short.township=tsh.
 location.type.short.village=v.
-location.type.short.capital=capital
-location.type.short.regional=reg.
-location.type.short.district=dstr.
 location.type.short.bowery=bow.
+
+administrative.type.short.capital=capital
+administrative.type.short.regional=reg.
+administrative.type.short.district=dstr.
 
 
 playauthenticate.login.email.placeholder=Your e-mail address

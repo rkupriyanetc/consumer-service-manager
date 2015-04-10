@@ -207,19 +207,21 @@ location.type.full.city=Місто
 location.type.full.hamlet=Хутір
 location.type.full.township=Селище
 location.type.full.village=Село
-location.type.full.capital=Столиця країни
-location.type.full.regional=Обласний центр
-location.type.full.district=Районний центр
 location.type.full.bowery=Окрема садиба
+
+administrative.type.full.capital=Столиця країни
+administrative.type.full.regional=Обласний центр
+administrative.type.full.district=Районний центр
 
 location.type.short.city=м.
 location.type.short.hamlet=х.
 location.type.short.township=смт.
 location.type.short.village=с.
-location.type.short.capital=столиця
-location.type.short.regional=обл.
-location.type.short.district=р-н
 location.type.short.bowery=сад.
+
+administrative.type.short.capital=столиця
+administrative.type.short.regional=обл.
+administrative.type.short.district=р-н
 
 
 playauthenticate.login.email.placeholder=Ваша e-mail адреса

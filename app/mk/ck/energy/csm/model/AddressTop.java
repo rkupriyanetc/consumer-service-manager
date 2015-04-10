@@ -1,16 +1,16 @@
 package mk.ck.energy.csm.model;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import mk.ck.energy.csm.model.db.AbstractMongoDocument;
 
-import org.bson.Document;
-
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 
 public class AddressTop extends AbstractMongoDocument< AddressTop > {
 	
@@ -23,8 +23,8 @@ public class AddressTop extends AbstractMongoDocument< AddressTop > {
 	private static final String	DB_FIELD_REF_TO_TOP					= "ref_id";
 	
 	public AddressTop( final String name, final String refId ) {
-		put( DB_FIELD_NAME, name );
-		put( DB_FIELD_REF_TO_TOP, refId );
+		setName( name );
+		setRefId( refId );
 	}
 	
 	/**
@@ -56,35 +56,46 @@ public class AddressTop extends AbstractMongoDocument< AddressTop > {
 	
 	public static AddressTop findById( final String id ) throws AddressNotFoundException {
 		if ( id != null && !id.isEmpty() ) {
-			final AddressTop doc = getMongoCollection().find( new Document( DB_FIELD_ID, id ) ).first();
+			final AddressTop doc = getMongoCollection().find( Filters.eq( DB_FIELD_ID, id ) ).first();
 			if ( doc == null )
 				throw new AddressNotFoundException( "Cannot find address-top by " + id );
 			return doc;
 		} else
-			throw new IllegalArgumentException( "ID must be greater than zero in AddressTop.findById( id )" );
+			throw new IllegalArgumentException( "ID should not be empty in AddressTop.findById( id )" );
 	}
 	
-	public static AddressTop findByName( final String name ) throws AddressNotFoundException {
-		if ( name == null || name.isEmpty() )
-			throw new IllegalArgumentException( "The parameter cannot be empty" );
-		final AddressTop doc = getMongoCollection().find( new Document( DB_FIELD_NAME, name ) ).first();
-		if ( doc == null )
-			throw new AddressNotFoundException( "Address " + name + " not found" );
-		return doc;
+	/**
+	 * @param pattern
+	 *          db.collection.find({name: /pattern/}) //like '%a%'
+	 * @return
+	 * @throws AddressNotFoundException
+	 */
+	public static List< AddressTop > findByName( final String pattern ) throws AddressNotFoundException {
+		if ( pattern == null || pattern.isEmpty() )
+			throw new IllegalArgumentException( "The parameter should not be empty" );
+		final List< AddressTop > list = new LinkedList<>();
+		final MongoCursor< AddressTop > cursor = getMongoCollection().find( Filters.regex( DB_FIELD_NAME, "/" + pattern + "/" ) )
+				.iterator();
+		if ( cursor == null )
+			throw new AddressNotFoundException( "Address " + pattern + " not found" );
+		while ( cursor.hasNext() ) {
+			final AddressTop o = cursor.next();
+			list.add( o );
+		}
+		return list;
 	}
 	
 	public static void remove( final AddressTop addr ) throws ForeignKeyException {
 		if ( hasChildren( addr ) )
 			throw new ForeignKeyException( "This record has dependencies" );
 		else {
-			final AddressTop doc = getMongoCollection().findOneAndDelete( new Document( DB_FIELD_ID, addr.getId() ) );
+			final AddressTop doc = getMongoCollection().findOneAndDelete( Filters.eq( DB_FIELD_ID, addr.getId() ) );
 			LOGGER.debug( "AddressTop object removed {}", doc );
 		}
 	}
 	
 	private static boolean hasChildren( final AddressTop addr ) {
-		final Document doc = new Document( DB_FIELD_REF_TO_TOP, addr.getId() );
-		final Document rec = getMongoCollection().find( doc ).first();
+		final AddressTop rec = getMongoCollection().find( Filters.eq( DB_FIELD_REF_TO_TOP, addr.getId() ) ).first();
 		final boolean b = rec != null && !rec.isEmpty();
 		if ( b )
 			return true;
@@ -109,11 +120,11 @@ public class AddressTop extends AbstractMongoDocument< AddressTop > {
 		if ( refId == null || refId.isEmpty() || refId.equals( "0" ) )
 			cursor = collection.find().iterator();
 		else
-			cursor = collection.find( new Document( DB_FIELD_REF_TO_TOP, refId ) ).iterator();
+			cursor = collection.find( Filters.eq( DB_FIELD_REF_TO_TOP, refId ) ).iterator();
 		while ( cursor.hasNext() ) {
 			final AddressTop o = cursor.next();
-			final String name = ( String )o.get( DB_FIELD_NAME );
-			final String _id = ( String )o.get( DB_FIELD_ID );
+			final String name = o.getName();
+			final String _id = o.getId();
 			references.put( _id, name );
 		}
 		return references;
@@ -132,8 +143,8 @@ public class AddressTop extends AbstractMongoDocument< AddressTop > {
 			return sb.toString();
 		}
 		catch ( final AddressNotFoundException anfe ) {
-			LOGGER.error( "AddressTop.toString() Exception: {}", anfe );
-			return null;
+			LOGGER.warn( "AddressTop.toString() Exception: {}", anfe );
+			return sb.toString();
 		}
 	}
 	

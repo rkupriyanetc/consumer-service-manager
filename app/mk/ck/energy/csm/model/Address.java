@@ -22,6 +22,10 @@ public class Address {
 	
 	public static final String	LOCATION_TYPE_SHORTNAME						= "location.type.short";
 	
+	public static final String	ADMINISTRATIVE_TYPE_FULLNAME			= "administrative.type.full";
+	
+	public static final String	ADMINISTRATIVE_TYPE_SHORTNAME			= "administrative.type.short";
+	
 	public static final String	STREET_TYPE_FULLNAME							= "street.type.full";
 	
 	public static final String	STREET_TYPE_SHORTNAME							= "street.type.short";
