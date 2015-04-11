@@ -70,7 +70,7 @@ public class AddressTop extends AbstractMongoDocument< AddressTop > {
 	 * @return
 	 * @throws AddressNotFoundException
 	 */
-	public static List< AddressTop > findByName( final String pattern ) throws AddressNotFoundException {
+	public static List< AddressTop > findByLikeName( final String pattern ) throws AddressNotFoundException {
 		if ( pattern == null || pattern.isEmpty() )
 			throw new IllegalArgumentException( "The parameter should not be empty" );
 		final List< AddressTop > list = new LinkedList<>();
@@ -100,7 +100,7 @@ public class AddressTop extends AbstractMongoDocument< AddressTop > {
 		if ( b )
 			return true;
 		try {
-			final List< AddressLocation > al = AddressLocation.findByAddressTop( addr );
+			final List< AddressLocation > al = AddressLocation.findByAddressTop( addr.getId() );
 			return !al.isEmpty();
 		}
 		catch ( final AddressNotFoundException anfe ) {

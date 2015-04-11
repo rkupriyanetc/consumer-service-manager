@@ -97,7 +97,7 @@ public class Application extends Controller {
 	
 	public static Result phoneBook() {
 		final List< Employee > employees = importEmployees();
-		final List< Employee > tmpDelete = new ArrayList< Employee >( 0 );
+		final List< Employee > tmpDelete = new ArrayList< Employee >( employees.size() );
 		for ( final Employee emp : employees )
 			if ( !emp.isToPhoneBook() )
 				tmpDelete.add( emp );
