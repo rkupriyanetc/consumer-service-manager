@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import mk.ck.energy.csm.model.db.AbstractMongoDocument;
+import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
 import org.bson.BsonArray;
 import org.bson.BsonString;
@@ -18,7 +18,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
-public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
+public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	
 	private static final long		serialVersionUID										= 1L;
 	
@@ -140,7 +140,7 @@ public class AddressLocation extends AbstractMongoDocument< AddressLocation > {
 	 * @return
 	 * @throws AddressNotFoundException
 	 */
-	public static List< AddressLocation > findByLikeLocationName( final String pattern ) throws AddressNotFoundException {
+	public static List< AddressLocation > findLikeLocationName( final String pattern ) throws AddressNotFoundException {
 		final List< AddressLocation > locations = new LinkedList<>();
 		final MongoCursor< AddressLocation > cursor = getMongoCollection().find(
 				Filters.regex( DB_FIELD_LOCATION, "/" + pattern + "/" ) ).iterator();

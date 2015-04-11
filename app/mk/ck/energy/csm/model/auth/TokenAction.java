@@ -1,7 +1,7 @@
 package mk.ck.energy.csm.model.auth;
 
 import mk.ck.energy.csm.model.Database;
-import mk.ck.energy.csm.model.db.AbstractMongoDocument;
+import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
 import org.bson.Document;
 
@@ -11,7 +11,7 @@ import com.mongodb.client.MongoDatabase;
 /**
  * @author KYL
  */
-public class TokenAction extends AbstractMongoDocument< TokenAction > {
+public class TokenAction extends CSMAbstractDocument< TokenAction > {
 	
 	private static final long		serialVersionUID				= 1L;
 	

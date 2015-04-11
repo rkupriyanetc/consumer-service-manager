@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import mk.ck.energy.csm.model.Database;
-import mk.ck.energy.csm.model.db.AbstractMongoDocument;
+import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
 import org.bson.BsonArray;
@@ -41,7 +41,7 @@ import com.mongodb.client.model.Filters;
  * 
  * @author KYL
  */
-public class User extends AbstractMongoDocument< User > implements Subject {
+public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	private static final long							serialVersionUID					= 1L;
 	

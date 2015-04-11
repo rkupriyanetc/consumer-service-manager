@@ -3,7 +3,7 @@ package mk.ck.energy.csm.model;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import mk.ck.energy.csm.model.db.AbstractMongoDocument;
+import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
 import org.bson.Document;
 
@@ -14,7 +14,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
-public class AddressPlace extends AbstractMongoDocument< AddressPlace > {
+public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 	
 	private static final long		serialVersionUID							= 1L;
 	

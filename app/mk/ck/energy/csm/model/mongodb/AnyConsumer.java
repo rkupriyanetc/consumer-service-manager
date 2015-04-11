@@ -1,4 +1,4 @@
-package mk.ck.energy.csm.model.db;
+package mk.ck.energy.csm.model.mongodb;
 
 import java.util.List;
 

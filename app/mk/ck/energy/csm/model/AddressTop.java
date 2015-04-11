@@ -5,14 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import mk.ck.energy.csm.model.db.AbstractMongoDocument;
+import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
-public class AddressTop extends AbstractMongoDocument< AddressTop > {
+public class AddressTop extends CSMAbstractDocument< AddressTop > {
 	
 	private static final long		serialVersionUID						= 1L;
 	
@@ -70,7 +70,7 @@ public class AddressTop extends AbstractMongoDocument< AddressTop > {
 	 * @return
 	 * @throws AddressNotFoundException
 	 */
-	public static List< AddressTop > findByLikeName( final String pattern ) throws AddressNotFoundException {
+	public static List< AddressTop > findLikeName( final String pattern ) throws AddressNotFoundException {
 		if ( pattern == null || pattern.isEmpty() )
 			throw new IllegalArgumentException( "The parameter should not be empty" );
 		final List< AddressTop > list = new LinkedList<>();

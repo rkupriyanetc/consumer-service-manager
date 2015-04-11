@@ -1,4 +1,4 @@
-package mk.ck.energy.csm.model.db;
+package mk.ck.energy.csm.model.mongodb;
 
 import java.util.UUID;
 
@@ -11,11 +11,11 @@ import com.mongodb.MongoWriteConcernException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 
-public abstract class AbstractMongoDocument< I extends Document > extends Document {
+public abstract class CSMAbstractDocument< I extends Document > extends Document {
 	
 	private static final long			serialVersionUID	= 1L;
 	
-	protected static final Logger	LOGGER						= LoggerFactory.getLogger( AbstractMongoDocument.class );
+	protected static final Logger	LOGGER						= LoggerFactory.getLogger( CSMAbstractDocument.class );
 	
 	protected static final String	DB_FIELD_ID				= "_id";
 	
