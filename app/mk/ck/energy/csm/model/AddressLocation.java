@@ -203,6 +203,14 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 		return sb.toString();
 	}
 	
+	@Override
+	public boolean equals( final Object o ) {
+		if ( o == null )
+			return false;
+		final AddressLocation al = ( AddressLocation )o;
+		return getLocation().equals( al.getLocation() ) && getLocationType().equals( al.getLocationType() );
+	}
+	
 	/**
 	 * protected static String choiceFromLocationsTypes( final BasicDBList dbList
 	 * ) {

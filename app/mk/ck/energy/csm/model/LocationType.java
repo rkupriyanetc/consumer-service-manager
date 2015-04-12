@@ -48,6 +48,12 @@ public enum LocationType {
 		return vals;
 	}
 	
+	public boolean equals( final LocationType o ) {
+		if ( o == null )
+			return false;
+		return name().equals( o.name() );
+	}
+	
 	public String toString( final String method ) {
 		return Messages.get( method + "." + name().toLowerCase() );
 	}

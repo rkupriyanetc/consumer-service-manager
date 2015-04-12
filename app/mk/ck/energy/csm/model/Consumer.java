@@ -184,25 +184,22 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		put( DB_FIELD_FULLNAME, fullName );
 	}
 	
-	@Override
 	public Address getAddress() {
-		return address;
+		return ( Address )get( DB_FIELD_ADDRESS );
 	}
 	
 	public void setAddress( final Address address ) {
-		this.address = address;
+		put( DB_FIELD_ADDRESS, address );
 	}
 	
-	@Override
 	public boolean isActive() {
-		return active;
+		return getBoolean( DB_FIELD_ACTIVE, false );
 	}
 	
 	public void setActive( final boolean active ) {
-		this.active = active;
+		put( DB_FIELD_ACTIVE, active );
 	}
 	
-	@Override
 	public List< Meter > getMeters() {
 		return meters;
 	}
@@ -211,33 +208,28 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		return meters.add( meter );
 	}
 	
-	@Override
-	public String getOrganization() {
-		return "M REM";
-	}
-	
 	public Documents getDocument() {
-		return document;
+		return ( Documents )get( DB_FIELD_DOCUMENT );
 	}
 	
 	public void setDocuments( final Documents document ) {
-		this.document = document;
+		put( DB_FIELD_DOCUMENT, document );
 	}
 	
 	public ConsumerType getConsumerType() {
-		return consumerType;
+		return ConsumerType.valueOf( getString( DB_FIELD_CONSUMER_TYPE ) );
 	}
 	
 	public void setConsumerType( final ConsumerType consumerType ) {
-		this.consumerType = consumerType;
+		put( DB_FIELD_CONSUMER_TYPE, consumerType.name() );
 	}
 	
 	public ConsumerStatusType getStatusType() {
-		return statusType;
+		return ConsumerStatusType.valueOf( getString( DB_FIELD_STATUS_TYPE ) );
 	}
 	
 	public void setStatusType( final ConsumerStatusType statusType ) {
-		this.statusType = statusType;
+		put( DB_FIELD_STATUS_TYPE, statusType.name() );
 	}
 	
 	public Set< HouseType > getHouseType() {

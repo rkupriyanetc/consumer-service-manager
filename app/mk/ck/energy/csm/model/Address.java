@@ -86,7 +86,7 @@ public class Address {
 	}
 	
 	public void setAddressLocation( final AddressLocation address ) {
-		if ( !this.addressLocation.equals( address.getLocation() ) ) {
+		if ( !this.addressLocation.equals( address ) ) {
 			this.addressLocation = address;
 			this.addressLocationId = address.getId();
 		}
@@ -104,7 +104,7 @@ public class Address {
 			}
 			catch ( final AddressNotFoundException anfe ) {
 				this.addressLocationId = null;
-				LOGGER.trace( "Sorry. Cannot find address location by {}", addressLocationId );
+				LOGGER.warn( "Sorry. Cannot find address location by {}", addressLocationId );
 			}
 	}
 	
@@ -113,8 +113,10 @@ public class Address {
 	}
 	
 	public void setAddressPlace( final AddressPlace address ) {
-		this.addressPlace = address;
-		this.addressPlaceId = address.getId();
+		if ( !this.addressPlace.equals( address ) ) {
+			this.addressPlace = address;
+			this.addressPlaceId = address.getId();
+		}
 	}
 	
 	public String getAddressPlaceId() {
@@ -122,14 +124,14 @@ public class Address {
 	}
 	
 	public void setAddressPlaceId( final String addressPlaceId ) {
-		if ( this.addressPlaceId != addressPlaceId )
+		if ( !this.addressPlaceId.equals( addressPlaceId ) )
 			try {
 				this.addressPlace = AddressPlace.findById( addressPlaceId );
 				this.addressPlaceId = addressPlaceId;
 			}
 			catch ( final AddressNotFoundException anfe ) {
 				this.addressPlaceId = null;
-				LOGGER.trace( "Sorry. Cannot find address place by {}", addressPlaceId );
+				LOGGER.warn( "Sorry. Cannot find address place by {}", addressPlaceId );
 			}
 	}
 	

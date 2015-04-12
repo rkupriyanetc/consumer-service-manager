@@ -88,6 +88,14 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 	}
 	
 	@Override
+	public boolean equals( final Object o ) {
+		if ( o == null )
+			return false;
+		final AddressPlace ap = ( AddressPlace )o;
+		return getStreet().equals( ap.getStreet() ) && getStreetType().equals( ap.getStreetType() );
+	}
+	
+	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder( Messages.get( Address.STREET_TYPE_SHORTNAME + "."
 				+ getStreetType().name().toLowerCase() ) );

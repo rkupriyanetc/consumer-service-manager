@@ -87,4 +87,10 @@ public enum StreetType {
 			vals.put( lType.name(), lType.name() );
 		return vals;
 	}
+	
+	public boolean equals( final StreetType o ) {
+		if ( o == null )
+			return false;
+		return name().equals( o.name() );
+	}
 }
