@@ -282,7 +282,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		// LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) );
 	}
 	
-	public static List< User > findByRole( final UserRole role ) throws UserNotFoundException {
+	public static List< User > findByRole( final Role role ) throws UserNotFoundException {
 		final MongoCursor< User > cursor = getMongoCollection()
 				.find(
 						Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
@@ -294,7 +294,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 			LOGGER.warn( "Could not find users by role {}", role );
 			throw new UserNotFoundException();
 		} else {
-			final List< User > users = new LinkedList< User >();
+			final List< User > users = new LinkedList<>();
 			while ( cursor.hasNext() )
 				users.add( cursor.next() );
 			return users;

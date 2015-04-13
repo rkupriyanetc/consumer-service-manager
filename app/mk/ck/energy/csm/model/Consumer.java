@@ -1,5 +1,6 @@
 package mk.ck.energy.csm.model;
 
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -7,6 +8,10 @@ import java.util.Set;
 import mk.ck.energy.csm.model.auth.User;
 import mk.ck.energy.csm.model.auth.UserNotFoundException;
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
+
+import org.bson.BsonArray;
+import org.bson.BsonString;
+import org.bson.BsonValue;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -233,11 +238,18 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	}
 	
 	public Set< HouseType > getHouseType() {
-		return houseType;
+		final BsonArray list = ( BsonArray )get( DB_FIELD_HOUSE_TYPE );
+		final Set< HouseType > hts = new LinkedHashSet<>();
+		for ( final BsonValue key : list.getValues() ) {
+			final HouseType ht = HouseType.valueOf( ( ( BsonString )key ).getValue() );
+			hts.add( ht );
+		}
+		return hts;
 	}
 	
 	public boolean addHouseType( final HouseType houseType ) {
-		return this.houseType.add( houseType );
+		return getMongoCollection().updateOne( Filters.eq( DB_FIELD_ID, getUserId() ),
+				Filters.eq( "$addToSet", Filters.eq( "$each", houseType.name() ) ) ).isModifiedCountAvailable();
 	}
 	
 	/**

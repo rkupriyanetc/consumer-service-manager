@@ -62,19 +62,18 @@ public class Signup extends Controller {
 	public static Result forgotPassword( final String email ) {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		Form< MyIdentity > form = FORGOT_PASSWORD_FORM;
-		if ( email != null && !email.trim().isEmpty() ) {
+		if ( email != null && !email.trim().isEmpty() )
 			form = FORGOT_PASSWORD_FORM.fill( new MyIdentity( email ) );
-		}
 		return ok( password_forgot.render( form ) );
 	}
 	
 	public static Result doForgotPassword() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< MyIdentity > filledForm = FORGOT_PASSWORD_FORM.bindFromRequest();
-		if ( filledForm.hasErrors() ) {
+		if ( filledForm.hasErrors() )
 			// User did not fill in his/her email
 			return badRequest( password_forgot.render( filledForm ) );
-		} else {
+		else {
 			// The email address given *BY AN UNKNWON PERSON* to the form - we
 			// should find out if we actually have a user with this email
 			// address and whether password login is enabled for him/her. Also
@@ -91,12 +90,12 @@ public class Signup extends Controller {
 				// reset, though.
 				final MyUsernamePasswordAuthProvider provider = MyUsernamePasswordAuthProvider.getProvider();
 				// User exists
-				if ( user.isEmailValidated() ) {
+				if ( user.isEmailValidated() )
 					provider.sendPasswordResetMailing( user, ctx() );
-					// In case you actually want to let (the unknown person)
-					// know whether a user was found/an email was sent, use,
-					// change the flash message
-				} else {
+				// In case you actually want to let (the unknown person)
+				// know whether a user was found/an email was sent, use,
+				// change the flash message
+				else {
 					// We need to change the message here, otherwise the user
 					// does not understand whats going on - we should not verify
 					// with the password reset, as a "bad" user could then sign
@@ -122,12 +121,11 @@ public class Signup extends Controller {
 	 * @return
 	 */
 	private static TokenAction tokenIsValid( final String token, final TokenType type ) throws InvalidTokenException {
-		final String cleanedToken = ( token == null || token.isEmpty() ) ? null : token.trim();
+		final String cleanedToken = token == null || token.isEmpty() ? null : token.trim();
 		if ( cleanedToken != null ) {
 			final TokenAction ta = TokenAction.findByToken( cleanedToken, type );
-			if ( ta.isValid() ) {
+			if ( ta.isValid() )
 				return ta;
-			}
 		}
 		throw new InvalidTokenException( type, cleanedToken );
 	}
@@ -147,14 +145,14 @@ public class Signup extends Controller {
 	public static Result doResetPassword() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< PasswordReset > filledForm = PASSWORD_RESET_FORM.bindFromRequest();
-		if ( filledForm.hasErrors() ) {
+		if ( filledForm.hasErrors() )
 			return badRequest( password_reset.render( filledForm ) );
-		} else {
+		else {
 			final String token = filledForm.get().getToken();
 			final String newPassword = filledForm.get().getPassword();
 			try {
 				final TokenAction ta = tokenIsValid( token, TokenType.PASSWORD_RESET );
-				final User u = User.findById( ta.getTargetUser() );
+				final User u = User.findById( ta.getUserId() );
 				try {
 					// Pass true for the second parameter if you want to
 					// automatically create a password and the exception never to
@@ -169,10 +167,9 @@ public class Signup extends Controller {
 					// automatically log in
 					flash( Application.FLASH_MESSAGE_KEY, Messages.get( "message.reset_password.success.auto_login" ) );
 					return PlayAuthenticate.loginAndRedirect( ctx(), new MyLoginUsernamePasswordAuthUser( u.getEmail() ) );
-				} else {
+				} else
 					// send the user to the login page
 					flash( Application.FLASH_MESSAGE_KEY, Messages.get( "message.reset_password.success.manual_login" ) );
-				}
 				return redirect( routes.Application.login() );
 			}
 			catch ( final InvalidTokenException | UserNotFoundException e ) {
@@ -196,14 +193,13 @@ public class Signup extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		try {
 			final TokenAction ta = tokenIsValid( token, TokenType.EMAIL_VERIFICATION );
-			final User user = User.findById( ta.getTargetUser() );
+			final User user = User.findById( ta.getUserId() );
 			user.verify();
 			flash( Application.FLASH_MESSAGE_KEY, Messages.get( "message.email_verification.succeeded", user.getEmail() ) );
-			if ( User.getLocalUser( session() ) != null ) {
+			if ( User.getLocalUser( session() ) != null )
 				return redirect( routes.Application.index() );
-			} else {
+			else
 				return redirect( routes.Application.login() );
-			}
 		}
 		catch ( final InvalidTokenException | UserNotFoundException e ) {
 			LOGGER.error( "Invalid token on verification", e );

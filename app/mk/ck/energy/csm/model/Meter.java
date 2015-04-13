@@ -318,6 +318,7 @@ public class Meter {
 	}
 	
 	private static DBCollection getMetersCollection() {
-		return Database.getInstance().getDatabase().getCollection( "meters" );
+		return null;// Database.getInstance().getDatabase().getCollection( "meters"
+								// );
 	}
 }

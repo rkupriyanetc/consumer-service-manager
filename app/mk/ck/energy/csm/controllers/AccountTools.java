@@ -3,6 +3,7 @@ package mk.ck.energy.csm.controllers;
 import static play.data.Form.form;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import mk.ck.energy.csm.controllers.AccountTools.AddrLocation;
@@ -93,7 +94,7 @@ public class AccountTools extends Controller {
 		public AddrLocation() {
 			id = "0";
 			refId = "0";
-			locationsTypes = new ArrayList< String >( 0 );
+			locationsTypes = new LinkedList<>();
 		}
 		
 		public String getId() {
@@ -250,7 +251,7 @@ public class AccountTools extends Controller {
 			}
 			try {
 				final AddressTop at = AddressTop.findById( u.getRefId() );
-				final AddressLocation al = AddressLocation.create( at, u.getLocation(), slt );
+				final AddressLocation al = new AddressLocation( at, u.getLocation(), slt );
 				al.save();
 				filledForm.data().put( "id", String.valueOf( al.getId() ) );
 				LOGGER.info( "Address location saved {}", al );

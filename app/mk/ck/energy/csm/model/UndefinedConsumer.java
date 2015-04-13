@@ -39,6 +39,7 @@ public class UndefinedConsumer {
 	}
 	
 	private static DBCollection getUndefinedConsumerCollection() {
-		return Database.getInstance().getDatabase().getCollection( "consumersUndefined" );
+		return null;// Database.getInstance().getDatabase().getCollection(
+								// "consumersUndefined" );
 	}
 }

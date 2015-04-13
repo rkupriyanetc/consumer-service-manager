@@ -14,9 +14,11 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -32,8 +34,6 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import mk.ck.energy.csm.controllers.AdministrationTools.StepByStep;
-import mk.ck.energy.csm.controllers.AdministrationTools.XMLText;
 import mk.ck.energy.csm.model.Address;
 import mk.ck.energy.csm.model.AddressLocation;
 import mk.ck.energy.csm.model.AddressNotFoundException;
@@ -439,14 +439,7 @@ public class AdministrationTools extends Controller {
 									}
 									break;
 								default :
-									long refId = 0;
-									try {
-										refId = Long.valueOf( id );
-									}
-									catch ( final NumberFormatException nfe ) {
-										LOGGER.error( "{} for parse refId in file AddresTop.xml", nfe );
-									}
-									new AddressTop( name, refId ).save();
+									new AddressTop( name, null ).save();
 									break;
 							}
 						}
@@ -501,8 +494,7 @@ public class AdministrationTools extends Controller {
 									}
 								}
 							}
-							List< AddressTop > addr = new LinkedList<>();
-							long refId;
+							final List< AddressTop > addr = new LinkedList<>();
 							switch ( ref ) {
 								case "references" :
 									try {
@@ -514,18 +506,14 @@ public class AdministrationTools extends Controller {
 									break;
 								default :
 									try {
-										refId = Long.valueOf( id );
-										addr.add( AddressTop.findById( refId ) );
-									}
-									catch ( final NumberFormatException nfe ) {
-										LOGGER.error( "{} for parse refId in file AddresTop.xml", nfe );
+										addr.add( AddressTop.findById( id ) );
 									}
 									catch ( final AddressNotFoundException anfe ) {
 										LOGGER.error( "{} for parse refId in file AddresTop.xml", anfe );
 									}
 									break;
 							}
-							final List< AdministrativeCenterType > at = new LinkedList<>();
+							final Set< AdministrativeCenterType > at = new LinkedHashSet<>();
 							final StringTokenizer st = new StringTokenizer( nameType, "," );
 							LocationType lt;
 							while ( st.hasMoreTokens() ) {
@@ -560,7 +548,7 @@ public class AdministrationTools extends Controller {
 										break;
 								}
 							}
-							new AddressLocation( addr.get( 0 ), name, lt, at );
+							new AddressLocation( addr.get( 0 ), name, lt, at ).save();
 						}
 					}
 				}
@@ -681,8 +669,7 @@ public class AdministrationTools extends Controller {
 									}
 								}
 							}
-							List< AddressTop > addr = new LinkedList<>();
-							long refId;
+							final List< AddressTop > addr = new LinkedList<>();
 							switch ( ref ) {
 								case "references" :
 									try {
@@ -694,18 +681,14 @@ public class AdministrationTools extends Controller {
 									break;
 								default :
 									try {
-										refId = Long.valueOf( id );
-										addr.add( AddressTop.findById( refId ) );
-									}
-									catch ( final NumberFormatException nfe ) {
-										LOGGER.error( "{} for parse refId in file AddresTop.xml", nfe );
+										addr.add( AddressTop.findById( id ) );
 									}
 									catch ( final AddressNotFoundException anfe ) {
 										LOGGER.error( "{} for parse refId in file AddresTop.xml", anfe );
 									}
 									break;
 							}
-							final List< AdministrativeCenterType > at = new LinkedList<>();
+							final Set< AdministrativeCenterType > at = new LinkedHashSet<>();
 							final StringTokenizer st = new StringTokenizer( nameType, "," );
 							LocationType lt;
 							while ( st.hasMoreTokens() ) {
@@ -813,7 +796,7 @@ public class AdministrationTools extends Controller {
 							type.appendChild( document.createTextNode( typeStr ) );
 							street.appendChild( type );
 						} else
-							AddressPlace.create( st, nameStr );
+							new AddressPlace( st, nameStr ).save();
 					}
 					final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 					transformerFactory.setAttribute( "indent-number", 2 );
@@ -907,7 +890,7 @@ public class AdministrationTools extends Controller {
 									st = StreetType.UNCERTAIN;
 									break;
 							}
-							AddressPlace.create( st, name );
+							new AddressPlace( st, name );
 						}
 					}
 				}
@@ -972,7 +955,7 @@ public class AdministrationTools extends Controller {
 			if ( step.isUpdateConsumers() ) {
 				// Run process
 				// This is temporary variable
-				final long keyReferences = Long.valueOf( step.getReferences().get( 0 ) );
+				final String keyReferences = step.getReferences().get( 0 );
 				int consumerSize = 0;
 				final String sqlText = readSQLFile( "consumers" );
 				boolean isReadSQLFile = sqlText != "";
@@ -1114,17 +1097,15 @@ public class AdministrationTools extends Controller {
 							else {
 								List< AddressLocation > addrLocations = null;
 								try {
-									addrLocations = AddressLocation.findByLocationName( nameCity );
+									addrLocations = AddressLocation.findLikeLocationName( nameCity );
 									boolean bool = false;
 									for ( int k = 0; k < addrLocations.size() && !bool; k++ ) {
-										final AddressLocation al = addrLocations.get( k );
-										final boolean isAddrTop = keyReferences == al.getTopAddress().getId();
-										for ( final LocationType type : al.getLocationsTypes() ) {
-											bool = type.name().compareTo( lt.name() ) == 0 && isAddrTop;
-											if ( bool ) {
-												address.setAddressLocation( al );
-												break;
-											}
+										final String al = addrLocations.get( k ).getRefId();
+										final boolean isAddrTop = keyReferences.equals( al );
+										bool = al.equals( lt.name() ) && isAddrTop;
+										if ( bool ) {
+											address.setAddressLocationId( al );
+											break;
 										}
 									}
 									if ( !bool )
@@ -1224,7 +1205,7 @@ public class AdministrationTools extends Controller {
 								}
 							}
 							consumer.addMeters( meter );
-							consumer.save( Consumer.UPDATING_READING_ALL );
+							consumer.save();
 							LOGGER.trace( "Consumer {} created. Writed by {} record!", consumer.getId(), ++consumerSize );
 						}
 						// Finish all Consumers

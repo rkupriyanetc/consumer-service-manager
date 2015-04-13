@@ -122,6 +122,7 @@ public class MeteringData {
 	}
 	
 	private static DBCollection getMeteringDataCollection() {
-		return Database.getInstance().getDatabase().getCollection( "meteringData" );
+		return null;// Database.getInstance().getDatabase().getCollection(
+								// "meteringData" );
 	}
 }
