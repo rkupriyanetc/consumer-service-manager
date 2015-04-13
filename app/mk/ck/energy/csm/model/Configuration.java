@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
-import com.mongodb.MongoURI;
 import com.mongodb.ServerAddress;
 
 public class Configuration {
@@ -80,7 +79,7 @@ public class Configuration {
 			if ( !key.equals( "default" ) ) {
 				final play.Configuration cConf = play.Play.application().configuration().getConfig( cName );
 				mongoConfigurations.put( cName, cConf );
-				final StringBuffer sb = new StringBuffer( MongoURI.MONGODB_PREFIX ); // mongodb://
+				final StringBuilder sb = new StringBuilder( "mongodb://" ); // mongodb://
 				sb.append( cConf.getString( "host" ) );
 				sb.append( ":" );
 				sb.append( cConf.getString( "port" ) );

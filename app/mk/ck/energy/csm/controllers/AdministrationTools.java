@@ -14,6 +14,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -38,6 +39,7 @@ import mk.ck.energy.csm.model.AddressLocation;
 import mk.ck.energy.csm.model.AddressNotFoundException;
 import mk.ck.energy.csm.model.AddressPlace;
 import mk.ck.energy.csm.model.AddressTop;
+import mk.ck.energy.csm.model.AdministrativeCenterType;
 import mk.ck.energy.csm.model.Configuration;
 import mk.ck.energy.csm.model.Consumer;
 import mk.ck.energy.csm.model.ConsumerStatusType;
@@ -72,6 +74,8 @@ import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Result;
+import views.html.admin.userAdd;
+import views.html.admin.viewXML;
 import views.html.admin.index;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
@@ -427,8 +431,8 @@ public class AdministrationTools extends Controller {
 							switch ( ref ) {
 								case "references" :
 									try {
-										final AddressTop addr = AddressTop.findByName( id );
-										new AddressTop( name, addr.getId() ).save();
+										final List< AddressTop > addr = AddressTop.findLikeName( id );
+										new AddressTop( name, addr.get( 0 ).getId() ).save();
 									}
 									catch ( final AddressNotFoundException anfe ) {
 										LOGGER.error( "Cannot find addressTop", anfe );
@@ -442,7 +446,7 @@ public class AdministrationTools extends Controller {
 									catch ( final NumberFormatException nfe ) {
 										LOGGER.error( "{} for parse refId in file AddresTop.xml", nfe );
 									}
-									AddressTop.create( name, refId );
+									new AddressTop( name, refId ).save();
 									break;
 							}
 						}
@@ -497,12 +501,12 @@ public class AdministrationTools extends Controller {
 									}
 								}
 							}
-							AddressTop addr = null;
+							List< AddressTop > addr = new LinkedList<>();
 							long refId;
 							switch ( ref ) {
 								case "references" :
 									try {
-										addr = AddressTop.findByName( id );
+										addr.addAll( AddressTop.findLikeName( id ) );
 									}
 									catch ( final AddressNotFoundException anfe ) {
 										LOGGER.error( "Cannot find addressTop", anfe );
@@ -511,7 +515,7 @@ public class AdministrationTools extends Controller {
 								default :
 									try {
 										refId = Long.valueOf( id );
-										addr = AddressTop.findById( refId );
+										addr.add( AddressTop.findById( refId ) );
 									}
 									catch ( final NumberFormatException nfe ) {
 										LOGGER.error( "{} for parse refId in file AddresTop.xml", nfe );
@@ -521,49 +525,42 @@ public class AdministrationTools extends Controller {
 									}
 									break;
 							}
-							final List< LocationType > lt = new ArrayList< LocationType >( 0 );
+							final List< AdministrativeCenterType > at = new LinkedList<>();
 							final StringTokenizer st = new StringTokenizer( nameType, "," );
+							LocationType lt;
 							while ( st.hasMoreTokens() ) {
 								final String token = st.nextToken().trim();
 								switch ( token ) {
 									case "с." :
-										lt.add( LocationType.VILLAGE );
+										lt = LocationType.VILLAGE;
 										break;
 									case "смт." :
-										lt.add( LocationType.TOWNSHIP );
+										lt = LocationType.TOWNSHIP;
 										break;
 									case "м." :
-										lt.add( LocationType.CITY );
+										lt = LocationType.CITY;
 										break;
 									case "х." :
-										lt.add( LocationType.HAMLET );
+										lt = LocationType.HAMLET;
 										break;
 									case "сад." :
-										lt.add( LocationType.BOWERY );
+										lt = LocationType.BOWERY;
 										break;
 									case "р-н" :
-										lt.add( LocationType.DISTRICT );
+										at.add( AdministrativeCenterType.DISTRICT );
 										break;
 									case "обл." :
-										lt.add( LocationType.REGIONAL );
+										at.add( AdministrativeCenterType.REGIONAL );
 										break;
 									case "столиця" :
-										lt.add( LocationType.CAPITAL );
+										at.add( AdministrativeCenterType.CAPITAL );
 										break;
 									default :
-										try {
-											final LocationType tok = LocationType.valueOf( token );
-											lt.add( tok );
-										}
-										catch ( final IllegalArgumentException iae ) {
-											LOGGER.debug( "This token {} is no LocationType", token );
-										}
-										catch ( final NullPointerException npe ) {
-											LOGGER.debug( "This token {} is no LocationType", token );
-										}
+										LOGGER.debug( "This token {} is no LocationType or AdministrativeCenterType", token );
+										break;
 								}
 							}
-							AddressLocation.create( addr, name, lt );
+							new AddressLocation( addr.get( 0 ), name, lt, at );
 						}
 					}
 				}
@@ -684,12 +681,12 @@ public class AdministrationTools extends Controller {
 									}
 								}
 							}
-							AddressTop addr = null;
+							List< AddressTop > addr = new LinkedList<>();
 							long refId;
 							switch ( ref ) {
 								case "references" :
 									try {
-										addr = AddressTop.findByName( id );
+										addr.addAll( AddressTop.findLikeName( id ) );
 									}
 									catch ( final AddressNotFoundException anfe ) {
 										LOGGER.error( "Cannot find addressTop", anfe );
@@ -698,7 +695,7 @@ public class AdministrationTools extends Controller {
 								default :
 									try {
 										refId = Long.valueOf( id );
-										addr = AddressTop.findById( refId );
+										addr.add( AddressTop.findById( refId ) );
 									}
 									catch ( final NumberFormatException nfe ) {
 										LOGGER.error( "{} for parse refId in file AddresTop.xml", nfe );
@@ -708,49 +705,42 @@ public class AdministrationTools extends Controller {
 									}
 									break;
 							}
-							final List< LocationType > lt = new ArrayList< LocationType >( 0 );
+							final List< AdministrativeCenterType > at = new LinkedList<>();
 							final StringTokenizer st = new StringTokenizer( nameType, "," );
+							LocationType lt;
 							while ( st.hasMoreTokens() ) {
 								final String token = st.nextToken().trim();
 								switch ( token ) {
 									case "с." :
-										lt.add( LocationType.VILLAGE );
+										lt = LocationType.VILLAGE;
 										break;
 									case "смт." :
-										lt.add( LocationType.TOWNSHIP );
+										lt = LocationType.TOWNSHIP;
 										break;
 									case "м." :
-										lt.add( LocationType.CITY );
+										lt = LocationType.CITY;
 										break;
 									case "х." :
-										lt.add( LocationType.HAMLET );
+										lt = LocationType.HAMLET;
 										break;
 									case "сад." :
-										lt.add( LocationType.BOWERY );
+										lt = LocationType.BOWERY;
 										break;
 									case "р-н" :
-										lt.add( LocationType.DISTRICT );
+										at.add( AdministrativeCenterType.DISTRICT );
 										break;
 									case "обл." :
-										lt.add( LocationType.REGIONAL );
+										at.add( AdministrativeCenterType.REGIONAL );
 										break;
 									case "столиця" :
-										lt.add( LocationType.CAPITAL );
+										at.add( AdministrativeCenterType.CAPITAL );
 										break;
 									default :
-										try {
-											final LocationType tok = LocationType.valueOf( token );
-											lt.add( tok );
-										}
-										catch ( final IllegalArgumentException iae ) {
-											LOGGER.debug( "This token {} is no LocationType", token );
-										}
-										catch ( final NullPointerException npe ) {
-											LOGGER.debug( "This token {} is no LocationType", token );
-										}
+										LOGGER.debug( "This token {} is no LocationType or AdministrativeCenterType", token );
+										break;
 								}
 							}
-							AddressLocation.create( addr, name, lt );
+							new AddressLocation( addr.get( 0 ), name, lt, at );
 						}
 					}
 				}

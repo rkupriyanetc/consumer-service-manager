@@ -3,7 +3,6 @@ package mk.ck.energy.csm.controllers;
 import static play.data.Form.form;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import mk.ck.energy.csm.controllers.AccountTools.AddrLocation;
@@ -18,7 +17,6 @@ import mk.ck.energy.csm.model.LocationType;
 import mk.ck.energy.csm.model.StreetType;
 import mk.ck.energy.csm.model.auth.UserRole;
 
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +25,12 @@ import play.data.validation.Constraints.Required;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.addressTop;
+import views.html.addressPlace;
+import views.html.addressLocation;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
 
 public class AccountTools extends Controller {
 	
@@ -200,13 +197,10 @@ public class AccountTools extends Controller {
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
 	public static Result testTopAddress() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
-		FindIterable< AddressTop > iterable = AddressTop.getMongoCollection().find().sort( new Document( "_id", 1 ) );
-		final List< AddressTop > list = new LinkedList< AddressTop >();
-		for ( MongoCursor< AddressTop > iterator = iterable.iterator(); iterator.hasNext(); ) {
-			final AddressTop at = iterator.next();
-			list.add( at );
-		}
-		return ok( addressTop.render( ADDRTOP_FORM, scala.collection.JavaConversions.asScalaBuffer( list ) ) );
+		return ok( addressTop.render(
+				ADDRTOP_FORM,
+				scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
+						.iterator() ) ) );
 	}
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
@@ -214,18 +208,17 @@ public class AccountTools extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< AddrTop > filledForm = ADDRTOP_FORM.bindFromRequest();
 		if ( filledForm.hasErrors() )
-			return badRequest( addressTop.render(
-					filledForm,
-					scala.collection.JavaConversions.asScalaBuffer( AddressTop.asClassType( AddressTop.getAddressCollection().find()
-							.toArray() ) ) ) );
+			return badRequest( addressTop.render( filledForm,
+					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().iterator() ) ) );
 		else {
 			final AddrTop u = filledForm.get();
 			final AddressTop at = new AddressTop( u.getName(), u.getRefId() ).save();
 			filledForm.data().put( "id", String.valueOf( at.getId() ) );
 			LOGGER.info( "Address top saved {}", at );
-			final List< AddressTop > items = AddressTop.asClassType( AddressTop.getAddressCollection().find()
-					.sort( new BasicDBObject( "_id", 1 ) ).toArray() );
-			return ok( addressTop.render( filledForm, scala.collection.JavaConversions.asScalaBuffer( items ) ) );
+			return ok( addressTop.render(
+					filledForm,
+					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
+							.iterator() ) ) );
 		}
 	}
 	
@@ -234,8 +227,8 @@ public class AccountTools extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		return ok( addressLocation.render(
 				ADDRLOCATION_FORM,
-				scala.collection.JavaConversions.asScalaBuffer( AddressLocation.asClassType( AddressLocation.getAddressCollection()
-						.find().sort( new BasicDBObject( "_id", 1 ) ).toArray() ) ) ) );
+				scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find()
+						.sort( Filters.eq( "_id", 1 ) ).iterator() ) ) );
 	}
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
@@ -243,10 +236,8 @@ public class AccountTools extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< AddrLocation > filledForm = ADDRLOCATION_FORM.bindFromRequest();
 		if ( filledForm.hasErrors() )
-			return badRequest( addressLocation.render(
-					filledForm,
-					scala.collection.JavaConversions.asScalaBuffer( AddressLocation.asClassType( AddressLocation.getAddressCollection()
-							.find().toArray() ) ) ) );
+			return badRequest( addressLocation.render( filledForm,
+					scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find().iterator() ) ) );
 		else {
 			final AddrLocation u = filledForm.get();
 			final List< LocationType > slt = new ArrayList< LocationType >( 0 );
@@ -267,22 +258,19 @@ public class AccountTools extends Controller {
 			catch ( final AddressNotFoundException anfe ) {
 				LOGGER.error( "Address Not Found in doTestLocationAddress() method!" );
 				filledForm.reject( "Address Not Found in doTestLocationAddress() method!" );
-				return badRequest( addressLocation.render(
-						filledForm,
-						scala.collection.JavaConversions.asScalaBuffer( AddressLocation.asClassType( AddressLocation.getAddressCollection()
-								.find().toArray() ) ) ) );
+				return badRequest( addressLocation.render( filledForm,
+						scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find().iterator() ) ) );
 			}
 			catch ( final ImpossibleCreatingException ice ) {
 				LOGGER.error( "Impossible to duplicate CAPITAL type" );
 				filledForm.reject( "Impossible to duplicate CAPITAL type" );
-				return badRequest( addressLocation.render(
-						filledForm,
-						scala.collection.JavaConversions.asScalaBuffer( AddressLocation.asClassType( AddressLocation.getAddressCollection()
-								.find().toArray() ) ) ) );
+				return badRequest( addressLocation.render( filledForm,
+						scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find().iterator() ) ) );
 			}
-			final List< AddressLocation > items = AddressLocation.asClassType( AddressLocation.getAddressCollection().find()
-					.sort( new BasicDBObject( "_id", 1 ) ).toArray() );
-			return ok( addressLocation.render( filledForm, scala.collection.JavaConversions.asScalaBuffer( items ) ) );
+			return ok( addressLocation.render(
+					filledForm,
+					scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find()
+							.sort( Filters.eq( "_id", 1 ) ).iterator() ) ) );
 		}
 	}
 	
@@ -291,8 +279,8 @@ public class AccountTools extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		return ok( addressPlace.render(
 				ADDRPLACE_FORM,
-				scala.collection.JavaConversions.asScalaBuffer( AddressPlace.getAddressCollection().find()
-						.sort( new BasicDBObject( "_id", 1 ) ).toArray() ) ) );
+				scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
+						.iterator() ) ) );
 	}
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
@@ -301,15 +289,17 @@ public class AccountTools extends Controller {
 		final Form< AddrPlace > filledForm = ADDRPLACE_FORM.bindFromRequest();
 		if ( filledForm.hasErrors() )
 			return badRequest( addressPlace.render( filledForm,
-					scala.collection.JavaConversions.asScalaBuffer( AddressPlace.getAddressCollection().find().toArray() ) ) );
+					scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find().iterator() ) ) );
 		else {
 			final AddrPlace u = filledForm.get();
-			final AddressPlace at = AddressPlace.create( StreetType.valueOf( u.getStreetType() ), u.getStreet() );
+			final AddressPlace at = new AddressPlace( StreetType.valueOf( u.getStreetType() ), u.getStreet() );
 			at.save();
 			filledForm.data().put( "id", String.valueOf( at.getId() ) );
 			LOGGER.info( "Address place saved {}", at );
-			final List< DBObject > items = AddressPlace.getAddressCollection().find().sort( new BasicDBObject( "_id", 1 ) ).toArray();
-			return ok( addressPlace.render( filledForm, scala.collection.JavaConversions.asScalaBuffer( items ) ) );
+			return ok( addressPlace.render(
+					filledForm,
+					scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find()
+							.sort( Filters.eq( "_id", 1 ) ).iterator() ) ) );
 		}
 	}
 	
@@ -319,17 +309,15 @@ public class AccountTools extends Controller {
 			AddressTop.remove( AddressTop.findById( id ) );
 			return ok( addressTop.render(
 					ADDRTOP_FORM,
-					scala.collection.JavaConversions.asScalaBuffer( AddressTop.asClassType( AddressTop.getAddressCollection().find()
-							.sort( new BasicDBObject( "_id", 1 ) ).toArray() ) ) ) );
+					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
+							.iterator() ) ) );
 		}
 		catch ( final Exception e ) {
 			flash( Application.FLASH_MESSAGE_KEY, e.getMessage() );
 			final Form< AddrTop > filledForm = ADDRTOP_FORM.bindFromRequest();
 			filledForm.reject( e.getMessage() );
-			return badRequest( addressTop.render(
-					filledForm,
-					scala.collection.JavaConversions.asScalaBuffer( AddressTop.asClassType( AddressTop.getAddressCollection().find()
-							.toArray() ) ) ) );
+			return badRequest( addressTop.render( filledForm,
+					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().iterator() ) ) );
 		}
 	}
 	
@@ -339,17 +327,15 @@ public class AccountTools extends Controller {
 			AddressLocation.remove( AddressLocation.findById( id ) );
 			return ok( addressLocation.render(
 					ADDRLOCATION_FORM,
-					scala.collection.JavaConversions.asScalaBuffer( AddressLocation.asClassType( AddressLocation.getAddressCollection()
-							.find().sort( new BasicDBObject( "_id", 1 ) ).toArray() ) ) ) );
+					scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find()
+							.sort( Filters.eq( "_id", 1 ) ).iterator() ) ) );
 		}
 		catch ( final Exception e ) {
 			flash( Application.FLASH_MESSAGE_KEY, e.getMessage() );
 			final Form< AddrLocation > filledForm = ADDRLOCATION_FORM.bindFromRequest();
 			filledForm.reject( e.getMessage() );
-			return badRequest( addressLocation.render(
-					filledForm,
-					scala.collection.JavaConversions.asScalaBuffer( AddressLocation.asClassType( AddressLocation.getAddressCollection()
-							.find().toArray() ) ) ) );
+			return badRequest( addressLocation.render( filledForm,
+					scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find().iterator() ) ) );
 		}
 	}
 }

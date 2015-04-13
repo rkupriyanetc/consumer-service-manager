@@ -189,19 +189,19 @@ public class Address {
 			sb.append( postalCode );
 			sb.append( ", " );
 		}
-		sb.append( addressLocation.getTopAddress().toString() );
-		sb.append( ", " );
-		sb.append( addressLocation );
-		sb.append( ", " );
 		sb.append( addressPlace );
+		sb.append( ", " );
 		if ( house != null && !house.isEmpty() ) {
-			sb.append( ", " );
 			sb.append( house );
+			sb.append( ", " );
 		}
 		if ( apartment != null && !apartment.isEmpty() ) {
-			sb.append( ", " );
 			sb.append( apartment );
+			sb.append( ", " );
 		}
+		sb.append( addressLocation );
+		sb.append( ", " );
+		sb.append( addressLocation.getTopAddress().toString() );
 		return sb.toString();
 	}
 }
