@@ -439,7 +439,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	private static Bson getEmailUserFind( final String email ) {
-		return Filters.and( new Document( DB_FIELD_ACTIVE, true ), new Document( DB_FIELD_EMAIL, email ) );
+		return Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ), Filters.eq( DB_FIELD_EMAIL, email ) );
 		// return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and(
 		// DB_FIELD_EMAIL ).is( email );
 	}
