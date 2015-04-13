@@ -30,10 +30,6 @@ public class LinkedAccount {
 		return new LinkedAccount( linkedAccount.provider, linkedAccount.userId );
 	}
 	
-	public static LinkedAccount getInstance( final Document doc ) {
-		return new LinkedAccount( ( String )doc.get( DB_FIELD_PROVIDER ), ( String )doc.get( DB_FIELD_USER_ID ) );
-	}
-	
 	public String getProvider() {
 		return provider;
 	}

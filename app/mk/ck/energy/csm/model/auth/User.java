@@ -209,15 +209,20 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public static boolean existsByAuthUserIdentity( final AuthUserIdentity identity ) {
-		if ( identity instanceof UsernamePasswordAuthUser )
-			return getMongoCollection().count( getUsernamePasswordAuthUserFind( ( UsernamePasswordAuthUser )identity ) ) > 0;
-		else
-			return getMongoCollection().count( getAuthUserFind( identity ) ) > 0;
+		if ( identity instanceof UsernamePasswordAuthUser ) {
+			final Bson doc = getUsernamePasswordAuthUserFind( ( UsernamePasswordAuthUser )identity );
+			return getMongoCollection().count( doc ) > 0;
+		} else {
+			final Bson doc = getAuthUserFind( identity );
+			return getMongoCollection().count( doc ) > 0;
+		}
 	}
 	
 	private static Bson getAuthUserFind( final AuthUserIdentity identity ) {
-		return Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
-				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, LinkedAccount.getInstance( identity ).getDocument() ) );
+		final Bson active = Filters.eq( DB_FIELD_ACTIVE, true );
+		final Bson linkeds = LinkedAccount.getInstance( identity ).getDocument();
+		final Bson match = Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, linkeds );
+		return Filters.and( active, match );
 		// return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and(
 		// DB_FIELD_LINKED_ACCOUNTS ).elemMatch( LinkedAccount.getInstance( identity
 		// ).getDBObject() );
@@ -266,17 +271,20 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public static User findByUsernamePasswordIdentity( final UsernamePasswordAuthUser identity ) throws UserNotFoundException {
-		final User doc = getMongoCollection().find( getUsernamePasswordAuthUserFind( identity ) ).first();
-		if ( doc == null ) {
+		final Bson doc = getUsernamePasswordAuthUserFind( identity );
+		final User user = getMongoCollection().find( doc ).first();
+		if ( user == null ) {
 			LOGGER.warn( "Could not finr user by user and password {}", identity );
 			throw new UserNotFoundException();
 		} else
-			return doc;
+			return user;
 	}
 	
 	private static Bson getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {
-		return Filters.and( getEmailUserFind( identity.getEmail() ),
-				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, Filters.eq( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) ) );
+		final Bson email = getEmailUserFind( identity.getEmail() );
+		final Bson linkProvider = Filters.eq( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() );
+		final Bson match = Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, linkProvider );
+		return Filters.and( email, match );
 		// return getEmailUserFind( identity.getEmail() ).and(
 		// DB_FIELD_LINKED_ACCOUNTS ).elemMatch( new BasicDBObject(
 		// LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) );
