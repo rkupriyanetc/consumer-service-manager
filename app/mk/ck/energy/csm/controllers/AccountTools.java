@@ -2,18 +2,16 @@ package mk.ck.energy.csm.controllers;
 
 import static play.data.Form.form;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
-import mk.ck.energy.csm.controllers.AccountTools.AddrLocation;
-import mk.ck.energy.csm.controllers.AccountTools.AddrPlace;
-import mk.ck.energy.csm.controllers.AccountTools.AddrTop;
 import mk.ck.energy.csm.model.AddressLocation;
 import mk.ck.energy.csm.model.AddressNotFoundException;
 import mk.ck.energy.csm.model.AddressPlace;
 import mk.ck.energy.csm.model.AddressTop;
-import mk.ck.energy.csm.model.ImpossibleCreatingException;
+import mk.ck.energy.csm.model.AdministrativeCenterType;
 import mk.ck.energy.csm.model.LocationType;
 import mk.ck.energy.csm.model.StreetType;
 import mk.ck.energy.csm.model.auth.UserRole;
@@ -89,12 +87,15 @@ public class AccountTools extends Controller {
 		private String					location;
 		
 		@Required
-		private List< String >	locationsTypes;
+		private String					locationType;
+		
+		@Required
+		private List< String >	administrativeCenterType;
 		
 		public AddrLocation() {
 			id = "0";
 			refId = "0";
-			locationsTypes = new LinkedList<>();
+			administrativeCenterType = new LinkedList<>();
 		}
 		
 		public String getId() {
@@ -105,6 +106,14 @@ public class AccountTools extends Controller {
 			this.id = id;
 		}
 		
+		public String getRefId() {
+			return refId;
+		}
+		
+		public void setRefId( final String refId ) {
+			this.refId = refId;
+		}
+		
 		public String getLocation() {
 			return location;
 		}
@@ -113,20 +122,20 @@ public class AccountTools extends Controller {
 			this.location = location;
 		}
 		
-		public List< String > getLocationsTypes() {
-			return locationsTypes;
+		public String getLocationType() {
+			return locationType;
 		}
 		
-		public void setLocationsTypes( final List< String > locationsTypes ) {
-			this.locationsTypes = locationsTypes;
+		public void setLocationType( final String locationType ) {
+			this.locationType = locationType;
 		}
 		
-		public String getRefId() {
-			return refId;
+		public List< String > getAdministrativeCenterType() {
+			return administrativeCenterType;
 		}
 		
-		public void setRefId( final String refId ) {
-			this.refId = refId;
+		public void setAdministrativeCenterType( final List< String > administrativeCenterType ) {
+			this.administrativeCenterType = administrativeCenterType;
 		}
 	}
 	
@@ -241,17 +250,17 @@ public class AccountTools extends Controller {
 					scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find().iterator() ) ) );
 		else {
 			final AddrLocation u = filledForm.get();
-			final List< LocationType > slt = new ArrayList< LocationType >( 0 );
+			final Set< AdministrativeCenterType > act = new LinkedHashSet<>();
 			try {
-				for ( final String i : u.getLocationsTypes() )
-					slt.add( LocationType.valueOf( i ) );
+				for ( final String i : u.getAdministrativeCenterType() )
+					act.add( AdministrativeCenterType.valueOf( i ) );
 			}
 			catch ( final NumberFormatException nfe ) {
-				LOGGER.error( "Error convertation StreetType of {}", u.getLocationsTypes() );
+				LOGGER.error( "Error convertation StreetType of {}", u.getAdministrativeCenterType() );
 			}
 			try {
 				final AddressTop at = AddressTop.findById( u.getRefId() );
-				final AddressLocation al = new AddressLocation( at, u.getLocation(), slt );
+				final AddressLocation al = new AddressLocation( at, u.getLocation(), LocationType.valueOf( u.getLocationType() ), act );
 				al.save();
 				filledForm.data().put( "id", String.valueOf( al.getId() ) );
 				LOGGER.info( "Address location saved {}", al );
@@ -259,12 +268,6 @@ public class AccountTools extends Controller {
 			catch ( final AddressNotFoundException anfe ) {
 				LOGGER.error( "Address Not Found in doTestLocationAddress() method!" );
 				filledForm.reject( "Address Not Found in doTestLocationAddress() method!" );
-				return badRequest( addressLocation.render( filledForm,
-						scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find().iterator() ) ) );
-			}
-			catch ( final ImpossibleCreatingException ice ) {
-				LOGGER.error( "Impossible to duplicate CAPITAL type" );
-				filledForm.reject( "Impossible to duplicate CAPITAL type" );
 				return badRequest( addressLocation.render( filledForm,
 						scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find().iterator() ) ) );
 			}

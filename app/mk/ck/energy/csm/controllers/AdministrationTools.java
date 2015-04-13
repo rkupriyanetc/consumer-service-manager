@@ -74,9 +74,9 @@ import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Result;
+import views.html.admin.index;
 import views.html.admin.userAdd;
 import views.html.admin.viewXML;
-import views.html.admin.index;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 
@@ -515,7 +515,7 @@ public class AdministrationTools extends Controller {
 							}
 							final Set< AdministrativeCenterType > at = new LinkedHashSet<>();
 							final StringTokenizer st = new StringTokenizer( nameType, "," );
-							LocationType lt;
+							LocationType lt = null;
 							while ( st.hasMoreTokens() ) {
 								final String token = st.nextToken().trim();
 								switch ( token ) {
@@ -690,7 +690,7 @@ public class AdministrationTools extends Controller {
 							}
 							final Set< AdministrativeCenterType > at = new LinkedHashSet<>();
 							final StringTokenizer st = new StringTokenizer( nameType, "," );
-							LocationType lt;
+							LocationType lt = null;
 							while ( st.hasMoreTokens() ) {
 								final String token = st.nextToken().trim();
 								switch ( token ) {
@@ -723,7 +723,7 @@ public class AdministrationTools extends Controller {
 										break;
 								}
 							}
-							new AddressLocation( addr.get( 0 ), name, lt, at );
+							new AddressLocation( addr.get( 0 ), name, lt, at ).save();
 						}
 					}
 				}
