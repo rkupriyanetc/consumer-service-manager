@@ -45,29 +45,35 @@ import com.mongodb.client.model.Filters;
  */
 public class User extends CSMAbstractDocument< User > implements Subject {
 	
-	private static final long							serialVersionUID					= 1L;
+	private static final long			serialVersionUID					= 1L;
 	
-	private static final String						COLLECTION_NAME_USERS			= "users";
+	private static final String		COLLECTION_NAME_USERS			= "users";
 	
-	private static final String						DB_FIELD_EMAIL						= "email";
+	private static final String		DB_FIELD_EMAIL						= "email";
 	
-	private static final String						DB_FIELD_NAME							= "name";
+	private static final String		DB_FIELD_NAME							= "name";
 	
-	private static final String						DB_FIELD_FIRST_NAME				= "first_name";
+	private static final String		DB_FIELD_FIRST_NAME				= "first_name";
 	
-	private static final String						DB_FIELD_LAST_NAME				= "last_name";
+	private static final String		DB_FIELD_LAST_NAME				= "last_name";
 	
-	private static final String						DB_FIELD_LAST_LOGIN				= "last_login";
+	private static final String		DB_FIELD_LAST_LOGIN				= "last_login";
 	
-	private static final String						DB_FIELD_ACTIVE						= "active";
+	private static final String		DB_FIELD_ACTIVE						= "active";
 	
-	private static final String						DB_FIELD_EMAIL_VALIDATED	= "validated";
+	private static final String		DB_FIELD_EMAIL_VALIDATED	= "validated";
 	
-	private static final String						DB_FIELD_ROLES						= "roles";
+	private static final String		DB_FIELD_ROLES						= "roles";
 	
-	private static final String						DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
+	private static final String		DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
 	
-	private final List< UserPermission >	permissions								= new LinkedList<>();
+	private static final String		DB_FIELD_PERMISSIONS			= "permissions";
+	
+	private List< Role >					roles;
+	
+	private List< LinkedAccount >	linkeds;
+	
+	private List< Permission >		permissions;
 	
 	private User( final AuthUser authUser ) {
 		setLastLogin( System.currentTimeMillis() );
@@ -190,32 +196,44 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	@Override
 	public List< ? extends Role > getRoles() {
-		final BsonArray list = ( BsonArray )get( DB_FIELD_ROLES );
-		final List< Role > lts = new ArrayList<>( list.size() );
-		for ( final BsonValue key : list.getValues() ) {
-			final Role lt = UserRole.getInstance( ( ( BsonString )key ).getValue() );
-			lts.add( lt );
+		if ( roles == null || roles.isEmpty() ) {
+			final BsonArray list = ( BsonArray )get( DB_FIELD_ROLES );
+			roles = new ArrayList<>( list.size() );
+			for ( final BsonValue key : list.getValues() ) {
+				final Role lt = UserRole.getInstance( ( ( BsonString )key ).getValue() );
+				roles.add( lt );
+			}
 		}
-		return lts;
+		return roles;
 	}
 	
 	public List< LinkedAccount > getLinkedAccounts() {
-		final BsonArray list = ( BsonArray )get( DB_FIELD_LINKED_ACCOUNTS );
-		final List< LinkedAccount > las = new LinkedList<>();
-		for ( final BsonValue key : list.getValues() ) {
-			final BsonDocument bd = key.asDocument();
-			for ( final Map.Entry< String, BsonValue > entry : bd.entrySet() ) {
-				final String k = entry.getKey();
-				final String v = entry.getValue().asString().getValue();
-				final LinkedAccount la = LinkedAccount.getInstance( k, v );
-				las.add( la );
+		if ( linkeds == null || linkeds.isEmpty() ) {
+			final BsonArray list = ( BsonArray )get( DB_FIELD_LINKED_ACCOUNTS );
+			linkeds = new ArrayList<>( list.size() );
+			for ( final BsonValue key : list.getValues() ) {
+				final BsonDocument bd = key.asDocument();
+				for ( final Map.Entry< String, BsonValue > entry : bd.entrySet() ) {
+					final String k = entry.getKey();
+					final String v = entry.getValue().asString().getValue();
+					final LinkedAccount la = LinkedAccount.getInstance( k, v );
+					linkeds.add( la );
+				}
 			}
 		}
-		return las;
+		return linkeds;
 	}
 	
 	@Override
 	public List< ? extends Permission > getPermissions() {
+		if ( permissions == null || permissions.isEmpty() ) {
+			final BsonArray list = ( BsonArray )get( DB_FIELD_PERMISSIONS );
+			permissions = new ArrayList<>( list.size() );
+			for ( final BsonValue key : list.getValues() ) {
+				final Permission lt = UserPermission.getInstance( ( ( BsonString )key ).getValue() );
+				permissions.add( lt );
+			}
+		}
 		return permissions;
 	}
 	

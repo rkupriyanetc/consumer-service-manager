@@ -73,7 +73,7 @@ public class Configuration {
 		// final play.Configuration cfg =
 		// play.Play.application().configuration().getConfig( MONGODB_CONFIG_NAME );
 		// final List< String > keys = cfg.getStringList( MONGODB_DEFAULT_NAME );
-		LOGGER.info( "BasicDBObject to String {}", keys );
+		LOGGER.info( "{}={}", MONGODB_CONFIG_NAME, keys );
 		for ( final String key : keys ) {
 			final String cName = MONGODB_DEFAULT_NAME + "." + key;
 			if ( !key.equals( "default" ) ) {
