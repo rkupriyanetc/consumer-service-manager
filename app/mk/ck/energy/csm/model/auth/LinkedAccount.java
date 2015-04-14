@@ -25,6 +25,10 @@ public class LinkedAccount {
 		this.userId = userId;
 	}
 	
+	public static LinkedAccount getInstance( final String provider, final String userId ) {
+		return new LinkedAccount( provider, userId );
+	}
+	
 	public static LinkedAccount getInstance( final AuthUserIdentity authUserIdentity ) {
 		return new LinkedAccount( authUserIdentity.getProvider(), authUserIdentity.getId() );
 	}

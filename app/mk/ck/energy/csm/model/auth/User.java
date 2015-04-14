@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -12,6 +13,7 @@ import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
 import org.bson.BsonArray;
+import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
@@ -39,7 +41,7 @@ import com.mongodb.client.model.Filters;
 /**
  * Authenticated user.
  * 
- * @author KYL
+ * @author RVK
  */
 public class User extends CSMAbstractDocument< User > implements Subject {
 	
@@ -65,9 +67,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	private static final String						DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
 	
-	private final List< LinkedAccount >		linkedAccounts						= new ArrayList< LinkedAccount >( 0 );
-	
-	private final List< UserPermission >	permissions								= new ArrayList< UserPermission >( 0 );
+	private final List< UserPermission >	permissions								= new LinkedList<>();
 	
 	private User( final AuthUser authUser ) {
 		setLastLogin( System.currentTimeMillis() );
@@ -79,7 +79,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 			addRole( UserRole.USER );
 		// user.permissions = new ArrayList<UserPermission>();
 		// user.permissions.add(UserPermission.findByValue("printers.edit"));
-		linkedAccounts.add( LinkedAccount.getInstance( authUser ) );
+		getLinkedAccounts().add( LinkedAccount.getInstance( authUser ) );
 		if ( authUser instanceof EmailIdentity ) {
 			final EmailIdentity identity = ( EmailIdentity )authUser;
 			// Remember, even when getting them from FB & Co., emails should be
@@ -200,7 +200,18 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public List< LinkedAccount > getLinkedAccounts() {
-		return linkedAccounts;
+		final BsonArray list = ( BsonArray )get( DB_FIELD_LINKED_ACCOUNTS );
+		final List< LinkedAccount > las = new LinkedList<>();
+		for ( final BsonValue key : list.getValues() ) {
+			final BsonDocument bd = key.asDocument();
+			for ( final Map.Entry< String, BsonValue > entry : bd.entrySet() ) {
+				final String k = entry.getKey();
+				final String v = entry.getValue().asString().getValue();
+				final LinkedAccount la = LinkedAccount.getInstance( k, v );
+				las.add( la );
+			}
+		}
+		return las;
 	}
 	
 	@Override
@@ -337,8 +348,8 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	 * }
 	 */
 	public void merge( final User otherUser ) {
-		for ( final LinkedAccount acc : otherUser.linkedAccounts )
-			this.linkedAccounts.add( LinkedAccount.getInstance( acc ) );
+		for ( final LinkedAccount acc : otherUser.getLinkedAccounts() )
+			this.getLinkedAccounts().add( LinkedAccount.getInstance( acc ) );
 		// do all other merging stuff here - like resources, etc.
 		if ( getEmail() == null )
 			setEmail( otherUser.getEmail() );
@@ -368,8 +379,8 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public Set< String > getProviders() {
-		final Set< String > providerKeys = new HashSet< String >( linkedAccounts.size() );
-		for ( final LinkedAccount acc : linkedAccounts )
+		final Set< String > providerKeys = new HashSet< String >( getLinkedAccounts().size() );
+		for ( final LinkedAccount acc : getLinkedAccounts() )
 			providerKeys.add( acc.getProvider() );
 		return providerKeys;
 	}
@@ -377,7 +388,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	public static void addLinkedAccount( final AuthUser oldUser, final AuthUser newUser ) {
 		try {
 			final User u = User.findByAuthUserIdentity( oldUser );
-			u.linkedAccounts.add( LinkedAccount.getInstance( newUser ) );
+			u.getLinkedAccounts().add( LinkedAccount.getInstance( newUser ) );
 			// Зберегти лише u.linkedAccounts
 			u.save();
 		}
@@ -445,7 +456,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public LinkedAccount getAccountByProvider( final String providerKey ) {
-		for ( final LinkedAccount acc : linkedAccounts )
+		for ( final LinkedAccount acc : getLinkedAccounts() )
 			if ( acc.getProvider().equals( providerKey ) )
 				return acc;
 		LOGGER.warn( "Could not find account by provider {}", providerKey );
@@ -478,8 +489,8 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 			if ( !create )
 				throw new RuntimeException( "Account not enabled for password usage" );
 		} else
-			linkedAccounts.remove( existing );
-		linkedAccounts.add( LinkedAccount.getInstance( authUser ) );
+			getLinkedAccounts().remove( existing );
+		getLinkedAccounts().add( LinkedAccount.getInstance( authUser ) );
 		// Зберегти лише LinkedAccount
 		save();
 	}
