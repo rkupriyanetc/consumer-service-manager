@@ -12,6 +12,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -97,7 +98,7 @@ public class Application extends Controller {
 	
 	public static Result phoneBook() {
 		final List< Employee > employees = importEmployees();
-		final List< Employee > tmpDelete = new ArrayList< Employee >( employees.size() );
+		final List< Employee > tmpDelete = new ArrayList<>( employees.size() );
 		for ( final Employee emp : employees )
 			if ( !emp.isToPhoneBook() )
 				tmpDelete.add( emp );
@@ -176,7 +177,7 @@ public class Application extends Controller {
 	}
 	
 	public static List< Employee > importEmployees() {
-		final List< Employee > employees = new ArrayList< Employee >( 0 );
+		final List< Employee > employees = new LinkedList<>();
 		final File xmlEmployee = Database.getConfiguration().getEmployeesFileXML();
 		final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware( true );

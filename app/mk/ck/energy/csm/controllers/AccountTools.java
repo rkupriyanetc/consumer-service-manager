@@ -23,9 +23,9 @@ import play.data.Form;
 import play.data.validation.Constraints.Required;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.addressTop;
-import views.html.addressPlace;
 import views.html.addressLocation;
+import views.html.addressPlace;
+import views.html.addressTop;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 
@@ -223,7 +223,7 @@ public class AccountTools extends Controller {
 		else {
 			final AddrTop u = filledForm.get();
 			final AddressTop at = new AddressTop( u.getName(), u.getRefId() ).save();
-			filledForm.data().put( "id", String.valueOf( at.getId() ) );
+			filledForm.data().put( "id", at.getId() );
 			LOGGER.info( "Address top saved {}", at );
 			return ok( addressTop.render(
 					filledForm,
@@ -260,9 +260,9 @@ public class AccountTools extends Controller {
 			}
 			try {
 				final AddressTop at = AddressTop.findById( u.getRefId() );
-				final AddressLocation al = new AddressLocation( at, u.getLocation(), LocationType.valueOf( u.getLocationType() ), act );
-				al.save();
-				filledForm.data().put( "id", String.valueOf( al.getId() ) );
+				final AddressLocation al = new AddressLocation( at, u.getLocation(), LocationType.valueOf( u.getLocationType() ), act )
+						.save();
+				filledForm.data().put( "id", al.getId() );
 				LOGGER.info( "Address location saved {}", al );
 			}
 			catch ( final AddressNotFoundException anfe ) {
@@ -296,9 +296,8 @@ public class AccountTools extends Controller {
 					scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find().iterator() ) ) );
 		else {
 			final AddrPlace u = filledForm.get();
-			final AddressPlace at = new AddressPlace( StreetType.valueOf( u.getStreetType() ), u.getStreet() );
-			at.save();
-			filledForm.data().put( "id", String.valueOf( at.getId() ) );
+			final AddressPlace at = new AddressPlace( StreetType.valueOf( u.getStreetType() ), u.getStreet() ).save();
+			filledForm.data().put( "id", at.getId() );
 			LOGGER.info( "Address place saved {}", at );
 			return ok( addressPlace.render(
 					filledForm,

@@ -1,8 +1,11 @@
 package mk.ck.energy.csm.model.auth;
 
-import org.bson.Document;
+import mk.ck.energy.csm.model.mongodb.SimpleFilter;
+
+import org.bson.conversions.Bson;
 
 import com.feth.play.module.pa.user.AuthUserIdentity;
+import com.mongodb.client.model.Filters;
 
 /**
  * @author KYL
@@ -38,7 +41,9 @@ public class LinkedAccount {
 		return userId;
 	}
 	
-	Document getDocument() {
-		return new Document( DB_FIELD_PROVIDER, provider ).append( DB_FIELD_USER_ID, userId );
+	Bson getFilters() {
+		final Bson prov = new SimpleFilter< String >( DB_FIELD_PROVIDER, provider );
+		final Bson uid = new SimpleFilter< String >( DB_FIELD_USER_ID, userId );
+		return Filters.and( prov, uid );
 	}
 }

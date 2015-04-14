@@ -1,18 +1,16 @@
 package mk.ck.energy.csm.model.auth;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static play.test.Helpers.contentAsString;
-import static play.test.Helpers.contentType;
 import mk.ck.energy.csm.model.Configuration;
 import mk.ck.energy.csm.model.Database;
 
+import org.bson.Document;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import play.i18n.Messages;
-import play.twirl.api.Content;
+import com.mongodb.client.MongoCollection;
 
 public class UserTest {
 	
@@ -36,9 +34,8 @@ public class UserTest {
 	
 	@Test
 	public void test() {
-		final Content html = views.html.index.render();
-		assertThat( contentType( html ) ).isEqualTo( "text/html" );
-		assertThat( contentAsString( html ) ).contains( Messages.get( "page.home.title" ) );
+		final MongoCollection< Document > csm = data.getDatabase().getCollection( "users" );
+		assertThat( 2 == csm.count() );
 		LOGGER.trace( config.getActiveMongoDBName() );
 		LOGGER.trace( data.getDatabase().getName() );
 	}

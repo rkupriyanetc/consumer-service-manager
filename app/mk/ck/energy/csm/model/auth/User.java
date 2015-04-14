@@ -220,7 +220,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	private static Bson getAuthUserFind( final AuthUserIdentity identity ) {
 		final Bson active = Filters.eq( DB_FIELD_ACTIVE, true );
-		final Bson linkeds = LinkedAccount.getInstance( identity ).getDocument();
+		final Bson linkeds = LinkedAccount.getInstance( identity ).getFilters();
 		final Bson match = Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, linkeds );
 		return Filters.and( active, match );
 		// return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and(

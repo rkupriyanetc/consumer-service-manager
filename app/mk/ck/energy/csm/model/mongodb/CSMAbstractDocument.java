@@ -11,7 +11,7 @@ import com.mongodb.MongoWriteConcernException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 
-public abstract class CSMAbstractDocument< I extends Document > extends Document {
+public abstract class CSMAbstractDocument< I extends CSMAbstractDocument > extends Document {
 	
 	private static final long			serialVersionUID	= 1L;
 	
