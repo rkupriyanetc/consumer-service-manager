@@ -29,6 +29,8 @@ public class Database {
 	
 	private MongoDatabase													database;
 	
+	private MongoClient														mongoClient;
+	
 	private final ReadWriteLock										lock					= new ReentrantReadWriteLock();
 	
 	private final String													name;
@@ -63,6 +65,10 @@ public class Database {
 		return database;
 	}
 	
+	public MongoClient getMongoClient() {
+		return mongoClient;
+	}
+	
 	private void connect() {
 		lock.readLock().lock();
 		if ( database == null ) {
@@ -76,10 +82,9 @@ public class Database {
 				if ( credentials != null ) {
 					final MongoCredential credential = MongoCredential.createCredential( credentials.getString( "user" ), dbName,
 							credentials.getString( "password" ).toCharArray() );
-					final MongoClient mongoClient = new MongoClient( new ServerAddress( config.getString( "host" ) ),
-							Arrays.asList( credential ) );
+					if ( mongoClient == null )
+						mongoClient = new MongoClient( new ServerAddress( config.getString( "host" ) ), Arrays.asList( credential ) );
 					database = mongoClient.getDatabase( dbName );
-					mongoClient.close();
 				}
 			}
 			lock.writeLock().unlock();

@@ -112,25 +112,23 @@ public class User extends CSMAbstractDocument< Document > implements Subject {
 		setId( id );
 	}
 	
-	/**
-	 * private User( final DBObject doc ) {
-	 * setId( ( String )doc.get( DB_FIELD_ID ) );
-	 * this.email = ( String )doc.get( DB_FIELD_EMAIL );
-	 * this.name = ( String )doc.get( DB_FIELD_NAME );
-	 * this.firstName = ( String )doc.get( DB_FIELD_FIRST_NAME );
-	 * this.lastName = ( String )doc.get( DB_FIELD_LAST_NAME );
-	 * this.lastLogin = ( Long )doc.get( DB_FIELD_LAST_LOGIN );
-	 * this.active = ( Boolean )doc.get( DB_FIELD_ACTIVE );
-	 * this.emailValidated = ( Boolean )doc.get( DB_FIELD_EMAIL_VALIDATED );
-	 * final BasicDBList dbRoles = ( BasicDBList )doc.get( DB_FIELD_ROLES );
-	 * for ( final Object elm : dbRoles )
-	 * roles.add( UserRole.getInstance( ( DBObject )elm ) );
-	 * final BasicDBList dbAccounts = ( BasicDBList )doc.get(
-	 * DB_FIELD_LINKED_ACCOUNTS );
-	 * for ( final Object elm : dbAccounts )
-	 * linkedAccounts.add( LinkedAccount.getInstance( ( DBObject )elm ) );
-	 * }
-	 */
+	private User( final Document doc ) {
+		setId( ( String )doc.get( DB_FIELD_ID ) );
+		setEmail( ( String )doc.get( DB_FIELD_EMAIL ) );
+		setName( ( String )doc.get( DB_FIELD_NAME ) );
+		setFirstName( ( String )doc.get( DB_FIELD_FIRST_NAME ) );
+		setLastName( ( String )doc.get( DB_FIELD_LAST_NAME ) );
+		setLastLogin( ( Long )doc.get( DB_FIELD_LAST_LOGIN ) );
+		setActive( ( Boolean )doc.get( DB_FIELD_ACTIVE ) );
+		setEmailValidated( ( Boolean )doc.get( DB_FIELD_EMAIL_VALIDATED ) );
+		final BsonArray dbRoles = ( BsonArray )doc.get( DB_FIELD_ROLES );
+		for ( final BsonValue elm : dbRoles )
+			roles.add( UserRole.getInstance( elm.toString() ) );
+		final BsonArray dbAccounts = ( BsonArray )doc.get( DB_FIELD_LINKED_ACCOUNTS );
+		for ( final BsonValue elm : dbAccounts )
+			linkedAccounts.add( LinkedAccount.getInstance( ( LinkedAccount )elm ) );
+	}
+	
 	@Override
 	public String getIdentifier() {
 		return getId();
@@ -298,13 +296,12 @@ public class User extends CSMAbstractDocument< Document > implements Subject {
 	}
 	
 	public static User findByUsernamePasswordIdentity( final UsernamePasswordAuthUser identity ) throws UserNotFoundException {
-		final Bson doc = getUsernamePasswordAuthUserFind( identity );
-		final Document user = getMongoCollection().find( doc ).first();
-		if ( user == null ) {
+		final Document doc = getMongoCollection().find( getUsernamePasswordAuthUserFind( identity ) ).first();
+		if ( doc == null ) {
 			LOGGER.warn( "Could not finr user by user and password {}", identity );
 			throw new UserNotFoundException();
 		} else
-			return User.class.cast( user );
+			return User.class.cast( doc );
 	}
 	
 	private static Bson getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {

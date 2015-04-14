@@ -1,8 +1,10 @@
 package mk.ck.energy.csm.model.auth;
 
-import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import be.objectify.deadbolt.core.models.Permission;
+
+import com.mongodb.client.model.Filters;
 
 /**
  * Initial version based on work by Steve Chaloner (steve@objectify.be) for
@@ -18,10 +20,6 @@ public class UserPermission implements Permission {
 		this.value = value;
 	}
 	
-	public static UserPermission getInstance( final Document doc ) {
-		return new UserPermission( ( String )doc.get( DB_FIELD_VALUE ) );
-	}
-	
 	public static UserPermission getInstance( final String value ) {
 		return new UserPermission( value );
 	}
@@ -31,7 +29,7 @@ public class UserPermission implements Permission {
 		return value;
 	}
 	
-	Document getDocument() {
-		return new Document( DB_FIELD_VALUE, value );
+	Bson getDocument() {
+		return Filters.eq( DB_FIELD_VALUE, value );
 	}
 }
