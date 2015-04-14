@@ -2,6 +2,8 @@ package mk.ck.energy.csm.model.mongodb;
 
 import java.util.UUID;
 
+import mk.ck.energy.csm.model.Database;
+
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,14 +12,17 @@ import com.mongodb.MongoException;
 import com.mongodb.MongoWriteConcernException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
-public abstract class CSMAbstractDocument< I extends CSMAbstractDocument > extends Document {
+public abstract class CSMAbstractDocument< I extends Document > extends Document {
 	
-	private static final long			serialVersionUID	= 1L;
+	private static final MongoDatabase	db								= Database.getInstance().getDatabase();
 	
-	protected static final Logger	LOGGER						= LoggerFactory.getLogger( CSMAbstractDocument.class );
+	private static final long						serialVersionUID	= 1L;
 	
-	protected static final String	DB_FIELD_ID				= "_id";
+	protected static final Logger				LOGGER						= LoggerFactory.getLogger( CSMAbstractDocument.class );
+	
+	protected static final String				DB_FIELD_ID				= "_id";
 	
 	public String getId() {
 		return getString( DB_FIELD_ID );
@@ -46,6 +51,10 @@ public abstract class CSMAbstractDocument< I extends CSMAbstractDocument > exten
 		catch ( final MongoException me ) {}
 		LOGGER.trace( "Saved class {}. ID is {}", getClass(), getId() );
 		return ( I )this;
+	}
+	
+	public static MongoDatabase getDatabase() {
+		return db;
 	}
 	
 	protected abstract MongoCollection< I > getCollection();

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import mk.ck.energy.csm.model.Database;
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
@@ -35,7 +34,6 @@ import com.feth.play.module.pa.user.FirstLastNameIdentity;
 import com.feth.play.module.pa.user.NameIdentity;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
 /**
@@ -43,7 +41,7 @@ import com.mongodb.client.model.Filters;
  * 
  * @author RVK
  */
-public class User extends CSMAbstractDocument< User > implements Subject {
+public class User extends CSMAbstractDocument< Document > implements Subject {
 	
 	private static final long			serialVersionUID					= 1L;
 	
@@ -269,14 +267,14 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		@Override
 		public User call() throws Exception {
 			if ( identity instanceof UsernamePasswordAuthUser )
-				return findByUsernamePasswordIdentity( ( UsernamePasswordAuthUser )identity );
+				return User.class.cast( findByUsernamePasswordIdentity( ( UsernamePasswordAuthUser )identity ) );
 			else {
-				final User doc = getMongoCollection().find( getAuthUserFind( identity ) ).first();
+				final Document doc = getMongoCollection().find( getAuthUserFind( identity ) ).first();
 				if ( doc == null ) {
 					LOGGER.warn( "Could not find user by identity {}", identity );
 					throw new UserNotFoundException();
 				} else
-					return doc;
+					return User.class.cast( doc );
 			}
 		}
 	}
@@ -301,12 +299,12 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	public static User findByUsernamePasswordIdentity( final UsernamePasswordAuthUser identity ) throws UserNotFoundException {
 		final Bson doc = getUsernamePasswordAuthUserFind( identity );
-		final User user = getMongoCollection().find( doc ).first();
+		final Document user = getMongoCollection().find( doc ).first();
 		if ( user == null ) {
 			LOGGER.warn( "Could not finr user by user and password {}", identity );
 			throw new UserNotFoundException();
 		} else
-			return user;
+			return User.class.cast( user );
 	}
 	
 	private static Bson getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {
@@ -320,7 +318,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public static List< User > findByRole( final Role role ) throws UserNotFoundException {
-		final MongoCursor< User > cursor = getMongoCollection()
+		final MongoCursor< Document > cursor = getMongoCollection()
 				.find(
 						Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
 								Filters.elemMatch( DB_FIELD_ROLES, Filters.eq( DB_FIELD_ROLES, role.getName() ) ) ) )
@@ -333,7 +331,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		} else {
 			final List< User > users = new LinkedList<>();
 			while ( cursor.hasNext() )
-				users.add( cursor.next() );
+				users.add( User.class.cast( cursor.next() ) );
 			return users;
 		}
 	}
@@ -382,7 +380,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	public static User create( final AuthUser authUser ) {
 		final User user = new User( authUser );
-		return user.save();
+		return User.class.cast( user.save() );
 	}
 	
 	public static void merge( final AuthUser oldAuthUser, final AuthUser newAuthUser ) {
@@ -442,20 +440,20 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public static User findById( final String userId ) throws UserNotFoundException {
-		final User doc = getMongoCollection().find( new Document( DB_FIELD_ID, userId ) ).first();
+		final Document doc = getMongoCollection().find( Filters.eq( DB_FIELD_ID, userId ) ).first();
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", userId );
 			throw new UserNotFoundException();
 		} else
-			return doc;
+			return User.class.cast( doc );
 	}
 	
 	public static User findByEmail( final String email ) throws UserNotFoundException {
 		// there is out RuntimeException
 		try {
-			final User doc = getMongoCollection().find( getEmailUserFind( email ) ).first();
+			final Document doc = getMongoCollection().find( getEmailUserFind( email ) ).first();
 			if ( doc != null )
-				return doc;
+				return User.class.cast( doc );
 			else {
 				LOGGER.warn( "Could not find user by email {}", email );
 				throw new UserNotFoundException();
@@ -520,13 +518,13 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public static User remove( final String id ) throws UserNotFoundException {
-		final User doc = getMongoCollection().findOneAndDelete( new Document( DB_FIELD_ID, id ) );
+		final Document doc = getMongoCollection().findOneAndDelete( new Document( DB_FIELD_ID, id ) );
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", id );
 			throw new UserNotFoundException();
 		} else
 			LOGGER.debug( "User {} was removed.", id );
-		return doc;
+		return User.class.cast( doc );
 	}
 	
 	public boolean isAdmin() {
@@ -537,14 +535,13 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		return ( ( BsonArray )get( DB_FIELD_ROLES ) ).contains( new BsonString( UserRole.OPER_ROLE_NAME ) );
 	}
 	
-	public static MongoCollection< User > getMongoCollection() {
-		final MongoDatabase db = Database.getInstance().getDatabase();
-		final MongoCollection< User > collection = db.getCollection( COLLECTION_NAME_USERS, User.class );
+	public static MongoCollection< Document > getMongoCollection() {
+		final MongoCollection< Document > collection = getDatabase().getCollection( COLLECTION_NAME_USERS, Document.class );
 		return collection;
 	}
 	
 	@Override
-	protected MongoCollection< User > getCollection() {
+	protected MongoCollection< Document > getCollection() {
 		return getMongoCollection();
 	}
 }
