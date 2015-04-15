@@ -13,9 +13,10 @@ import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
+import org.bson.BsonDocumentWrapper;
 import org.bson.BsonString;
 import org.bson.BsonValue;
-import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 
 import play.cache.Cache;
@@ -41,7 +42,7 @@ import com.mongodb.client.model.Filters;
  * 
  * @author RVK
  */
-public class User extends CSMAbstractDocument< Document > implements Subject {
+public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	private static final long			serialVersionUID					= 1L;
 	
@@ -112,23 +113,25 @@ public class User extends CSMAbstractDocument< Document > implements Subject {
 		setId( id );
 	}
 	
-	private User( final Document doc ) {
-		setId( ( String )doc.get( DB_FIELD_ID ) );
-		setEmail( ( String )doc.get( DB_FIELD_EMAIL ) );
-		setName( ( String )doc.get( DB_FIELD_NAME ) );
-		setFirstName( ( String )doc.get( DB_FIELD_FIRST_NAME ) );
-		setLastName( ( String )doc.get( DB_FIELD_LAST_NAME ) );
-		setLastLogin( ( Long )doc.get( DB_FIELD_LAST_LOGIN ) );
-		setActive( ( Boolean )doc.get( DB_FIELD_ACTIVE ) );
-		setEmailValidated( ( Boolean )doc.get( DB_FIELD_EMAIL_VALIDATED ) );
-		final BsonArray dbRoles = ( BsonArray )doc.get( DB_FIELD_ROLES );
-		for ( final BsonValue elm : dbRoles )
-			roles.add( UserRole.getInstance( elm.toString() ) );
-		final BsonArray dbAccounts = ( BsonArray )doc.get( DB_FIELD_LINKED_ACCOUNTS );
-		for ( final BsonValue elm : dbAccounts )
-			linkedAccounts.add( LinkedAccount.getInstance( ( LinkedAccount )elm ) );
-	}
-	
+	/**
+	 * private User( final Document doc ) {
+	 * setId( ( String )doc.get( DB_FIELD_ID ) );
+	 * setEmail( ( String )doc.get( DB_FIELD_EMAIL ) );
+	 * setName( ( String )doc.get( DB_FIELD_NAME ) );
+	 * setFirstName( ( String )doc.get( DB_FIELD_FIRST_NAME ) );
+	 * setLastName( ( String )doc.get( DB_FIELD_LAST_NAME ) );
+	 * setLastLogin( ( Long )doc.get( DB_FIELD_LAST_LOGIN ) );
+	 * setActive( ( Boolean )doc.get( DB_FIELD_ACTIVE ) );
+	 * setEmailValidated( ( Boolean )doc.get( DB_FIELD_EMAIL_VALIDATED ) );
+	 * final BsonArray dbRoles = ( BsonArray )doc.get( DB_FIELD_ROLES );
+	 * for ( final BsonValue elm : dbRoles )
+	 * roles.add( UserRole.getInstance( elm.toString() ) );
+	 * final BsonArray dbAccounts = ( BsonArray )doc.get( DB_FIELD_LINKED_ACCOUNTS
+	 * );
+	 * for ( final BsonValue elm : dbAccounts )
+	 * linkedAccounts.add( LinkedAccount.getInstance( ( LinkedAccount )elm ) );
+	 * }
+	 */
 	@Override
 	public String getIdentifier() {
 		return getId();
@@ -265,14 +268,14 @@ public class User extends CSMAbstractDocument< Document > implements Subject {
 		@Override
 		public User call() throws Exception {
 			if ( identity instanceof UsernamePasswordAuthUser )
-				return User.class.cast( findByUsernamePasswordIdentity( ( UsernamePasswordAuthUser )identity ) );
+				return findByUsernamePasswordIdentity( ( UsernamePasswordAuthUser )identity );
 			else {
-				final Document doc = getMongoCollection().find( getAuthUserFind( identity ) ).first();
+				final User doc = getMongoCollection().find( getAuthUserFind( identity ), User.class ).first();
 				if ( doc == null ) {
 					LOGGER.warn( "Could not find user by identity {}", identity );
 					throw new UserNotFoundException();
 				} else
-					return User.class.cast( doc );
+					return doc;
 			}
 		}
 	}
@@ -296,12 +299,13 @@ public class User extends CSMAbstractDocument< Document > implements Subject {
 	}
 	
 	public static User findByUsernamePasswordIdentity( final UsernamePasswordAuthUser identity ) throws UserNotFoundException {
-		final Document doc = getMongoCollection().find( getUsernamePasswordAuthUserFind( identity ) ).first();
+		final Bson doc = getUsernamePasswordAuthUserFind( identity );
+		final User user = getMongoCollection().find( doc, User.class ).first();
 		if ( doc == null ) {
 			LOGGER.warn( "Could not finr user by user and password {}", identity );
 			throw new UserNotFoundException();
 		} else
-			return User.class.cast( doc );
+			return user;
 	}
 	
 	private static Bson getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {
@@ -315,10 +319,10 @@ public class User extends CSMAbstractDocument< Document > implements Subject {
 	}
 	
 	public static List< User > findByRole( final Role role ) throws UserNotFoundException {
-		final MongoCursor< Document > cursor = getMongoCollection()
-				.find(
-						Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
-								Filters.elemMatch( DB_FIELD_ROLES, Filters.eq( DB_FIELD_ROLES, role.getName() ) ) ) )
+		final Bson active = Filters.eq( DB_FIELD_ACTIVE, true );
+		final Bson rol = Filters.eq( DB_FIELD_ROLES, role.getName() );
+		final Bson elemMatch = Filters.elemMatch( DB_FIELD_ROLES, rol );
+		final MongoCursor< User > cursor = getMongoCollection().find( Filters.and( active, elemMatch ), User.class )
 				.sort( Filters.eq( DB_FIELD_ROLES, 1 ) ).iterator();
 		// QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_ROLES
 		// ).elemMatch( role.getDBObject() ).get() ).sort( sort );
@@ -328,7 +332,7 @@ public class User extends CSMAbstractDocument< Document > implements Subject {
 		} else {
 			final List< User > users = new LinkedList<>();
 			while ( cursor.hasNext() )
-				users.add( User.class.cast( cursor.next() ) );
+				users.add( cursor.next() );
 			return users;
 		}
 	}
@@ -377,7 +381,7 @@ public class User extends CSMAbstractDocument< Document > implements Subject {
 	
 	public static User create( final AuthUser authUser ) {
 		final User user = new User( authUser );
-		return User.class.cast( user.save() );
+		return user.save();
 	}
 	
 	public static void merge( final AuthUser oldAuthUser, final AuthUser newAuthUser ) {
@@ -437,20 +441,21 @@ public class User extends CSMAbstractDocument< Document > implements Subject {
 	}
 	
 	public static User findById( final String userId ) throws UserNotFoundException {
-		final Document doc = getMongoCollection().find( Filters.eq( DB_FIELD_ID, userId ) ).first();
+		final Bson us = Filters.eq( DB_FIELD_ID, userId );
+		final User doc = getMongoCollection().find( us, User.class ).first();
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", userId );
 			throw new UserNotFoundException();
 		} else
-			return User.class.cast( doc );
+			return doc;
 	}
 	
 	public static User findByEmail( final String email ) throws UserNotFoundException {
 		// there is out RuntimeException
 		try {
-			final Document doc = getMongoCollection().find( getEmailUserFind( email ) ).first();
+			final User doc = getMongoCollection().find( getEmailUserFind( email ), User.class ).first();
 			if ( doc != null )
-				return User.class.cast( doc );
+				return doc;
 			else {
 				LOGGER.warn( "Could not find user by email {}", email );
 				throw new UserNotFoundException();
@@ -515,13 +520,14 @@ public class User extends CSMAbstractDocument< Document > implements Subject {
 	}
 	
 	public static User remove( final String id ) throws UserNotFoundException {
-		final Document doc = getMongoCollection().findOneAndDelete( new Document( DB_FIELD_ID, id ) );
+		final Bson usId = Filters.eq( DB_FIELD_ID, id );
+		final User doc = getMongoCollection().findOneAndDelete( usId );
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", id );
 			throw new UserNotFoundException();
 		} else
 			LOGGER.debug( "User {} was removed.", id );
-		return User.class.cast( doc );
+		return doc;
 	}
 	
 	public boolean isAdmin() {
@@ -532,13 +538,18 @@ public class User extends CSMAbstractDocument< Document > implements Subject {
 		return ( ( BsonArray )get( DB_FIELD_ROLES ) ).contains( new BsonString( UserRole.OPER_ROLE_NAME ) );
 	}
 	
-	public static MongoCollection< Document > getMongoCollection() {
-		final MongoCollection< Document > collection = getDatabase().getCollection( COLLECTION_NAME_USERS, Document.class );
+	@Override
+	public < TDocument >BsonDocument toBsonDocument( final Class< TDocument > documentClass, final CodecRegistry codecRegistry ) {
+		return new BsonDocumentWrapper< User >( this, codecRegistry.get( User.class ) );
+	}
+	
+	public static MongoCollection< User > getMongoCollection() {
+		final MongoCollection< User > collection = getDatabase().getCollection( COLLECTION_NAME_USERS, User.class );
 		return collection;
 	}
 	
 	@Override
-	protected MongoCollection< Document > getCollection() {
+	protected MongoCollection< User > getCollection() {
 		return getMongoCollection();
 	}
 }
