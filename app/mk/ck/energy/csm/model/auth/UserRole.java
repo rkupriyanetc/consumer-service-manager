@@ -1,6 +1,9 @@
 package mk.ck.energy.csm.model.auth;
 
+import mk.ck.energy.csm.model.mongodb.SimpleFilter;
+
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import be.objectify.deadbolt.core.models.Role;
 
@@ -55,6 +58,10 @@ public class UserRole implements Role {
 			default :
 				throw new IllegalArgumentException( "Role name is null" );
 		}
+	}
+	
+	Bson getFilters() {
+		return new SimpleFilter< String >( DB_FIELD_ROLE_NAME, name );
 	}
 	
 	@Override

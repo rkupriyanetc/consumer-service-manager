@@ -1,5 +1,6 @@
 package mk.ck.energy.csm.model.auth;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -179,29 +180,33 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	public List< ? extends Role > getRoles() {
 		if ( roles == null || roles.isEmpty() ) {
 			final List< Document > list = ( List< Document > )get( DB_FIELD_ROLES );
-			for ( final Document key : list ) {
-				final Role lt = UserRole.getInstance( key );
-				roles.add( lt );
-			}
+			if ( list != null )
+				for ( final Document key : list ) {
+					final Role lt = UserRole.getInstance( key );
+					roles.add( lt );
+				}
 		}
 		return roles;
 	}
 	
 	public boolean addRole( final Role role ) {
 		final boolean bool = roles.add( role );
+		final List< Bson > rs = new ArrayList< Bson >( roles.size() );
+		for ( final Role r : roles )
+			rs.add( ( ( UserRole )r ).getFilters() );
 		// Зберегти лише roles
-		if ( bool )
-			save();
+		put( DB_FIELD_ROLES, rs );
 		return bool;
 	}
 	
 	public List< LinkedAccount > getLinkedAccounts() {
 		if ( linkeds == null || linkeds.isEmpty() ) {
 			final List< Document > list = ( List< Document > )get( DB_FIELD_LINKED_ACCOUNTS );
-			for ( final Document key : list ) {
-				final LinkedAccount la = LinkedAccount.getInstance( key );
-				linkeds.add( la );
-			}
+			if ( list != null )
+				for ( final Document key : list ) {
+					final LinkedAccount la = LinkedAccount.getInstance( key );
+					linkeds.add( la );
+				}
 		}
 		return linkeds;
 	}
@@ -210,10 +215,11 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	public List< ? extends Permission > getPermissions() {
 		if ( permissions == null || permissions.isEmpty() ) {
 			final List< Document > list = ( List< Document > )get( DB_FIELD_PERMISSIONS );
-			for ( final Document key : list ) {
-				final Permission lt = UserPermission.getInstance( key );
-				permissions.add( lt );
-			}
+			if ( list != null )
+				for ( final Document key : list ) {
+					final Permission lt = UserPermission.getInstance( key );
+					permissions.add( lt );
+				}
 		}
 		return permissions;
 	}
