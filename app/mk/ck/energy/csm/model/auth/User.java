@@ -384,6 +384,10 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		return user.save();
 	}
 	
+	public static User create( final String id ) {
+		return new User( id );
+	}
+	
 	public static void merge( final AuthUser oldAuthUser, final AuthUser newAuthUser ) {
 		try {
 			final User oldUser = User.findByAuthUserIdentity( oldAuthUser );

@@ -6,10 +6,17 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import mk.ck.energy.csm.model.codecs.UserCodec;
+
+import org.bson.Document;
+import org.bson.codecs.Codec;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
@@ -82,8 +89,15 @@ public class Database {
 				if ( credentials != null ) {
 					final MongoCredential credential = MongoCredential.createCredential( credentials.getString( "user" ), dbName,
 							credentials.getString( "password" ).toCharArray() );
-					if ( mongoClient == null )
-						mongoClient = new MongoClient( new ServerAddress( config.getString( "host" ) ), Arrays.asList( credential ) );
+					if ( mongoClient == null ) {
+						final Codec< Document > defaultDocumentCodec = MongoClient.getDefaultCodecRegistry().get( Document.class );
+						LOGGER.trace( "DocumentCodec default is {}", defaultDocumentCodec );
+						final UserCodec userCodec = new UserCodec( defaultDocumentCodec );
+						final CodecRegistry codecRegistry = CodecRegistries.fromRegistries( MongoClient.getDefaultCodecRegistry(),
+								CodecRegistries.fromCodecs( userCodec ) );
+						final MongoClientOptions options = MongoClientOptions.builder().codecRegistry( codecRegistry ).build();
+						mongoClient = new MongoClient( new ServerAddress( config.getString( "host" ) ), Arrays.asList( credential ), options );
+					}
 					database = mongoClient.getDatabase( dbName );
 				}
 			}

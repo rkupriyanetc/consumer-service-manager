@@ -82,7 +82,7 @@ public class UserCodec implements CollectibleCodec< User > {
 	@Override
 	public User decode( final BsonReader reader, final DecoderContext decoderContext ) {
 		final Document document = documentCodec.decode( reader, decoderContext );
-		final User user = new User( document.getString( DB_FIELD_ID ) );
+		final User user = User.create( document.getString( DB_FIELD_ID ) );
 		user.setEmail( document.getString( DB_FIELD_EMAIL ) );
 		user.setActive( document.getBoolean( DB_FIELD_ACTIVE ) );
 		return user;
