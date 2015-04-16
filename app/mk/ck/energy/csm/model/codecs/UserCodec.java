@@ -3,8 +3,8 @@ package mk.ck.energy.csm.model.codecs;
 import java.util.List;
 import java.util.UUID;
 
-import mk.ck.energy.csm.model.auth.LinkedAccount;
 import mk.ck.energy.csm.model.auth.User;
+import mk.ck.energy.csm.model.auth.UserRole;
 
 import org.bson.BsonReader;
 import org.bson.BsonString;
@@ -16,8 +16,6 @@ import org.bson.codecs.CollectibleCodec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.DocumentCodec;
 import org.bson.codecs.EncoderContext;
-
-import be.objectify.deadbolt.core.models.Role;
 
 public class UserCodec implements CollectibleCodec< User > {
 	
@@ -55,23 +53,25 @@ public class UserCodec implements CollectibleCodec< User > {
 	
 	@Override
 	public void encode( final BsonWriter writer, final User value, final EncoderContext encoderContext ) {
-		final Document document = new Document();
-		final String id = value.getId();
-		final String email = value.getEmail();
-		final List< ? extends Role > roles = value.getRoles();
-		final List< LinkedAccount > linkeds = value.getLinkedAccounts();
-		final boolean active = value.isActive();
-		if ( null != id )
-			document.put( DB_FIELD_ID, id );
-		if ( null != email )
-			document.put( DB_FIELD_EMAIL, email );
-		if ( null != roles )
-			document.put( DB_FIELD_ROLES, roles );
-		if ( null != linkeds )
-			document.put( DB_FIELD_LINKED_ACCOUNTS, linkeds );
-		if ( active )
-			document.put( DB_FIELD_ACTIVE, active );
-		documentCodec.encode( writer, document, encoderContext );
+		/*
+		 * final Document document = new Document();
+		 * final String id = value.getId();
+		 * final String email = value.getEmail();
+		 * final List< ? extends Role > roles = value.getRoles();
+		 * final List< LinkedAccount > linkeds = value.getLinkedAccounts();
+		 * final boolean active = value.isActive();
+		 * if ( null != id )
+		 * document.put( DB_FIELD_ID, id );
+		 * if ( null != email )
+		 * document.put( DB_FIELD_EMAIL, email );
+		 * if ( null != roles )
+		 * document.put( DB_FIELD_ROLES, roles );
+		 * if ( null != linkeds )
+		 * document.put( DB_FIELD_LINKED_ACCOUNTS, linkeds );
+		 * if ( active )
+		 * document.put( DB_FIELD_ACTIVE, active );
+		 */
+		documentCodec.encode( writer, value, encoderContext );
 	}
 	
 	@Override
@@ -85,6 +85,16 @@ public class UserCodec implements CollectibleCodec< User > {
 		final User user = User.create( document.getString( DB_FIELD_ID ) );
 		user.setEmail( document.getString( DB_FIELD_EMAIL ) );
 		user.setActive( document.getBoolean( DB_FIELD_ACTIVE ) );
+		user.setName( document.getString( DB_FIELD_NAME ) );
+		user.setFirstName( document.getString( DB_FIELD_FIRST_NAME ) );
+		user.setLastName( document.getString( DB_FIELD_LAST_NAME ) );
+		user.setLastLogin( document.getLong( DB_FIELD_LAST_LOGIN ) );
+		user.setEmailValidated( document.getBoolean( DB_FIELD_EMAIL_VALIDATED ) );
+		final List< Document > o = ( List< Document > )document.get( DB_FIELD_ROLES );
+		for ( final Document doc : o ) {
+			final String nameRole = doc.getString( "name" );
+			user.addRole( UserRole.getInstance( nameRole ) );
+		}
 		return user;
 	}
 	

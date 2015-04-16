@@ -91,7 +91,6 @@ public class Database {
 							credentials.getString( "password" ).toCharArray() );
 					if ( mongoClient == null ) {
 						final Codec< Document > defaultDocumentCodec = MongoClient.getDefaultCodecRegistry().get( Document.class );
-						LOGGER.trace( "DocumentCodec default is {}", defaultDocumentCodec );
 						final UserCodec userCodec = new UserCodec( defaultDocumentCodec );
 						final CodecRegistry codecRegistry = CodecRegistries.fromRegistries( MongoClient.getDefaultCodecRegistry(),
 								CodecRegistries.fromCodecs( userCodec ) );

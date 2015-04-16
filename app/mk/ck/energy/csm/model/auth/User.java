@@ -1,10 +1,8 @@
 package mk.ck.energy.csm.model.auth;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -15,7 +13,7 @@ import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWrapper;
 import org.bson.BsonString;
-import org.bson.BsonValue;
+import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 
@@ -74,6 +72,13 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	private List< Permission >		permissions;
 	
+	protected User( final String id ) {
+		setId( id );
+		roles = new LinkedList<>();
+		linkeds = new LinkedList<>();
+		permissions = new LinkedList<>();
+	}
+	
 	private User( final AuthUser authUser ) {
 		setLastLogin( System.currentTimeMillis() );
 		setActive( true );
@@ -109,29 +114,6 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		}
 	}
 	
-	protected User( final String id ) {
-		setId( id );
-	}
-	
-	/**
-	 * private User( final Document doc ) {
-	 * setId( ( String )doc.get( DB_FIELD_ID ) );
-	 * setEmail( ( String )doc.get( DB_FIELD_EMAIL ) );
-	 * setName( ( String )doc.get( DB_FIELD_NAME ) );
-	 * setFirstName( ( String )doc.get( DB_FIELD_FIRST_NAME ) );
-	 * setLastName( ( String )doc.get( DB_FIELD_LAST_NAME ) );
-	 * setLastLogin( ( Long )doc.get( DB_FIELD_LAST_LOGIN ) );
-	 * setActive( ( Boolean )doc.get( DB_FIELD_ACTIVE ) );
-	 * setEmailValidated( ( Boolean )doc.get( DB_FIELD_EMAIL_VALIDATED ) );
-	 * final BsonArray dbRoles = ( BsonArray )doc.get( DB_FIELD_ROLES );
-	 * for ( final BsonValue elm : dbRoles )
-	 * roles.add( UserRole.getInstance( elm.toString() ) );
-	 * final BsonArray dbAccounts = ( BsonArray )doc.get( DB_FIELD_LINKED_ACCOUNTS
-	 * );
-	 * for ( final BsonValue elm : dbAccounts )
-	 * linkedAccounts.add( LinkedAccount.getInstance( ( LinkedAccount )elm ) );
-	 * }
-	 */
 	@Override
 	public String getIdentifier() {
 		return getId();
@@ -196,28 +178,29 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	@Override
 	public List< ? extends Role > getRoles() {
 		if ( roles == null || roles.isEmpty() ) {
-			final BsonArray list = ( BsonArray )get( DB_FIELD_ROLES );
-			roles = new ArrayList<>( list.size() );
-			for ( final BsonValue key : list.getValues() ) {
-				final Role lt = UserRole.getInstance( ( ( BsonString )key ).getValue() );
+			final List< Document > list = ( List< Document > )get( DB_FIELD_ROLES );
+			for ( final Document key : list ) {
+				final Role lt = UserRole.getInstance( key );
 				roles.add( lt );
 			}
 		}
 		return roles;
 	}
 	
+	public boolean addRole( final Role role ) {
+		final boolean bool = roles.add( role );
+		// Зберегти лише roles
+		if ( bool )
+			save();
+		return bool;
+	}
+	
 	public List< LinkedAccount > getLinkedAccounts() {
 		if ( linkeds == null || linkeds.isEmpty() ) {
-			final BsonArray list = ( BsonArray )get( DB_FIELD_LINKED_ACCOUNTS );
-			linkeds = new ArrayList<>( list.size() );
-			for ( final BsonValue key : list.getValues() ) {
-				final BsonDocument bd = key.asDocument();
-				for ( final Map.Entry< String, BsonValue > entry : bd.entrySet() ) {
-					final String k = entry.getKey();
-					final String v = entry.getValue().asString().getValue();
-					final LinkedAccount la = LinkedAccount.getInstance( k, v );
-					linkeds.add( la );
-				}
+			final List< Document > list = ( List< Document > )get( DB_FIELD_LINKED_ACCOUNTS );
+			for ( final Document key : list ) {
+				final LinkedAccount la = LinkedAccount.getInstance( key );
+				linkeds.add( la );
 			}
 		}
 		return linkeds;
@@ -226,14 +209,34 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	@Override
 	public List< ? extends Permission > getPermissions() {
 		if ( permissions == null || permissions.isEmpty() ) {
-			final BsonArray list = ( BsonArray )get( DB_FIELD_PERMISSIONS );
-			permissions = new ArrayList<>( list.size() );
-			for ( final BsonValue key : list.getValues() ) {
-				final Permission lt = UserPermission.getInstance( ( ( BsonString )key ).getValue() );
+			final List< Document > list = ( List< Document > )get( DB_FIELD_PERMISSIONS );
+			for ( final Document key : list ) {
+				final Permission lt = UserPermission.getInstance( key );
 				permissions.add( lt );
 			}
 		}
 		return permissions;
+	}
+	
+	public static void addLinkedAccount( final AuthUser oldUser, final AuthUser newUser ) {
+		try {
+			final User u = User.findByAuthUserIdentity( oldUser );
+			u.getLinkedAccounts().add( LinkedAccount.getInstance( newUser ) );
+			// Зберегти лише u.linkedAccounts
+			u.save();
+		}
+		catch ( final UserNotFoundException e ) {
+			LOGGER.warn( "Cannot link {} to {}", newUser, oldUser );
+		}
+	}
+	
+	public static User create( final AuthUser authUser ) {
+		final User user = new User( authUser );
+		return user.save();
+	}
+	
+	public static User create( final String id ) {
+		return new User( id );
 	}
 	
 	public static boolean existsByAuthUserIdentity( final AuthUserIdentity identity ) {
@@ -337,33 +340,6 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		}
 	}
 	
-	/**
-	 * private Document getDocument() {
-	 * final BasicDBList dbRoles = new BasicDBList();
-	 * for ( final UserRole role : roles )
-	 * dbRoles.add( role.getDBObject() );
-	 * final BasicDBList dbAccounts = new BasicDBList();
-	 * for ( final LinkedAccount acc : linkedAccounts )
-	 * dbAccounts.add( acc.getDBObject() );
-	 * final DBObject doc = new BasicDBObject( DB_FIELD_ID, getOrCreateId() );
-	 * if ( email != null )
-	 * doc.put( DB_FIELD_EMAIL, email );
-	 * if ( firstName != null )
-	 * doc.put( DB_FIELD_FIRST_NAME, firstName );
-	 * if ( name != null )
-	 * doc.put( DB_FIELD_NAME, name );
-	 * if ( lastName != null )
-	 * doc.put( DB_FIELD_LAST_NAME, lastName );
-	 * doc.put( DB_FIELD_ACTIVE, active );
-	 * doc.put( DB_FIELD_EMAIL_VALIDATED, emailValidated );
-	 * if ( !dbRoles.isEmpty() )
-	 * doc.put( DB_FIELD_ROLES, dbRoles );
-	 * if ( !dbAccounts.isEmpty() )
-	 * doc.put( DB_FIELD_LINKED_ACCOUNTS, dbAccounts );
-	 * doc.put( DB_FIELD_LAST_LOGIN, lastLogin );
-	 * return doc;
-	 * }
-	 */
 	public void merge( final User otherUser ) {
 		for ( final LinkedAccount acc : otherUser.getLinkedAccounts() )
 			this.getLinkedAccounts().add( LinkedAccount.getInstance( acc ) );
@@ -377,15 +353,6 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		// Зберегти лише linkedAccounts, Email, Name. А також otherUser.Active
 		save();
 		otherUser.save();
-	}
-	
-	public static User create( final AuthUser authUser ) {
-		final User user = new User( authUser );
-		return user.save();
-	}
-	
-	public static User create( final String id ) {
-		return new User( id );
 	}
 	
 	public static void merge( final AuthUser oldAuthUser, final AuthUser newAuthUser ) {
@@ -404,24 +371,6 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		for ( final LinkedAccount acc : getLinkedAccounts() )
 			providerKeys.add( acc.getProvider() );
 		return providerKeys;
-	}
-	
-	public static void addLinkedAccount( final AuthUser oldUser, final AuthUser newUser ) {
-		try {
-			final User u = User.findByAuthUserIdentity( oldUser );
-			u.getLinkedAccounts().add( LinkedAccount.getInstance( newUser ) );
-			// Зберегти лише u.linkedAccounts
-			u.save();
-		}
-		catch ( final UserNotFoundException e ) {
-			LOGGER.warn( "Cannot link {} to {}", newUser, oldUser );
-		}
-	}
-	
-	public void addRole( final Role role ) {
-		( ( BsonArray )get( DB_FIELD_ROLES ) ).add( new BsonString( role.getName() ) );
-		// Зберегти лише roles
-		save();
 	}
 	
 	public void updateLastLoginDate() {

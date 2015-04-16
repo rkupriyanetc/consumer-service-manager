@@ -32,24 +32,24 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 		put( DB_FIELD_ID, id );
 	}
 	
-	protected String getOrCreateId() {
-		String id = getId();
-		if ( id == null ) {
-			id = UUID.randomUUID().toString().toLowerCase();
-			setId( id );
-		}
-		return id;
+	public String createId() {
+		return UUID.randomUUID().toString().toLowerCase();
 	}
 	
 	public I save() {
-		getOrCreateId();
+		String id = null;
 		try {
+			id = getId();
+			if ( id == null ) {
+				id = createId();
+				setId( id );
+			}
 			getCollection().insertOne( ( I )this );
 		}
 		catch ( final MongoWriteException mwe ) {}
 		catch ( final MongoWriteConcernException mwce ) {}
 		catch ( final MongoException me ) {}
-		LOGGER.trace( "Saved class {}. ID is {}", getClass(), getId() );
+		LOGGER.trace( "Saved class {}. ID is {}", getClass(), id );
 		return ( I )this;
 	}
 	

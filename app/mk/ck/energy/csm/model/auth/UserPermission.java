@@ -1,5 +1,6 @@
 package mk.ck.energy.csm.model.auth;
 
+import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import be.objectify.deadbolt.core.models.Permission;
@@ -22,6 +23,10 @@ public class UserPermission implements Permission {
 	
 	public static UserPermission getInstance( final String value ) {
 		return new UserPermission( value );
+	}
+	
+	public static UserPermission getInstance( final Document document ) {
+		return new UserPermission( document.getString( DB_FIELD_VALUE ) );
 	}
 	
 	@Override

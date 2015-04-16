@@ -2,6 +2,7 @@ package mk.ck.energy.csm.model.auth;
 
 import mk.ck.energy.csm.model.mongodb.SimpleFilter;
 
+import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.feth.play.module.pa.user.AuthUserIdentity;
@@ -35,6 +36,10 @@ public class LinkedAccount {
 	
 	public static LinkedAccount getInstance( final LinkedAccount linkedAccount ) {
 		return new LinkedAccount( linkedAccount.provider, linkedAccount.userId );
+	}
+	
+	public static LinkedAccount getInstance( final Document linkedAccount ) {
+		return new LinkedAccount( linkedAccount.getString( DB_FIELD_PROVIDER ), linkedAccount.getString( DB_FIELD_USER_ID ) );
 	}
 	
 	public String getProvider() {

@@ -1,5 +1,7 @@
 package mk.ck.energy.csm.model.auth;
 
+import org.bson.Document;
+
 import be.objectify.deadbolt.core.models.Role;
 
 /**
@@ -7,21 +9,23 @@ import be.objectify.deadbolt.core.models.Role;
  */
 public class UserRole implements Role {
 	
-	public static final String	GUEST_ROLE_NAME	= "GUEST";
+	public static final String	GUEST_ROLE_NAME			= "GUEST";
 	
-	public static final String	USER_ROLE_NAME	= "USER";
+	public static final String	USER_ROLE_NAME			= "USER";
 	
-	public static final String	OPER_ROLE_NAME	= "OPER";
+	public static final String	OPER_ROLE_NAME			= "OPER";
 	
-	public static final String	ADMIN_ROLE_NAME	= "ADMIN";
+	public static final String	ADMIN_ROLE_NAME			= "ADMIN";
 	
-	public static final Role		GUEST						= new UserRole( GUEST_ROLE_NAME );
+	public static final Role		GUEST								= new UserRole( GUEST_ROLE_NAME );
 	
-	public static final Role		USER						= new UserRole( USER_ROLE_NAME );
+	public static final Role		USER								= new UserRole( USER_ROLE_NAME );
 	
-	public static final Role		OPER						= new UserRole( OPER_ROLE_NAME );
+	public static final Role		OPER								= new UserRole( OPER_ROLE_NAME );
 	
-	public static final Role		ADMIN						= new UserRole( ADMIN_ROLE_NAME );
+	public static final Role		ADMIN								= new UserRole( ADMIN_ROLE_NAME );
+	
+	private static final String	DB_FIELD_ROLE_NAME	= "name";
 	
 	private final String				name;
 	
@@ -32,6 +36,10 @@ public class UserRole implements Role {
 	@Override
 	public String getName() {
 		return name;
+	}
+	
+	public static Role getInstance( final Document role ) {
+		return getInstance( role.getString( DB_FIELD_ROLE_NAME ) );
 	}
 	
 	public static Role getInstance( final String roleName ) {
