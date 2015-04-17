@@ -191,9 +191,9 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	public boolean addRole( final Role role ) {
 		final boolean bool = roles.add( role );
-		final List< Bson > rs = new ArrayList< Bson >( roles.size() );
+		final List< Document > rs = new ArrayList< Document >( roles.size() );
 		for ( final Role r : roles )
-			rs.add( ( ( UserRole )r ).getFilters() );
+			rs.add( ( ( UserRole )r ).getDocument() );
 		// Зберегти лише roles
 		put( DB_FIELD_ROLES, rs );
 		return bool;
@@ -257,8 +257,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	private static Bson getAuthUserFind( final AuthUserIdentity identity ) {
 		final Bson active = Filters.eq( DB_FIELD_ACTIVE, true );
-		final Bson linkeds = LinkedAccount.getInstance( identity ).getFilters();
-		final Bson match = Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, linkeds );
+		final Bson match = Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, LinkedAccount.getInstance( identity ).getDocument() );
 		return Filters.and( active, match );
 		// return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and(
 		// DB_FIELD_LINKED_ACCOUNTS ).elemMatch( LinkedAccount.getInstance( identity
