@@ -13,6 +13,8 @@ import com.mongodb.MongoWriteConcernException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 
 public abstract class CSMAbstractDocument< I extends Document > extends Document {
 	
@@ -44,7 +46,7 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 				id = createId();
 				setId( id );
 			}
-			getCollection().insertOne( ( I )this );
+			getCollection().updateOne( Filters.eq( DB_FIELD_ID, getId() ), this, new UpdateOptions().upsert( true ) );
 		}
 		catch ( final MongoWriteException mwe ) {}
 		catch ( final MongoWriteConcernException mwce ) {}

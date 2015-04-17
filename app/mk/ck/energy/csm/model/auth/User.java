@@ -190,11 +190,12 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	/**
-	 * @param listDocument
+	 * @param listRoles
 	 *          is ArrayList<Document> without prior processing
 	 */
-	public void setRoles( final Object listDocument ) {
-		put( DB_FIELD_ROLES, listDocument );
+	public void setRoles( final Object listRoles ) {
+		if ( listRoles != null )
+			put( DB_FIELD_ROLES, listRoles );
 	}
 	
 	public boolean addRole( final Role role ) {
@@ -219,6 +220,15 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		return linkeds;
 	}
 	
+	/**
+	 * @param listLinkedAccounts
+	 *          is ArrayList<Document> without prior processing
+	 */
+	public void setLinkedAccounts( final Object listLinkedAccounts ) {
+		if ( listLinkedAccounts != null )
+			put( DB_FIELD_LINKED_ACCOUNTS, listLinkedAccounts );
+	}
+	
 	@Override
 	public List< ? extends Permission > getPermissions() {
 		if ( permissions == null || permissions.isEmpty() ) {
@@ -230,6 +240,15 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 				}
 		}
 		return permissions;
+	}
+	
+	/**
+	 * @param listPermission
+	 *          is ArrayList<Document> without prior processing
+	 */
+	public void setPermission( final Object listPermission ) {
+		if ( listPermission != null )
+			put( DB_FIELD_PERMISSIONS, listPermission );
 	}
 	
 	public static void addLinkedAccount( final AuthUser oldUser, final AuthUser newUser ) {

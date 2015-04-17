@@ -51,25 +51,27 @@ public class UserCodec implements CollectibleCodec< User > {
 	
 	@Override
 	public void encode( final BsonWriter writer, final User value, final EncoderContext encoderContext ) {
-		/*
-		 * final Document document = new Document();
-		 * final String id = value.getId();
-		 * final String email = value.getEmail();
-		 * final List< ? extends Role > roles = value.getRoles();
-		 * final List< LinkedAccount > linkeds = value.getLinkedAccounts();
-		 * final boolean active = value.isActive();
-		 * if ( null != id )
-		 * document.put( DB_FIELD_ID, id );
-		 * if ( null != email )
-		 * document.put( DB_FIELD_EMAIL, email );
-		 * if ( null != roles )
-		 * document.put( DB_FIELD_ROLES, roles );
-		 * if ( null != linkeds )
-		 * document.put( DB_FIELD_LINKED_ACCOUNTS, linkeds );
-		 * if ( active )
-		 * document.put( DB_FIELD_ACTIVE, active );
-		 */
-		documentCodec.encode( writer, value, encoderContext );
+		final Document document = new Document( DB_FIELD_ID, value.getId() );
+		document.append( DB_FIELD_EMAIL, value.getEmail() );
+		String st = value.getFirstName();
+		if ( st != null )
+			document.append( DB_FIELD_FIRST_NAME, st );
+		st = value.getName();
+		document.append( DB_FIELD_NAME, st );
+		st = value.getLastName();
+		document.append( DB_FIELD_LAST_NAME, st );
+		document.append( DB_FIELD_ACTIVE, value.isActive() );
+		document.append( DB_FIELD_EMAIL_VALIDATED, value.isEmailValidated() );
+		Object o = value.get( DB_FIELD_ROLES );
+		if ( o != null )
+			document.append( DB_FIELD_ROLES, o );
+		o = value.get( DB_FIELD_LINKED_ACCOUNTS );
+		if ( o != null )
+			document.append( DB_FIELD_LINKED_ACCOUNTS, o );
+		o = value.get( DB_FIELD_PERMISSIONS );
+		if ( o != null )
+			document.append( DB_FIELD_PERMISSIONS, o );
+		documentCodec.encode( writer, document, encoderContext );
 	}
 	
 	@Override
@@ -82,13 +84,15 @@ public class UserCodec implements CollectibleCodec< User > {
 		final Document document = documentCodec.decode( reader, decoderContext );
 		final User user = User.create( document.getString( DB_FIELD_ID ) );
 		user.setEmail( document.getString( DB_FIELD_EMAIL ) );
-		user.setActive( document.getBoolean( DB_FIELD_ACTIVE ) );
-		user.setName( document.getString( DB_FIELD_NAME ) );
 		user.setFirstName( document.getString( DB_FIELD_FIRST_NAME ) );
+		user.setName( document.getString( DB_FIELD_NAME ) );
 		user.setLastName( document.getString( DB_FIELD_LAST_NAME ) );
-		user.setLastLogin( document.getLong( DB_FIELD_LAST_LOGIN ) );
+		user.setActive( document.getBoolean( DB_FIELD_ACTIVE ) );
 		user.setEmailValidated( document.getBoolean( DB_FIELD_EMAIL_VALIDATED ) );
 		user.setRoles( document.get( DB_FIELD_ROLES ) );
+		user.setLinkedAccounts( document.get( DB_FIELD_LINKED_ACCOUNTS ) );
+		user.setPermission( document.get( DB_FIELD_PERMISSIONS ) );
+		user.setLastLogin( document.getLong( DB_FIELD_LAST_LOGIN ) );
 		/*
 		 * final List< Document > o = ( List< Document > )document.get(
 		 * DB_FIELD_ROLES );
