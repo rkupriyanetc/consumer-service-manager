@@ -1,10 +1,8 @@
 package mk.ck.energy.csm.model.codecs;
 
-import java.util.List;
 import java.util.UUID;
 
 import mk.ck.energy.csm.model.auth.User;
-import mk.ck.energy.csm.model.auth.UserRole;
 
 import org.bson.BsonReader;
 import org.bson.BsonString;
@@ -90,11 +88,15 @@ public class UserCodec implements CollectibleCodec< User > {
 		user.setLastName( document.getString( DB_FIELD_LAST_NAME ) );
 		user.setLastLogin( document.getLong( DB_FIELD_LAST_LOGIN ) );
 		user.setEmailValidated( document.getBoolean( DB_FIELD_EMAIL_VALIDATED ) );
-		final List< Document > o = ( List< Document > )document.get( DB_FIELD_ROLES );
-		for ( final Document doc : o ) {
-			final String nameRole = doc.getString( "name" );
-			user.addRole( UserRole.getInstance( nameRole ) );
-		}
+		user.setRoles( document.get( DB_FIELD_ROLES ) );
+		/*
+		 * final List< Document > o = ( List< Document > )document.get(
+		 * DB_FIELD_ROLES );
+		 * for ( final Document doc : o ) {
+		 * final String nameRole = doc.getString( "name" );
+		 * user.addRole( UserRole.getInstance( nameRole ) );
+		 * }
+		 */
 		return user;
 	}
 	

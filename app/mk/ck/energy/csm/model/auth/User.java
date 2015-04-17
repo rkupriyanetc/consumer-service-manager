@@ -189,6 +189,14 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		return roles;
 	}
 	
+	/**
+	 * @param listDocument
+	 *          is ArrayList<Document> without prior processing
+	 */
+	public void setRoles( final Object listDocument ) {
+		put( DB_FIELD_ROLES, listDocument );
+	}
+	
 	public boolean addRole( final Role role ) {
 		final boolean bool = roles.add( role );
 		final List< Document > rs = new ArrayList< Document >( roles.size() );
