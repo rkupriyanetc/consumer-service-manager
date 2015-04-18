@@ -1,9 +1,10 @@
 package mk.ck.energy.csm.model.mongodb;
 
+import java.util.UUID;
+
 import mk.ck.energy.csm.model.Database;
 
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,26 +26,26 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 	
 	protected static final String				DB_FIELD_ID				= "_id";
 	
-	private ObjectId										id;
+	private String											id;
 	
-	public ObjectId getId() {
+	public String getId() {
 		return id;
 	}
 	
-	public void setId( final ObjectId id ) {
+	public void setId( final String id ) {
 		this.id = id;
 		put( DB_FIELD_ID, id );
 	}
 	
-	public ObjectId createId() {
-		setId( new ObjectId() );
+	public String createId() {
+		if ( id == null )
+			setId( UUID.randomUUID().toString().toLowerCase() );
 		return id;
 	}
 	
 	public I save() {
 		try {
-			if ( id == null )
-				createId();
+			createId();
 			getCollection().updateOne( Filters.eq( DB_FIELD_ID, id ), new Document( "$set", this ), new UpdateOptions().upsert( true ) );
 		}
 		catch ( final MongoWriteException mwe ) {}

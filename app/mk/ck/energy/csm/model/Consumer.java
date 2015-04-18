@@ -12,7 +12,6 @@ import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 import org.bson.BsonArray;
 import org.bson.BsonString;
 import org.bson.BsonValue;
-import org.bson.types.ObjectId;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -172,7 +171,7 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	}
 	
 	// Тут тра переробити
-	public void setUserId( final ObjectId userId ) {
+	public void setUserId( final String userId ) {
 		final String id = getUserId();
 		if ( !userId.equals( id ) ) {
 			put( DB_FIELD_USER_ID, userId );

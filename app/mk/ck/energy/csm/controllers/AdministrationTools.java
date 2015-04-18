@@ -433,7 +433,7 @@ public class AdministrationTools extends Controller {
 									try {
 										final List< AddressTop > addr = AddressTop.findLikeName( id );
 										// Тут тра переробити
-										new AddressTop( name, addr.get( 0 ).getId().toHexString() ).save();
+										new AddressTop( name, addr.get( 0 ).getId() ).save();
 									}
 									catch ( final AddressNotFoundException anfe ) {
 										LOGGER.error( "Cannot find addressTop", anfe );

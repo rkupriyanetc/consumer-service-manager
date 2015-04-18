@@ -89,7 +89,7 @@ public class Address {
 		if ( !this.addressLocation.equals( address ) ) {
 			this.addressLocation = address;
 			// Тут тра переробити
-			this.addressLocationId = address.getId().toHexString();
+			this.addressLocationId = address.getId();
 		}
 	}
 	
@@ -117,7 +117,7 @@ public class Address {
 		if ( !this.addressPlace.equals( address ) ) {
 			this.addressPlace = address;
 			// Тут тра переробити
-			this.addressPlaceId = address.getId().toHexString();
+			this.addressPlaceId = address.getId();
 		}
 	}
 	

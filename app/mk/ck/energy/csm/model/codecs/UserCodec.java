@@ -80,7 +80,7 @@ public class UserCodec implements CollectibleCodec< User > {
 	public User decode( final BsonReader reader, final DecoderContext decoderContext ) {
 		final Document document = documentCodec.decode( reader, decoderContext );
 		final User user = User.create();
-		user.setId( document.getObjectId( DB_FIELD_ID ) );
+		user.setId( document.getString( DB_FIELD_ID ) );
 		user.setEmail( document.getString( DB_FIELD_EMAIL ) );
 		user.setFirstName( document.getString( DB_FIELD_FIRST_NAME ) );
 		user.setName( document.getString( DB_FIELD_NAME ) );

@@ -116,7 +116,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	@Override
 	public String getIdentifier() {
-		return getId().toHexString();
+		return getId();
 	}
 	
 	public String getEmail() {
