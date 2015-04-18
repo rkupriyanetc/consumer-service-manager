@@ -23,7 +23,8 @@
             </div>
             
             <div class="col-md-1 col-sm-1">
-              <a href="@mk.ck.energy.csm.controllers.routes.AdministrationTools.removeUser(user.getId())" 
+              <!-- Тут тра переробити -->
+              <a href="@mk.ck.energy.csm.controllers.routes.AdministrationTools.removeUser(user.getIdentifier())" 
               		onclick='if (!confirm(@Messages("page.admin.delUser.question"))) return false;'>
                 <img alt='@Messages("page.admin.delUser.hint")' src='@routes.Assets.at("images/delete.png")'>
               </a>

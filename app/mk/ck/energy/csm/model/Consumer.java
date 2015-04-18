@@ -12,6 +12,7 @@ import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 import org.bson.BsonArray;
 import org.bson.BsonString;
 import org.bson.BsonValue;
+import org.bson.types.ObjectId;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -105,11 +106,13 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	 * this.houseType = new HashSet< HouseType >( 0 );
 	 * }
 	 */
+	// Тут тра переробити
 	private Consumer( final String id ) {
-		setId( id );
+		createId();
 		this.meters = new LinkedList<>();
 	}
 	
+	// Тут тра переробити
 	public static Consumer create( final String id ) {
 		LOGGER.debug( "It creates consumer {}", id );
 		return new Consumer( id );
@@ -168,12 +171,14 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		return getString( DB_FIELD_USER_ID );
 	}
 	
-	public void setUserId( final String userId ) {
+	// Тут тра переробити
+	public void setUserId( final ObjectId userId ) {
 		final String id = getUserId();
 		if ( !userId.equals( id ) ) {
 			put( DB_FIELD_USER_ID, userId );
 			try {
-				user = User.findById( userId );
+				// Тут тра переробити
+				user = User.findById( id );
 			}
 			catch ( final UserNotFoundException unfe ) {
 				LOGGER.error( "It's a complete lie" );

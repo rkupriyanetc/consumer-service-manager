@@ -432,7 +432,8 @@ public class AdministrationTools extends Controller {
 								case "references" :
 									try {
 										final List< AddressTop > addr = AddressTop.findLikeName( id );
-										new AddressTop( name, addr.get( 0 ).getId() ).save();
+										// Тут тра переробити
+										new AddressTop( name, addr.get( 0 ).getId().toHexString() ).save();
 									}
 									catch ( final AddressNotFoundException anfe ) {
 										LOGGER.error( "Cannot find addressTop", anfe );

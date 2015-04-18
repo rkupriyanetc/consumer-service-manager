@@ -223,7 +223,8 @@ public class AccountTools extends Controller {
 		else {
 			final AddrTop u = filledForm.get();
 			final AddressTop at = new AddressTop( u.getName(), u.getRefId() ).save();
-			filledForm.data().put( "id", at.getId() );
+			// Тут тра переробити
+			filledForm.data().put( "id", at.getId().toHexString() );
 			LOGGER.info( "Address top saved {}", at );
 			return ok( addressTop.render(
 					filledForm,
@@ -262,7 +263,8 @@ public class AccountTools extends Controller {
 				final AddressTop at = AddressTop.findById( u.getRefId() );
 				final AddressLocation al = new AddressLocation( at, u.getLocation(), LocationType.valueOf( u.getLocationType() ), act )
 						.save();
-				filledForm.data().put( "id", al.getId() );
+				// Тут тра переробити
+				filledForm.data().put( "id", al.getId().toHexString() );
 				LOGGER.info( "Address location saved {}", al );
 			}
 			catch ( final AddressNotFoundException anfe ) {
@@ -297,7 +299,8 @@ public class AccountTools extends Controller {
 		else {
 			final AddrPlace u = filledForm.get();
 			final AddressPlace at = new AddressPlace( StreetType.valueOf( u.getStreetType() ), u.getStreet() ).save();
-			filledForm.data().put( "id", at.getId() );
+			// Тут тра переробити
+			filledForm.data().put( "id", at.getId().toHexString() );
 			LOGGER.info( "Address place saved {}", at );
 			return ok( addressPlace.render(
 					filledForm,

@@ -312,7 +312,8 @@ public class Account extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< AppendConsumer > filledForm = APPEND_CONSUMER_FORM.bindFromRequest();
 		final AppendConsumer ac = new AppendConsumer();
-		ac.setUserId( User.getLocalUser( session() ).getId() );
+		// Тут тра переробити
+		ac.setUserId( User.getLocalUser( session() ).getIdentifier() );
 		Map< String, String > loc;
 		if ( idAddrTop != null && !idAddrTop.isEmpty() )
 			loc = AddressLocation.getMap( idAddrTop, 1 );

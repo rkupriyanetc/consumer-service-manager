@@ -1,10 +1,9 @@
 package mk.ck.energy.csm.model.mongodb;
 
-import java.util.UUID;
-
 import mk.ck.energy.csm.model.Database;
 
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,27 +25,27 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 	
 	protected static final String				DB_FIELD_ID				= "_id";
 	
-	public String getId() {
-		return getString( DB_FIELD_ID );
+	private ObjectId										id;
+	
+	public ObjectId getId() {
+		return id;
 	}
 	
-	public void setId( final String id ) {
+	public void setId( final ObjectId id ) {
+		this.id = id;
 		put( DB_FIELD_ID, id );
 	}
 	
-	public String createId() {
-		return UUID.randomUUID().toString().toLowerCase();
+	public ObjectId createId() {
+		id = new ObjectId();
+		return id;
 	}
 	
 	public I save() {
-		String id = null;
 		try {
-			id = getId();
-			if ( id == null ) {
-				id = createId();
-				setId( id );
-			}
-			getCollection().updateOne( Filters.eq( DB_FIELD_ID, getId() ), this, new UpdateOptions().upsert( true ) );
+			if ( id == null )
+				createId();
+			getCollection().updateOne( Filters.eq( DB_FIELD_ID, id ), this, new UpdateOptions().upsert( true ) );
 		}
 		catch ( final MongoWriteException mwe ) {}
 		catch ( final MongoWriteConcernException mwce ) {}

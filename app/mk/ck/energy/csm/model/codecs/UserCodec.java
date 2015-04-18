@@ -1,11 +1,8 @@
 package mk.ck.energy.csm.model.codecs;
 
-import java.util.UUID;
-
 import mk.ck.energy.csm.model.auth.User;
 
 import org.bson.BsonReader;
-import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.BsonWriter;
 import org.bson.Document;
@@ -82,7 +79,8 @@ public class UserCodec implements CollectibleCodec< User > {
 	@Override
 	public User decode( final BsonReader reader, final DecoderContext decoderContext ) {
 		final Document document = documentCodec.decode( reader, decoderContext );
-		final User user = User.create( document.getString( DB_FIELD_ID ) );
+		final User user = User.create();
+		user.setId( document.getObjectId( DB_FIELD_ID ) );
 		user.setEmail( document.getString( DB_FIELD_EMAIL ) );
 		user.setFirstName( document.getString( DB_FIELD_FIRST_NAME ) );
 		user.setName( document.getString( DB_FIELD_NAME ) );
@@ -112,7 +110,7 @@ public class UserCodec implements CollectibleCodec< User > {
 	@Override
 	public User generateIdIfAbsentFromDocument( final User document ) {
 		if ( documentHasId( document ) ) {
-			document.setId( UUID.randomUUID().toString().toLowerCase() );
+			document.createId();
 			return document;
 		} else
 			return document;
@@ -122,6 +120,6 @@ public class UserCodec implements CollectibleCodec< User > {
 	public BsonValue getDocumentId( final User document ) {
 		if ( !documentHasId( document ) )
 			throw new IllegalStateException( "The document does not contain an _id" );
-		return new BsonString( document.getId() );
+		return BsonValue.class.cast( document.getId() );
 	}
 }

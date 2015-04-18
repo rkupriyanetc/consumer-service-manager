@@ -59,7 +59,8 @@
               </div>
               
               <div class="col-md-1 col-sm-1">
-                <a href='@mk.ck.energy.csm.controllers.routes.AccountTools.removeTopAddress(item.getId())'
+              <!-- Тут тра переробити -->
+                <a href='@mk.ck.energy.csm.controllers.routes.AccountTools.removeTopAddress(item.getId().toString())'
                    onclick='if (!confirm(@Messages("button.address.remove.question"))) return false;'>
                   <img alt='@Messages("button.address.remove.title")' src='@routes.Assets.at("images/delete.png")'>
                 </a>

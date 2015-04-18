@@ -73,8 +73,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	private List< Permission >		permissions;
 	
-	protected User( final String id ) {
-		setId( id );
+	protected User() {
 		roles = new LinkedList<>();
 		linkeds = new LinkedList<>();
 		permissions = new LinkedList<>();
@@ -117,7 +116,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	@Override
 	public String getIdentifier() {
-		return getId();
+		return getId().toHexString();
 	}
 	
 	public String getEmail() {
@@ -268,8 +267,8 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		return user.save();
 	}
 	
-	public static User create( final String id ) {
-		return new User( id );
+	public static User create() {
+		return new User();
 	}
 	
 	public static boolean existsByAuthUserIdentity( final AuthUserIdentity identity ) {
@@ -417,7 +416,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		if ( currentAuthUser != null )
 			try {
 				final User collector = User.findByAuthUserIdentity( currentAuthUser );
-				return collector.getId();
+				return collector.getIdentifier();
 			}
 			catch ( final UserNotFoundException e ) {
 				LOGGER.warn( "Could not find user by identity {}", currentAuthUser );

@@ -101,7 +101,7 @@ public class TokenAction extends CSMAbstractDocument< TokenAction > {
 	}
 	
 	public static TokenAction create( final TokenType type, final String token, final User targetUser ) {
-		final TokenAction ua = new TokenAction( type, token, targetUser.getId() ).save();
+		final TokenAction ua = new TokenAction( type, token, targetUser.getIdentifier() ).save();
 		return ua;
 	}
 	

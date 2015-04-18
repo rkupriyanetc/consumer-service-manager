@@ -100,7 +100,8 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 		if ( b )
 			return true;
 		try {
-			final List< AddressLocation > al = AddressLocation.findByAddressTop( addr.getId() );
+			// Тут тра переробити
+			final List< AddressLocation > al = AddressLocation.findByAddressTop( addr.getId().toHexString() );
 			return !al.isEmpty();
 		}
 		catch ( final AddressNotFoundException anfe ) {
@@ -124,7 +125,8 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 		while ( cursor.hasNext() ) {
 			final AddressTop o = cursor.next();
 			final String name = o.getName();
-			final String _id = o.getId();
+			// Тут тра переробити
+			final String _id = o.getId().toHexString();
 			references.put( _id, name );
 		}
 		return references;
