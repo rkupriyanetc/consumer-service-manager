@@ -37,7 +37,7 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 	}
 	
 	public ObjectId createId() {
-		id = new ObjectId();
+		setId( new ObjectId() );
 		return id;
 	}
 	
@@ -45,7 +45,7 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 		try {
 			if ( id == null )
 				createId();
-			getCollection().updateOne( Filters.eq( DB_FIELD_ID, id ), this, new UpdateOptions().upsert( true ) );
+			getCollection().updateOne( Filters.eq( DB_FIELD_ID, id ), new Document( "$set", this ), new UpdateOptions().upsert( true ) );
 		}
 		catch ( final MongoWriteException mwe ) {}
 		catch ( final MongoWriteConcernException mwce ) {}

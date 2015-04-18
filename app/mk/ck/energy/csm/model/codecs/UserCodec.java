@@ -91,14 +91,6 @@ public class UserCodec implements CollectibleCodec< User > {
 		user.setLinkedAccounts( document.get( DB_FIELD_LINKED_ACCOUNTS ) );
 		user.setPermission( document.get( DB_FIELD_PERMISSIONS ) );
 		user.setLastLogin( document.getLong( DB_FIELD_LAST_LOGIN ) );
-		/*
-		 * final List< Document > o = ( List< Document > )document.get(
-		 * DB_FIELD_ROLES );
-		 * for ( final Document doc : o ) {
-		 * final String nameRole = doc.getString( "name" );
-		 * user.addRole( UserRole.getInstance( nameRole ) );
-		 * }
-		 */
 		return user;
 	}
 	
