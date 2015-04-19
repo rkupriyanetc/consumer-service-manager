@@ -258,6 +258,7 @@ public class AdministrationTools extends Controller {
 					user.addRole( UserRole.OPER );
 					user.addRole( UserRole.ADMIN );
 				}
+			user.updateRoles();
 			return index( 0 );
 		}
 	}
@@ -433,14 +434,14 @@ public class AdministrationTools extends Controller {
 									try {
 										final List< AddressTop > addr = AddressTop.findLikeName( id );
 										// Тут тра переробити
-										new AddressTop( name, addr.get( 0 ).getId() ).save();
+										new AddressTop( name, addr.get( 0 ).getId() ).insertIntoDB();
 									}
 									catch ( final AddressNotFoundException anfe ) {
 										LOGGER.error( "Cannot find addressTop", anfe );
 									}
 									break;
 								default :
-									new AddressTop( name, null ).save();
+									new AddressTop( name, null ).insertIntoDB();
 									break;
 							}
 						}
@@ -549,7 +550,7 @@ public class AdministrationTools extends Controller {
 										break;
 								}
 							}
-							new AddressLocation( addr.get( 0 ), name, lt, at ).save();
+							new AddressLocation( addr.get( 0 ), name, lt, at ).insertIntoDB();
 						}
 					}
 				}
@@ -724,7 +725,7 @@ public class AdministrationTools extends Controller {
 										break;
 								}
 							}
-							new AddressLocation( addr.get( 0 ), name, lt, at ).save();
+							new AddressLocation( addr.get( 0 ), name, lt, at ).insertIntoDB();
 						}
 					}
 				}
@@ -797,7 +798,7 @@ public class AdministrationTools extends Controller {
 							type.appendChild( document.createTextNode( typeStr ) );
 							street.appendChild( type );
 						} else
-							new AddressPlace( st, nameStr ).save();
+							new AddressPlace( st, nameStr ).insertIntoDB();
 					}
 					final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 					transformerFactory.setAttribute( "indent-number", 2 );
@@ -891,7 +892,7 @@ public class AdministrationTools extends Controller {
 									st = StreetType.UNCERTAIN;
 									break;
 							}
-							new AddressPlace( st, name );
+							new AddressPlace( st, name ).insertIntoDB();
 						}
 					}
 				}
@@ -1135,7 +1136,7 @@ public class AdministrationTools extends Controller {
 							// Meter ID
 							final String meterName = result.getString( 13 );
 							// Must be only one, because the full name
-							final List< MeterDevice > devices = MeterDevice.findByName( meterName );
+							final List< MeterDevice > devices = MeterDevice.findLikeName( meterName );
 							if ( devices.size() > 1 )
 								undefinedConsumers.add( new UndefinedConsumer( consumer, UndefinedConsumerType.METERS_MANY ) );
 							// Meter place
@@ -1206,7 +1207,7 @@ public class AdministrationTools extends Controller {
 								}
 							}
 							consumer.addMeters( meter );
-							consumer.save();
+							consumer.insertIntoDB();
 							LOGGER.trace( "Consumer {} created. Writed by {} record!", consumer.getId(), ++consumerSize );
 						}
 						// Finish all Consumers

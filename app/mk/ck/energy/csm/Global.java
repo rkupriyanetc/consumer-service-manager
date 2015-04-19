@@ -74,7 +74,5 @@ public class Global extends GlobalSettings {
 		Database.getInstance().getMongoClient().close();
 	}
 	
-	private void initialData() {
-		LOGGER.info( "Instantiated {}", Global.class );
-	}
+	private void initialData() {}
 }

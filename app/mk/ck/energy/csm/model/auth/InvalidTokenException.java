@@ -1,9 +1,11 @@
 package mk.ck.energy.csm.model.auth;
 
+import mk.ck.energy.csm.model.mongodb.MongoDocumentException;
+
 /**
  * @author KYL
  */
-public class InvalidTokenException extends Exception {
+public class InvalidTokenException extends MongoDocumentException {
 	
 	private static final long	serialVersionUID	= 1L;
 	

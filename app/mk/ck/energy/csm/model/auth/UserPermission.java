@@ -21,11 +21,11 @@ public class UserPermission implements Permission {
 		this.value = value;
 	}
 	
-	public static UserPermission getInstance( final String value ) {
+	public static Permission getInstance( final String value ) {
 		return new UserPermission( value );
 	}
 	
-	public static UserPermission getInstance( final Document document ) {
+	public static Permission getInstance( final Document document ) {
 		return new UserPermission( document.getString( DB_FIELD_VALUE ) );
 	}
 	

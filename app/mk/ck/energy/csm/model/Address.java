@@ -164,14 +164,14 @@ public class Address {
 	Document getDocument( final short updateSet ) {
 		final Document doc = new Document();
 		if ( UPDATING_READING_ALL == updateSet
-				|| ( updateSet & UPDATING_READING_ADDRESS_LOCATION ) == UPDATING_READING_ADDRESS_LOCATION ) {
-			addressLocation.save();
+				|| ( updateSet & UPDATING_READING_ADDRESS_LOCATION ) == UPDATING_READING_ADDRESS_LOCATION )
+			// addressLocation.update( Filters.eq( DB_FIELD_ADDRESS_LOCATION_ID,
+			// addressLocation.getId() ) );
 			doc.put( DB_FIELD_ADDRESS_LOCATION_ID, addressLocation.getId() );
-		}
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_ADDRESS_PLACE ) == UPDATING_READING_ADDRESS_PLACE ) {
-			addressPlace.save();
+		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_ADDRESS_PLACE ) == UPDATING_READING_ADDRESS_PLACE )
+			// addressPlace.update( Filters.eq( DB_FIELD_ADDRESS_PLACE_ID,
+			// addressPlace.getId() ) );
 			doc.put( DB_FIELD_ADDRESS_PLACE_ID, addressPlace.getId() );
-		}
 		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_HOUSE ) == UPDATING_READING_HOUSE )
 			if ( house != null && !house.isEmpty() )
 				doc.put( DB_FIELD_ADDRESS_HOUSE, house );

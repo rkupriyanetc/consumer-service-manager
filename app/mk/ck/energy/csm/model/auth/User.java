@@ -1,6 +1,5 @@
 package mk.ck.energy.csm.model.auth;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +34,7 @@ import com.feth.play.module.pa.user.NameIdentity;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * Authenticated user.
@@ -43,35 +43,35 @@ import com.mongodb.client.model.Filters;
  */
 public class User extends CSMAbstractDocument< User > implements Subject {
 	
-	private static final long			serialVersionUID					= 1L;
+	private static final long		serialVersionUID					= 1L;
 	
-	private static final String		COLLECTION_NAME_USERS			= "users";
+	private static final String	COLLECTION_NAME_USERS			= "users";
 	
-	private static final String		DB_FIELD_EMAIL						= "email";
+	private static final String	DB_FIELD_EMAIL						= "email";
 	
-	private static final String		DB_FIELD_NAME							= "name";
+	private static final String	DB_FIELD_NAME							= "name";
 	
-	private static final String		DB_FIELD_FIRST_NAME				= "first_name";
+	private static final String	DB_FIELD_FIRST_NAME				= "first_name";
 	
-	private static final String		DB_FIELD_LAST_NAME				= "last_name";
+	private static final String	DB_FIELD_LAST_NAME				= "last_name";
 	
-	private static final String		DB_FIELD_LAST_LOGIN				= "last_login";
+	private static final String	DB_FIELD_LAST_LOGIN				= "last_login";
 	
-	private static final String		DB_FIELD_ACTIVE						= "active";
+	private static final String	DB_FIELD_ACTIVE						= "active";
 	
-	private static final String		DB_FIELD_EMAIL_VALIDATED	= "validated";
+	private static final String	DB_FIELD_EMAIL_VALIDATED	= "validated";
 	
-	private static final String		DB_FIELD_ROLES						= "roles";
+	private static final String	DB_FIELD_ROLES						= "roles";
 	
-	private static final String		DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
+	private static final String	DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
 	
-	private static final String		DB_FIELD_PERMISSIONS			= "permissions";
+	private static final String	DB_FIELD_PERMISSIONS			= "permissions";
 	
-	private List< Role >					roles;
+	private List< Document >		roles;
 	
-	private List< LinkedAccount >	linkeds;
+	private List< Document >		linkeds;
 	
-	private List< Permission >		permissions;
+	private List< Document >		permissions;
 	
 	protected User() {
 		roles = new LinkedList<>();
@@ -89,7 +89,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 			addRole( UserRole.USER );
 		// user.permissions = new ArrayList<UserPermission>();
 		// user.permissions.add(UserPermission.findByValue("printers.edit"));
-		getLinkedAccounts().add( LinkedAccount.getInstance( authUser ) );
+		linkeds.add( LinkedAccount.getInstance( authUser ).getDocument() );
 		if ( authUser instanceof EmailIdentity ) {
 			final EmailIdentity identity = ( EmailIdentity )authUser;
 			// Remember, even when getting them from FB & Co., emails should be
@@ -177,15 +177,11 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	@Override
 	public List< ? extends Role > getRoles() {
-		if ( roles == null || roles.isEmpty() ) {
-			final List< Document > list = ( List< Document > )get( DB_FIELD_ROLES );
-			if ( list != null )
-				for ( final Document key : list ) {
-					final Role lt = UserRole.getInstance( key );
-					roles.add( lt );
-				}
-		}
-		return roles;
+		final List< Role > rols = new LinkedList<>();
+		if ( roles != null || !roles.isEmpty() )
+			for ( final Document key : roles )
+				rols.add( UserRole.getInstance( key ) );
+		return rols;
 	}
 	
 	/**
@@ -193,30 +189,24 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	 *          is ArrayList<Document> without prior processing
 	 */
 	public void setRoles( final Object listRoles ) {
-		if ( listRoles != null )
+		if ( listRoles != null ) {
+			roles = ( List< Document > )listRoles;
 			put( DB_FIELD_ROLES, listRoles );
+		}
 	}
 	
 	public boolean addRole( final Role role ) {
-		final boolean bool = roles.add( role );
-		final List< Document > rs = new ArrayList< Document >( roles.size() );
-		for ( final Role r : roles )
-			rs.add( ( ( UserRole )r ).getDocument() );
-		// Зберегти лише roles
-		put( DB_FIELD_ROLES, rs );
+		final boolean bool = roles.add( ( ( UserRole )role ).getDocument() );
+		put( DB_FIELD_ROLES, roles );
 		return bool;
 	}
 	
 	public List< LinkedAccount > getLinkedAccounts() {
-		if ( linkeds == null || linkeds.isEmpty() ) {
-			final List< Document > list = ( List< Document > )get( DB_FIELD_LINKED_ACCOUNTS );
-			if ( list != null )
-				for ( final Document key : list ) {
-					final LinkedAccount la = LinkedAccount.getInstance( key );
-					linkeds.add( la );
-				}
-		}
-		return linkeds;
+		final List< LinkedAccount > las = new LinkedList<>();
+		if ( linkeds != null || !linkeds.isEmpty() )
+			for ( final Document key : linkeds )
+				las.add( LinkedAccount.getInstance( key ) );
+		return las;
 	}
 	
 	/**
@@ -224,21 +214,19 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	 *          is ArrayList<Document> without prior processing
 	 */
 	public void setLinkedAccounts( final Object listLinkedAccounts ) {
-		if ( listLinkedAccounts != null )
+		if ( listLinkedAccounts != null ) {
+			linkeds = ( List< Document > )listLinkedAccounts;
 			put( DB_FIELD_LINKED_ACCOUNTS, listLinkedAccounts );
+		}
 	}
 	
 	@Override
 	public List< ? extends Permission > getPermissions() {
-		if ( permissions == null || permissions.isEmpty() ) {
-			final List< Document > list = ( List< Document > )get( DB_FIELD_PERMISSIONS );
-			if ( list != null )
-				for ( final Document key : list ) {
-					final Permission lt = UserPermission.getInstance( key );
-					permissions.add( lt );
-				}
-		}
-		return permissions;
+		final List< Permission > ps = new LinkedList<>();
+		if ( permissions != null || !permissions.isEmpty() )
+			for ( final Document key : permissions )
+				ps.add( UserPermission.getInstance( key ) );
+		return ps;
 	}
 	
 	/**
@@ -246,25 +234,20 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	 *          is ArrayList<Document> without prior processing
 	 */
 	public void setPermission( final Object listPermission ) {
-		if ( listPermission != null )
+		if ( listPermission != null ) {
+			permissions = ( List< Document > )listPermission;
 			put( DB_FIELD_PERMISSIONS, listPermission );
+		}
 	}
 	
-	public static void addLinkedAccount( final AuthUser oldUser, final AuthUser newUser ) {
-		try {
-			final User u = User.findByAuthUserIdentity( oldUser );
-			u.getLinkedAccounts().add( LinkedAccount.getInstance( newUser ) );
-			// Зберегти лише u.linkedAccounts
-			u.save();
-		}
-		catch ( final UserNotFoundException e ) {
-			LOGGER.warn( "Cannot link {} to {}", newUser, oldUser );
-		}
+	public UpdateResult updateRoles() {
+		return update( Filters.eq( "$set", roles ) );
 	}
 	
 	public static User create( final AuthUser authUser ) {
 		final User user = new User( authUser );
-		return user.save();
+		user.insertIntoDB();
+		return user;
 	}
 	
 	public static User create() {
@@ -278,6 +261,18 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		} else {
 			final Bson doc = getAuthUserFind( identity );
 			return getMongoCollection().count( doc ) > 0;
+		}
+	}
+	
+	public static void addLinkedAccount( final AuthUser oldUser, final AuthUser newUser ) {
+		try {
+			final User u = User.findByAuthUserIdentity( oldUser );
+			u.linkeds.add( LinkedAccount.getInstance( newUser ).getDocument() );
+			// Зберегти лише u.linkedAccounts
+			u.update( new Document( DB_FIELD_LINKED_ACCOUNTS, u.linkeds ) );
+		}
+		catch ( final UserNotFoundException e ) {
+			LOGGER.warn( "Cannot link {} to {}", newUser, oldUser );
 		}
 	}
 	
@@ -372,8 +367,8 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public void merge( final User otherUser ) {
-		for ( final LinkedAccount acc : otherUser.getLinkedAccounts() )
-			this.getLinkedAccounts().add( LinkedAccount.getInstance( acc ) );
+		for ( final Document acc : otherUser.linkeds )
+			linkeds.add( acc );
 		// do all other merging stuff here - like resources, etc.
 		if ( getEmail() == null )
 			setEmail( otherUser.getEmail() );
@@ -382,8 +377,9 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		// deactivate the merged user that got added to this one
 		otherUser.setActive( false );
 		// Зберегти лише linkedAccounts, Email, Name. А також otherUser.Active
-		save();
-		otherUser.save();
+		update( new Document( DB_FIELD_LINKED_ACCOUNTS, linkeds ).append( DB_FIELD_EMAIL, getEmail() ).append( DB_FIELD_NAME,
+				getName() ) );
+		otherUser.update( new Document( DB_FIELD_ACTIVE, otherUser.isActive() ) );
 	}
 	
 	public static void merge( final AuthUser oldAuthUser, final AuthUser newAuthUser ) {
@@ -398,8 +394,9 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public Set< String > getProviders() {
-		final Set< String > providerKeys = new HashSet< String >( getLinkedAccounts().size() );
-		for ( final LinkedAccount acc : getLinkedAccounts() )
+		final List< LinkedAccount > lla = getLinkedAccounts();
+		final Set< String > providerKeys = new HashSet<>( lla.size() );
+		for ( final LinkedAccount acc : lla )
 			providerKeys.add( acc.getProvider() );
 		return providerKeys;
 	}
@@ -407,7 +404,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	public void updateLastLoginDate() {
 		setLastLogin( System.currentTimeMillis() );
 		// Зберегти лише LastLogin
-		save();
+		update( new Document( DB_FIELD_LAST_LOGIN, getLastLogin() ) );
 	}
 	
 	public static String getCollectorId() {
@@ -481,7 +478,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		// You might want to wrap this into a transaction
 		setEmailValidated( true );
 		// Зберегти лише EmailValidated
-		save();
+		update( Filters.eq( DB_FIELD_EMAIL_VALIDATED, true ) );
 		TokenAction.deleteByUser( this, TokenType.EMAIL_VERIFICATION );
 	}
 	
@@ -491,10 +488,10 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 			if ( !create )
 				throw new RuntimeException( "Account not enabled for password usage" );
 		} else
-			getLinkedAccounts().remove( existing );
-		getLinkedAccounts().add( LinkedAccount.getInstance( authUser ) );
+			linkeds.remove( existing.getDocument() );
+		linkeds.add( LinkedAccount.getInstance( authUser ).getDocument() );
 		// Зберегти лише LinkedAccount
-		save();
+		update( new Document( DB_FIELD_LINKED_ACCOUNTS, linkeds ) );
 	}
 	
 	public void resetPassword( final UsernamePasswordAuthUser authUser, final boolean create ) {

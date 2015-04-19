@@ -158,7 +158,7 @@ public class MeterDevice {
 		this.interval = interval;
 	}
 	
-	public static MeterDevice findById( final long id ) throws MeterDeviceException {
+	public static MeterDevice findById( final long id ) throws MeterDeviceNotFoundException {
 		if ( id > 0 )
 			try {
 				final DBObject doc = getMetersDevicesCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
@@ -166,20 +166,20 @@ public class MeterDevice {
 				return device;
 			}
 			catch ( final MongoException me ) {
-				throw new MeterDeviceException( "Exception in MeterDevice.findById( id ) of DBCollection", me );
+				throw new MeterDeviceNotFoundException( "Exception in MeterDevice.findById( id ) of DBCollection", me );
 			}
 		else
-			throw new MeterDeviceException( "ID must be greater than zero in MeterDevice.findById( id )" );
+			throw new MeterDeviceNotFoundException( "ID must be greater than zero in MeterDevice.findById( id )" );
 	}
 	
-	public static List< MeterDevice > findByName( final String name ) throws MeterDeviceException {
+	public static List< MeterDevice > findLikeName( final String name ) throws MeterDeviceNotFoundException {
 		if ( !( name == null ) ) {
 			final Pattern pattern = Pattern.compile( name, Pattern.CASE_INSENSITIVE );
 			final List< MeterDevice > devices = new ArrayList< MeterDevice >( 0 );
 			try {
 				final DBCursor cur = getMetersDevicesCollection().find( new BasicDBObject( DB_FIELD_NAME, pattern ) );
 				if ( cur == null )
-					throw new MeterDeviceException( "MeterDevice by " + name + " not found" );
+					throw new MeterDeviceNotFoundException( "MeterDevice by " + name + " not found" );
 				while ( cur.hasNext() ) {
 					final DBObject doc = cur.next();
 					final MeterDevice device = MeterDevice.create( doc );
@@ -188,10 +188,10 @@ public class MeterDevice {
 				return devices;
 			}
 			catch ( final MongoException me ) {
-				throw new MeterDeviceException( "Exception in MeterDevice.findByName( name ) of DBCollection", me );
+				throw new MeterDeviceNotFoundException( "Exception in MeterDevice.findByName( name ) of DBCollection", me );
 			}
 		} else
-			throw new MeterDeviceException( "Name should not be null in MeterDevice.findByName( name )" );
+			throw new MeterDeviceNotFoundException( "Name should not be null in MeterDevice.findByName( name )" );
 	}
 	
 	private long getOrCreateId() {

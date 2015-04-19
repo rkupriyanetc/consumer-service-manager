@@ -9,7 +9,6 @@ import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
 public class AddressTop extends CSMAbstractDocument< AddressTop > {
@@ -151,8 +150,7 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 	}
 	
 	public static MongoCollection< AddressTop > getMongoCollection() {
-		final MongoDatabase db = Database.getInstance().getDatabase();
-		final MongoCollection< AddressTop > collection = db.getCollection( COLLECTION_NAME_TOP_ADDRESS, AddressTop.class );
+		final MongoCollection< AddressTop > collection = getDatabase().getCollection( COLLECTION_NAME_TOP_ADDRESS, AddressTop.class );
 		return collection;
 	}
 	

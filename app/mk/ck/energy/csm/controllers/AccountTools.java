@@ -222,10 +222,11 @@ public class AccountTools extends Controller {
 					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().iterator() ) ) );
 		else {
 			final AddrTop u = filledForm.get();
-			final AddressTop at = new AddressTop( u.getName(), u.getRefId() ).save();
+			final AddressTop at = new AddressTop( u.getName(), u.getRefId() );
+			at.insertIntoDB();
 			// Тут тра переробити
 			filledForm.data().put( "id", at.getId() );
-			LOGGER.info( "Address top saved {}", at );
+			LOGGER.trace( "Address top saved {}", at );
 			return ok( addressTop.render(
 					filledForm,
 					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
@@ -257,18 +258,18 @@ public class AccountTools extends Controller {
 					act.add( AdministrativeCenterType.valueOf( i ) );
 			}
 			catch ( final NumberFormatException nfe ) {
-				LOGGER.error( "Error convertation StreetType of {}", u.getAdministrativeCenterType() );
+				LOGGER.warn( "Error convertation StreetType of {}", u.getAdministrativeCenterType() );
 			}
 			try {
 				final AddressTop at = AddressTop.findById( u.getRefId() );
-				final AddressLocation al = new AddressLocation( at, u.getLocation(), LocationType.valueOf( u.getLocationType() ), act )
-						.save();
+				final AddressLocation al = new AddressLocation( at, u.getLocation(), LocationType.valueOf( u.getLocationType() ), act );
+				al.insertIntoDB();
 				// Тут тра переробити
 				filledForm.data().put( "id", al.getId() );
-				LOGGER.info( "Address location saved {}", al );
+				LOGGER.trace( "Address location saved {}", al );
 			}
 			catch ( final AddressNotFoundException anfe ) {
-				LOGGER.error( "Address Not Found in doTestLocationAddress() method!" );
+				LOGGER.warn( "Address Not Found in doTestLocationAddress() method!" );
 				filledForm.reject( "Address Not Found in doTestLocationAddress() method!" );
 				return badRequest( addressLocation.render( filledForm,
 						scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find().iterator() ) ) );
@@ -298,10 +299,11 @@ public class AccountTools extends Controller {
 					scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find().iterator() ) ) );
 		else {
 			final AddrPlace u = filledForm.get();
-			final AddressPlace at = new AddressPlace( StreetType.valueOf( u.getStreetType() ), u.getStreet() ).save();
+			final AddressPlace ap = new AddressPlace( StreetType.valueOf( u.getStreetType() ), u.getStreet() );
+			ap.insertIntoDB();
 			// Тут тра переробити
-			filledForm.data().put( "id", at.getId() );
-			LOGGER.info( "Address place saved {}", at );
+			filledForm.data().put( "id", ap.getId() );
+			LOGGER.trace( "Address place saved {}", ap );
 			return ok( addressPlace.render(
 					filledForm,
 					scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find()

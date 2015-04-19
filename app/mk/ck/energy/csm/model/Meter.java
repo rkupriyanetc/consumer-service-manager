@@ -3,6 +3,7 @@ package mk.ck.energy.csm.model;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -52,6 +53,8 @@ public class Meter {
 	public static final short		UPDATING_READING_PLUMBS					= 256;
 	
 	private static final Logger	LOGGER													= LoggerFactory.getLogger( Meter.class );
+	
+	private static final String	DB_FIELD_USER_ID								= "user_id";
 	
 	private long								id;
 	
@@ -128,7 +131,7 @@ public class Meter {
 		try {
 			this.meterDevice = MeterDevice.findById( ( ( Long )dbo.get( "meter_device_id" ) ).longValue() );
 		}
-		catch ( final MeterDeviceException mde ) {
+		catch ( final MeterDeviceNotFoundException mde ) {
 			LOGGER.error( "Cannot create Meter because meter device id not found" );
 		}
 		this.number = ( String )dbo.get( "number" );
@@ -315,6 +318,21 @@ public class Meter {
 			LOGGER.debug( "Cannon find ID in MeterDevice.getOrCreateId(). {}", npe );
 		}
 		return id;
+	}
+	
+	public static List< Meter > findByConsumerId( final String consumerId ) throws MeterNotFoundException {
+		if ( consumerId != null && !consumerId.isEmpty() ) {
+			final DBCursor cur = getMetersCollection().find( new BasicDBObject( DB_FIELD_USER_ID, consumerId ) );
+			final List< Meter > userMeters = new LinkedList<>();
+			if ( cur == null )
+				throw new MeterNotFoundException( "The Consumer was found by " + consumerId );
+			while ( cur.hasNext() ) {
+				final Meter o = new Meter( cur.next() );
+				userMeters.add( o );
+			}
+			return userMeters;
+		} else
+			throw new IllegalArgumentException( "UserId should not be empty in Meter.findByUserId( userId )" );
 	}
 	
 	private static DBCollection getMetersCollection() {

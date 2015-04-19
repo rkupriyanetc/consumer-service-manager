@@ -1,6 +1,8 @@
 package mk.ck.energy.csm.model;
 
-public class ImpossibleCreatingException extends Exception {
+import mk.ck.energy.csm.model.mongodb.MongoDocumentException;
+
+public class ImpossibleCreatingException extends MongoDocumentException {
 	
 	private static final long	serialVersionUID	= 1L;
 	

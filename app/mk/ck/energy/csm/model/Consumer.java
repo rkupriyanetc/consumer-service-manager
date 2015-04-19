@@ -83,7 +83,7 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	/**
 	 * All possible meters of consumer
 	 */
-	private final List< Meter >	meters;
+	private List< Meter >				meters;
 	
 	/**
 	 * private Consumer( final String id, final User user, final String fullName,
@@ -107,13 +107,12 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	 */
 	// Тут тра переробити
 	private Consumer( final String id ) {
-		createId();
+		setId( id );
 		this.meters = new LinkedList<>();
 	}
 	
 	// Тут тра переробити
 	public static Consumer create( final String id ) {
-		LOGGER.debug( "It creates consumer {}", id );
 		return new Consumer( id );
 	}
 	
@@ -177,10 +176,11 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 			put( DB_FIELD_USER_ID, userId );
 			try {
 				// Тут тра переробити
-				user = User.findById( id );
+				user = User.findById( userId );
+				update( Filters.eq( DB_FIELD_USER_ID, userId ) );
 			}
 			catch ( final UserNotFoundException unfe ) {
-				LOGGER.error( "It's a complete lie" );
+				LOGGER.warn( "It's a complete lie" );
 			}
 		}
 	}
@@ -198,7 +198,7 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	}
 	
 	public void setAddress( final Address address ) {
-		put( DB_FIELD_ADDRESS, address );
+		put( DB_FIELD_ADDRESS, address.getDocument( UPDATING_READING_ALL ) );
 	}
 	
 	public boolean isActive() {
@@ -207,14 +207,6 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	
 	public void setActive( final boolean active ) {
 		put( DB_FIELD_ACTIVE, active );
-	}
-	
-	public List< Meter > getMeters() {
-		return meters;
-	}
-	
-	public boolean addMeters( final Meter meter ) {
-		return meters.add( meter );
 	}
 	
 	public Documents getDocument() {
@@ -252,8 +244,20 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	}
 	
 	public boolean addHouseType( final HouseType houseType ) {
-		return getMongoCollection().updateOne( Filters.eq( DB_FIELD_ID, getUserId() ),
-				Filters.eq( "$addToSet", Filters.eq( "$each", houseType.name() ) ) ).isModifiedCountAvailable();
+		return update( Filters.eq( "$addToSet", Filters.eq( "$each", houseType.name() ) ) ).isModifiedCountAvailable();
+	}
+	
+	public List< Meter > getMeters() {
+		try {
+			if ( meters.isEmpty() )
+				meters = Meter.findByConsumerId( getId() );
+		}
+		catch ( final MeterNotFoundException mnfe ) {}
+		return meters;
+	}
+	
+	public boolean addMeters( final Meter meter ) {
+		return meters.add( meter );
 	}
 	
 	/**
@@ -321,7 +325,7 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	public void joinConsumerElectricity( final User user ) {
 		setUserId( user.getId() );
 		setActive( true );
-		save();
+		update( Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ), Filters.eq( DB_FIELD_USER_ID, user.getId() ) ) );
 	}
 	
 	public static MongoCollection< Consumer > getMongoCollection() {

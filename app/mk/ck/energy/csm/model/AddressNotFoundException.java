@@ -1,6 +1,8 @@
 package mk.ck.energy.csm.model;
 
-public class AddressNotFoundException extends Exception {
+import mk.ck.energy.csm.model.mongodb.MongoDocumentException;
+
+public class AddressNotFoundException extends MongoDocumentException {
 	
 	private static final long	serialVersionUID	= 1L;
 	
