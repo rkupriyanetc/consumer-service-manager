@@ -56,7 +56,8 @@ public class UserCodec implements CollectibleCodec< User > {
 		st = value.getName();
 		document.append( DB_FIELD_NAME, st );
 		st = value.getLastName();
-		document.append( DB_FIELD_LAST_NAME, st );
+		if ( st != null )
+			document.append( DB_FIELD_LAST_NAME, st );
 		document.append( DB_FIELD_ACTIVE, value.isActive() );
 		document.append( DB_FIELD_EMAIL_VALIDATED, value.isEmailValidated() );
 		Object o = value.get( DB_FIELD_ROLES );
@@ -68,6 +69,7 @@ public class UserCodec implements CollectibleCodec< User > {
 		o = value.get( DB_FIELD_PERMISSIONS );
 		if ( o != null )
 			document.append( DB_FIELD_PERMISSIONS, o );
+		document.append( DB_FIELD_LAST_LOGIN, value.getLastLogin() );
 		documentCodec.encode( writer, document, encoderContext );
 	}
 	

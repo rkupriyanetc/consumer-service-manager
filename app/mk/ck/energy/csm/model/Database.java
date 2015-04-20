@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import mk.ck.energy.csm.model.codecs.TokenActionCodec;
 import mk.ck.energy.csm.model.codecs.UserCodec;
 
 import org.bson.Document;
@@ -92,8 +93,9 @@ public class Database {
 					if ( mongoClient == null ) {
 						final Codec< Document > defaultDocumentCodec = MongoClient.getDefaultCodecRegistry().get( Document.class );
 						final UserCodec userCodec = new UserCodec( defaultDocumentCodec );
+						final TokenActionCodec tokenActionCodec = new TokenActionCodec( defaultDocumentCodec );
 						final CodecRegistry codecRegistry = CodecRegistries.fromRegistries( MongoClient.getDefaultCodecRegistry(),
-								CodecRegistries.fromCodecs( userCodec ) );
+								CodecRegistries.fromCodecs( userCodec, tokenActionCodec ) );
 						final MongoClientOptions options = MongoClientOptions.builder().codecRegistry( codecRegistry ).build();
 						mongoClient = new MongoClient( new ServerAddress( config.getString( "host" ) ), Arrays.asList( credential ), options );
 					}

@@ -266,7 +266,8 @@ public class MyUsernamePasswordAuthProvider
 	@Override
 	protected String generateVerificationRecord( final MyUsernamePasswordAuthUser user ) {
 		try {
-			return generateVerificationRecord( User.findByAuthUserIdentity( user ) );
+			final User u = User.findByAuthUserIdentity( user );
+			return generateVerificationRecord( u );
 		}
 		catch ( final UserNotFoundException e ) {
 			LOGGER.error( "Could not generate verification record for {}", user, e );

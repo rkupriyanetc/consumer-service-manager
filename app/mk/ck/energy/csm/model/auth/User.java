@@ -80,6 +80,9 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	private User( final AuthUser authUser ) {
+		roles = new LinkedList<>();
+		linkeds = new LinkedList<>();
+		permissions = new LinkedList<>();
 		setLastLogin( System.currentTimeMillis() );
 		setActive( true );
 		if ( authUser.getProvider().equals( MyStupidBasicAuthProvider.GUEST_PROVIDER )
@@ -89,7 +92,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 			addRole( UserRole.USER );
 		// user.permissions = new ArrayList<UserPermission>();
 		// user.permissions.add(UserPermission.findByValue("printers.edit"));
-		linkeds.add( LinkedAccount.getInstance( authUser ).getDocument() );
+		addLinkedAccount( LinkedAccount.getInstance( authUser ) );
 		if ( authUser instanceof EmailIdentity ) {
 			final EmailIdentity identity = ( EmailIdentity )authUser;
 			// Remember, even when getting them from FB & Co., emails should be
@@ -128,7 +131,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public boolean isEmailValidated() {
-		return getBoolean( DB_FIELD_EMAIL_VALIDATED );
+		return getBoolean( DB_FIELD_EMAIL_VALIDATED, false );
 	}
 	
 	public void setEmailValidated( final boolean emailValidated ) {
@@ -148,7 +151,8 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public void setFirstName( final String firstName ) {
-		put( DB_FIELD_FIRST_NAME, firstName );
+		if ( firstName != null && !firstName.isEmpty() )
+			put( DB_FIELD_FIRST_NAME, firstName );
 	}
 	
 	public String getLastName() {
@@ -156,7 +160,8 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public void setLastName( final String lastName ) {
-		put( DB_FIELD_LAST_NAME, lastName );
+		if ( lastName != null && !lastName.isEmpty() )
+			put( DB_FIELD_LAST_NAME, lastName );
 	}
 	
 	public long getLastLogin() {
@@ -168,7 +173,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public boolean isActive() {
-		return getBoolean( DB_FIELD_ACTIVE );
+		return getBoolean( DB_FIELD_ACTIVE, false );
 	}
 	
 	public void setActive( final boolean active ) {
@@ -220,6 +225,12 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		}
 	}
 	
+	public boolean addLinkedAccount( final LinkedAccount linkedAccount ) {
+		final boolean bool = linkeds.add( linkedAccount.getDocument() );
+		put( DB_FIELD_LINKED_ACCOUNTS, linkeds );
+		return bool;
+	}
+	
 	@Override
 	public List< ? extends Permission > getPermissions() {
 		final List< Permission > ps = new LinkedList<>();
@@ -267,9 +278,9 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	public static void addLinkedAccount( final AuthUser oldUser, final AuthUser newUser ) {
 		try {
 			final User u = User.findByAuthUserIdentity( oldUser );
-			u.linkeds.add( LinkedAccount.getInstance( newUser ).getDocument() );
+			u.addLinkedAccount( LinkedAccount.getInstance( newUser ) );
 			// Зберегти лише u.linkedAccounts
-			u.update( new Document( DB_FIELD_LINKED_ACCOUNTS, u.linkeds ) );
+			u.update( Filters.eq( DB_FIELD_LINKED_ACCOUNTS, u.linkeds ) );
 		}
 		catch ( final UserNotFoundException e ) {
 			LOGGER.warn( "Cannot link {} to {}", newUser, oldUser );
@@ -277,9 +288,8 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	private static Bson getAuthUserFind( final AuthUserIdentity identity ) {
-		final Bson active = Filters.eq( DB_FIELD_ACTIVE, true );
-		final Bson match = Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, LinkedAccount.getInstance( identity ).getDocument() );
-		return Filters.and( active, match );
+		return Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
+				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, LinkedAccount.getInstance( identity ).getDocument() ) );
 		// return QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and(
 		// DB_FIELD_LINKED_ACCOUNTS ).elemMatch( LinkedAccount.getInstance( identity
 		// ).getDBObject() );
@@ -328,9 +338,8 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public static User findByUsernamePasswordIdentity( final UsernamePasswordAuthUser identity ) throws UserNotFoundException {
-		final Bson doc = getUsernamePasswordAuthUserFind( identity );
-		final User user = getMongoCollection().find( doc, User.class ).first();
-		if ( doc == null ) {
+		final User user = getMongoCollection().find( getUsernamePasswordAuthUserFind( identity ), User.class ).first();
+		if ( user == null ) {
 			LOGGER.warn( "Could not finr user by user and password {}", identity );
 			throw new UserNotFoundException();
 		} else
@@ -338,20 +347,18 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	private static Bson getUsernamePasswordAuthUserFind( final UsernamePasswordAuthUser identity ) {
-		final Bson email = getEmailUserFind( identity.getEmail() );
-		final Bson linkProvider = Filters.eq( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() );
-		final Bson match = Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, linkProvider );
-		return Filters.and( email, match );
+		return Filters.and( getEmailUserFind( identity.getEmail() ),
+				Filters.elemMatch( DB_FIELD_LINKED_ACCOUNTS, Filters.eq( LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) ) );
 		// return getEmailUserFind( identity.getEmail() ).and(
 		// DB_FIELD_LINKED_ACCOUNTS ).elemMatch( new BasicDBObject(
 		// LinkedAccount.DB_FIELD_PROVIDER, identity.getProvider() ) );
 	}
 	
 	public static List< User > findByRole( final Role role ) throws UserNotFoundException {
-		final Bson active = Filters.eq( DB_FIELD_ACTIVE, true );
-		final Bson rol = Filters.eq( DB_FIELD_ROLES, role.getName() );
-		final Bson elemMatch = Filters.elemMatch( DB_FIELD_ROLES, rol );
-		final MongoCursor< User > cursor = getMongoCollection().find( Filters.and( active, elemMatch ), User.class )
+		final MongoCursor< User > cursor = getMongoCollection()
+				.find(
+						Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ),
+								Filters.elemMatch( DB_FIELD_ROLES, Filters.eq( DB_FIELD_ROLES, role.getName() ) ) ), User.class )
 				.sort( Filters.eq( DB_FIELD_ROLES, 1 ) ).iterator();
 		// QueryBuilder.start( DB_FIELD_ACTIVE ).is( true ).and( DB_FIELD_ROLES
 		// ).elemMatch( role.getDBObject() ).get() ).sort( sort );
@@ -367,19 +374,19 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public void merge( final User otherUser ) {
-		for ( final Document acc : otherUser.linkeds )
-			linkeds.add( acc );
+		for ( final LinkedAccount acc : otherUser.getLinkedAccounts() )
+			addLinkedAccount( acc );
 		// do all other merging stuff here - like resources, etc.
 		if ( getEmail() == null )
 			setEmail( otherUser.getEmail() );
-		if ( getName() == null )
+		if ( getName() == null && otherUser.getName() != null )
 			setName( otherUser.getName() );
 		// deactivate the merged user that got added to this one
 		otherUser.setActive( false );
 		// Зберегти лише linkedAccounts, Email, Name. А також otherUser.Active
-		update( new Document( DB_FIELD_LINKED_ACCOUNTS, linkeds ).append( DB_FIELD_EMAIL, getEmail() ).append( DB_FIELD_NAME,
-				getName() ) );
-		otherUser.update( new Document( DB_FIELD_ACTIVE, otherUser.isActive() ) );
+		update( Filters.and( Filters.eq( DB_FIELD_LINKED_ACCOUNTS, linkeds ), Filters.eq( DB_FIELD_EMAIL, getEmail() ),
+				Filters.eq( DB_FIELD_NAME, getName() ) ) );
+		otherUser.update( Filters.eq( DB_FIELD_ACTIVE, otherUser.isActive() ) );
 	}
 	
 	public static void merge( final AuthUser oldAuthUser, final AuthUser newAuthUser ) {
@@ -404,7 +411,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	public void updateLastLoginDate() {
 		setLastLogin( System.currentTimeMillis() );
 		// Зберегти лише LastLogin
-		update( new Document( DB_FIELD_LAST_LOGIN, getLastLogin() ) );
+		update( Filters.eq( DB_FIELD_LAST_LOGIN, getLastLogin() ) );
 	}
 	
 	public static String getCollectorId() {
@@ -413,7 +420,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		if ( currentAuthUser != null )
 			try {
 				final User collector = User.findByAuthUserIdentity( currentAuthUser );
-				return collector.getIdentifier();
+				return collector.getId();
 			}
 			catch ( final UserNotFoundException e ) {
 				LOGGER.warn( "Could not find user by identity {}", currentAuthUser );
@@ -422,8 +429,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public static User findById( final String userId ) throws UserNotFoundException {
-		final Bson us = Filters.eq( DB_FIELD_ID, userId );
-		final User doc = getMongoCollection().find( us, User.class ).first();
+		final User doc = getMongoCollection().find( Filters.eq( DB_FIELD_ID, userId ), User.class ).first();
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", userId );
 			throw new UserNotFoundException();
@@ -432,7 +438,6 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public static User findByEmail( final String email ) throws UserNotFoundException {
-		// there is out RuntimeException
 		try {
 			final User doc = getMongoCollection().find( getEmailUserFind( email ), User.class ).first();
 			if ( doc != null )
@@ -489,9 +494,9 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 				throw new RuntimeException( "Account not enabled for password usage" );
 		} else
 			linkeds.remove( existing.getDocument() );
-		linkeds.add( LinkedAccount.getInstance( authUser ).getDocument() );
+		addLinkedAccount( LinkedAccount.getInstance( authUser ) );
 		// Зберегти лише LinkedAccount
-		update( new Document( DB_FIELD_LINKED_ACCOUNTS, linkeds ) );
+		update( Filters.eq( DB_FIELD_LINKED_ACCOUNTS, linkeds ) );
 	}
 	
 	public void resetPassword( final UsernamePasswordAuthUser authUser, final boolean create ) {
@@ -501,8 +506,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public static User remove( final String id ) throws UserNotFoundException {
-		final Bson usId = Filters.eq( DB_FIELD_ID, id );
-		final User doc = getMongoCollection().findOneAndDelete( usId );
+		final User doc = getMongoCollection().findOneAndDelete( Filters.eq( DB_FIELD_ID, id ) );
 		if ( doc == null ) {
 			LOGGER.warn( "Could not find user by id {}", id );
 			throw new UserNotFoundException();

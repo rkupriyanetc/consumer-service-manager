@@ -3,10 +3,13 @@ package mk.ck.energy.csm.model.auth;
 import mk.ck.energy.csm.model.Database;
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
-import org.bson.Document;
+import org.bson.BsonDocument;
+import org.bson.BsonDocumentWrapper;
+import org.bson.codecs.configuration.CodecRegistry;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 
 /**
  * @author KYL
@@ -32,6 +35,8 @@ public class TokenAction extends CSMAbstractDocument< TokenAction > {
 	static final String					DB_FIELD_DATE_CREATED		= "created";
 	
 	static final String					DB_FIELD_DATE_EXPIRES		= "expires";
+	
+	private TokenAction() {}
 	
 	private TokenAction( final TokenType type, final String token, final String userId ) {
 		setToken( token );
@@ -85,9 +90,20 @@ public class TokenAction extends CSMAbstractDocument< TokenAction > {
 		return getExpires() > System.currentTimeMillis();
 	}
 	
+	public static TokenAction create() {
+		return new TokenAction();
+	}
+	
+	public static TokenAction create( final TokenType type, final String token, final User targetUser ) {
+		final TokenAction ua = new TokenAction( type, token, targetUser.getId() );
+		ua.insertIntoDB();
+		return ua;
+	}
+	
 	public static TokenAction findByToken( final String token, final TokenType type ) throws InvalidTokenException {
 		final TokenAction doc = getMongoCollection().find(
-				new Document( DB_FIELD_TOKEN, token ).append( DB_FIELD_TOKEN_TYPE, type.name() ) ).first();
+				Filters.and( Filters.eq( DB_FIELD_TOKEN, token ), Filters.eq( DB_FIELD_TOKEN_TYPE, type.name() ) ), TokenAction.class )
+				.first();
 		if ( doc == null )
 			throw new InvalidTokenException( type, token );
 		else
@@ -96,14 +112,13 @@ public class TokenAction extends CSMAbstractDocument< TokenAction > {
 	
 	public static void deleteByUser( final User u, final TokenType type ) {
 		final TokenAction removed = getMongoCollection().findOneAndDelete(
-				new Document( DB_FIELD_USER_ID, u.getId() ).append( DB_FIELD_TOKEN_TYPE, type.name() ) );
+				Filters.and( Filters.eq( DB_FIELD_USER_ID, u.getId() ), Filters.eq( DB_FIELD_TOKEN_TYPE, type.name() ) ) );
 		LOGGER.debug( "Removed {}", removed );
 	}
 	
-	public static TokenAction create( final TokenType type, final String token, final User targetUser ) {
-		final TokenAction ua = new TokenAction( type, token, targetUser.getIdentifier() );
-		ua.insertIntoDB();
-		return ua;
+	@Override
+	public < TDocument >BsonDocument toBsonDocument( final Class< TDocument > documentClass, final CodecRegistry codecRegistry ) {
+		return new BsonDocumentWrapper< TokenAction >( this, codecRegistry.get( TokenAction.class ) );
 	}
 	
 	public static MongoCollection< TokenAction > getMongoCollection() {
