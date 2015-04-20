@@ -1,7 +1,6 @@
 package mk.ck.energy.csm;
 
 import mk.ck.energy.csm.controllers.routes;
-import mk.ck.energy.csm.model.Database;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +70,7 @@ public class Global extends GlobalSettings {
 	
 	@Override
 	public void onStop( final Application app ) {
-		Database.getInstance().getMongoClient().close();
+		// Database.getInstance().getMongoClient().close();
 	}
 	
 	private void initialData() {}
