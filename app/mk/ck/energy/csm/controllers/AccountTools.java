@@ -221,6 +221,7 @@ public class AccountTools extends Controller {
 		else {
 			final AddrTop u = filledForm.get();
 			final AddressTop at = AddressTop.create( u.getName(), u.getRefId() );
+			LOGGER.trace( "Address top saved {}", at );
 			at.insertIntoDB();
 			// Тут тра переробити
 			filledForm.data().put( "id", at.getId() );

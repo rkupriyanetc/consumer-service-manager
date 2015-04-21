@@ -34,7 +34,9 @@ public class AddressTopCodec implements CollectibleCodec< AddressTop > {
 	public void encode( final BsonWriter writer, final AddressTop value, final EncoderContext encoderContext ) {
 		final Document document = new Document( DB_FIELD_ID, value.getId() );
 		document.append( DB_FIELD_NAME, value.getName() );
-		document.append( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, value.getTopAddressId() );
+		final String addrTop = value.getTopAddressId();
+		if ( addrTop != null && !addrTop.isEmpty() )
+			document.append( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addrTop );
 		documentCodec.encode( writer, document, encoderContext );
 	}
 	

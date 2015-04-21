@@ -64,13 +64,18 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 	}
 	
 	public void setTopAddressId( final String addressTopId ) {
-		try {
-			this.addressTop = AddressTop.findById( addressTopId );
-			put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addressTopId );
-		}
-		catch ( final AddressNotFoundException anfe ) {
-			LOGGER.warn( "Sorry. Cannot find AddressTop by {}", addressTopId );
-		}
+		if ( addressTopId != null && !addressTopId.isEmpty() ) {
+			final String topId = getTopAddressId();
+			if ( !addressTopId.equals( topId ) )
+				try {
+					this.addressTop = AddressTop.findById( addressTopId );
+					put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addressTopId );
+				}
+				catch ( final AddressNotFoundException anfe ) {
+					LOGGER.warn( "Sorry. Cannot find AddressTop by {}", addressTopId );
+				}
+		} else
+			remove( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
 	}
 	
 	public AddressTop getTopAddress() {
@@ -78,12 +83,13 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 	}
 	
 	public void setTopAddress( final AddressTop addressTop ) {
-		if ( !this.addressTop.equals( addressTop ) ) {
-			this.addressTop = addressTop;
-			put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addressTop.getTopAddressId() );
+		if ( addressTop != null ) {
+			if ( !addressTop.equals( this.addressTop ) ) {
+				this.addressTop = addressTop;
+				put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addressTop.getTopAddressId() );
+			}
 		} else
-			if ( addressTop == null )
-				put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, null );
+			remove( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
 	}
 	
 	public static AddressTop findById( final String id ) throws AddressNotFoundException {
@@ -167,19 +173,25 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder( getName() );
-		try {
-			AddressTop at = AddressTop.findById( getTopAddressId() );
-			while ( at != null ) {
-				sb.append( ", " );
-				sb.append( at.getName() );
-				at = AddressTop.findById( at.getTopAddressId() );
+		final String topAddresId = getTopAddressId();
+		if ( topAddresId != null && !topAddresId.isEmpty() )
+			try {
+				AddressTop at = AddressTop.findById( topAddresId );
+				while ( at != null ) {
+					sb.append( ", " );
+					sb.append( at.getName() );
+					final String atTopAddresId = at.getTopAddressId();
+					if ( atTopAddresId != null && !atTopAddresId.isEmpty() )
+						at = AddressTop.findById( atTopAddresId );
+					else
+						at = null;
+				}
 			}
-			return sb.toString();
-		}
-		catch ( final AddressNotFoundException anfe ) {
-			LOGGER.warn( "AddressTop.toString() Exception: {}", anfe );
-			return sb.toString();
-		}
+			catch ( final AddressNotFoundException anfe ) {
+				LOGGER.warn( "AddressTop.toString() Exception: {}", anfe );
+				return sb.toString();
+			}
+		return sb.toString();
 	}
 	
 	@Override
