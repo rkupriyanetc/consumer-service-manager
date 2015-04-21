@@ -43,35 +43,35 @@ import com.mongodb.client.result.UpdateResult;
  */
 public class User extends CSMAbstractDocument< User > implements Subject {
 	
-	private static final long		serialVersionUID					= 1L;
+	private static final long				serialVersionUID					= 1L;
 	
-	private static final String	COLLECTION_NAME_USERS			= "users";
+	private static final String			COLLECTION_NAME_USERS			= "users";
 	
-	private static final String	DB_FIELD_EMAIL						= "email";
+	private static final String			DB_FIELD_EMAIL						= "email";
 	
-	private static final String	DB_FIELD_NAME							= "name";
+	private static final String			DB_FIELD_NAME							= "name";
 	
-	private static final String	DB_FIELD_FIRST_NAME				= "first_name";
+	private static final String			DB_FIELD_FIRST_NAME				= "first_name";
 	
-	private static final String	DB_FIELD_LAST_NAME				= "last_name";
+	private static final String			DB_FIELD_LAST_NAME				= "last_name";
 	
-	private static final String	DB_FIELD_LAST_LOGIN				= "last_login";
+	private static final String			DB_FIELD_LAST_LOGIN				= "last_login";
 	
-	private static final String	DB_FIELD_ACTIVE						= "active";
+	private static final String			DB_FIELD_ACTIVE						= "active";
 	
-	private static final String	DB_FIELD_EMAIL_VALIDATED	= "validated";
+	private static final String			DB_FIELD_EMAIL_VALIDATED	= "validated";
 	
-	private static final String	DB_FIELD_ROLES						= "roles";
+	private static final String			DB_FIELD_ROLES						= "roles";
 	
-	private static final String	DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
+	private static final String			DB_FIELD_LINKED_ACCOUNTS	= "linkeds";
 	
-	private static final String	DB_FIELD_PERMISSIONS			= "permissions";
+	private static final String			DB_FIELD_PERMISSIONS			= "permissions";
 	
-	private List< Document >		roles;
+	private final List< Document >	roles;
 	
-	private List< Document >		linkeds;
+	private final List< Document >	linkeds;
 	
-	private List< Document >		permissions;
+	private final List< Document >	permissions;
 	
 	protected User() {
 		roles = new LinkedList<>();
@@ -195,7 +195,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	 */
 	public void setRoles( final Object listRoles ) {
 		if ( listRoles != null ) {
-			roles = ( List< Document > )listRoles;
+			roles.addAll( extractListDocuments( listRoles ) );
 			put( DB_FIELD_ROLES, listRoles );
 		}
 	}
@@ -220,7 +220,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	 */
 	public void setLinkedAccounts( final Object listLinkedAccounts ) {
 		if ( listLinkedAccounts != null ) {
-			linkeds = ( List< Document > )listLinkedAccounts;
+			linkeds.addAll( extractListDocuments( listLinkedAccounts ) );
 			put( DB_FIELD_LINKED_ACCOUNTS, listLinkedAccounts );
 		}
 	}
@@ -246,7 +246,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	 */
 	public void setPermission( final Object listPermission ) {
 		if ( listPermission != null ) {
-			permissions = ( List< Document > )listPermission;
+			permissions.addAll( extractListDocuments( listPermission ) );
 			put( DB_FIELD_PERMISSIONS, listPermission );
 		}
 	}

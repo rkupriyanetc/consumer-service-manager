@@ -434,14 +434,14 @@ public class AdministrationTools extends Controller {
 									try {
 										final List< AddressTop > addr = AddressTop.findLikeName( id );
 										// Тут тра переробити
-										new AddressTop( name, addr.get( 0 ).getId() ).insertIntoDB();
+										AddressTop.create( name, addr.get( 0 ).getId() ).insertIntoDB();
 									}
 									catch ( final AddressNotFoundException anfe ) {
 										LOGGER.error( "Cannot find addressTop", anfe );
 									}
 									break;
 								default :
-									new AddressTop( name, null ).insertIntoDB();
+									AddressTop.create( name, null ).insertIntoDB();
 									break;
 							}
 						}
@@ -550,7 +550,7 @@ public class AdministrationTools extends Controller {
 										break;
 								}
 							}
-							new AddressLocation( addr.get( 0 ), name, lt, at ).insertIntoDB();
+							AddressLocation.create( addr.get( 0 ), name, lt, at ).insertIntoDB();
 						}
 					}
 				}
@@ -725,7 +725,7 @@ public class AdministrationTools extends Controller {
 										break;
 								}
 							}
-							new AddressLocation( addr.get( 0 ), name, lt, at ).insertIntoDB();
+							AddressLocation.create( addr.get( 0 ), name, lt, at ).insertIntoDB();
 						}
 					}
 				}
@@ -798,7 +798,7 @@ public class AdministrationTools extends Controller {
 							type.appendChild( document.createTextNode( typeStr ) );
 							street.appendChild( type );
 						} else
-							new AddressPlace( st, nameStr ).insertIntoDB();
+							AddressPlace.create( st, nameStr ).insertIntoDB();
 					}
 					final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 					transformerFactory.setAttribute( "indent-number", 2 );
@@ -892,7 +892,7 @@ public class AdministrationTools extends Controller {
 									st = StreetType.UNCERTAIN;
 									break;
 							}
-							new AddressPlace( st, name ).insertIntoDB();
+							AddressPlace.create( st, name ).insertIntoDB();
 						}
 					}
 				}
@@ -1020,7 +1020,7 @@ public class AdministrationTools extends Controller {
 							if ( document != null )
 								consumer.setDocuments( document );
 							// Address
-							final Address address = new Address();
+							final Address address = Address.create();
 							field = result.getString( 4 );
 							if ( field != null && !field.isEmpty() )
 								address.setHouse( field.trim() );
@@ -1102,7 +1102,7 @@ public class AdministrationTools extends Controller {
 									addrLocations = AddressLocation.findLikeLocationName( nameCity );
 									boolean bool = false;
 									for ( int k = 0; k < addrLocations.size() && !bool; k++ ) {
-										final String al = addrLocations.get( k ).getRefId();
+										final String al = addrLocations.get( k ).getTopAddressId();
 										final boolean isAddrTop = keyReferences.equals( al );
 										bool = al.equals( lt.name() ) && isAddrTop;
 										if ( bool ) {

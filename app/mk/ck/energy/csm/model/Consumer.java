@@ -12,6 +12,7 @@ import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 import org.bson.BsonArray;
 import org.bson.BsonString;
 import org.bson.BsonValue;
+import org.bson.Document;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -194,11 +195,11 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	}
 	
 	public Address getAddress() {
-		return ( Address )get( DB_FIELD_ADDRESS );
+		return Address.create( ( Document )get( DB_FIELD_ADDRESS ) );
 	}
 	
 	public void setAddress( final Address address ) {
-		put( DB_FIELD_ADDRESS, address.getDocument( UPDATING_READING_ALL ) );
+		put( DB_FIELD_ADDRESS, address.getDocument() );
 	}
 	
 	public boolean isActive() {
@@ -260,58 +261,6 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		return meters.add( meter );
 	}
 	
-	/**
-	 * private DBObject getDBObject( final short updateSet ) {
-	 * final DBObject doc = new BasicDBObject();
-	 * short up = 0;
-	 * if ( UPDATING_READING_ALL == updateSet || ( updateSet &
-	 * UPDATING_READING_USER ) == UPDATING_READING_USER )
-	 * if ( user != null )
-	 * doc.put( DB_FIELD_USER_ID, userId );
-	 * if ( UPDATING_READING_ALL == updateSet || ( updateSet &
-	 * UPDATING_READING_FULLNAME ) == UPDATING_READING_FULLNAME )
-	 * doc.put( DB_FIELD_FULLNAME, fullName );
-	 * if ( UPDATING_READING_ALL == updateSet || ( updateSet &
-	 * UPDATING_READING_ACTIVE ) == UPDATING_READING_ACTIVE )
-	 * doc.put( DB_FIELD_ACTIVE, active );
-	 * if ( UPDATING_READING_ALL == updateSet
-	 * || ( updateSet & UPDATING_READING_ADDRESS_LOCATION ) ==
-	 * UPDATING_READING_ADDRESS_LOCATION )
-	 * up += Address.UPDATING_READING_ADDRESS_LOCATION;
-	 * if ( UPDATING_READING_ALL == updateSet || ( updateSet &
-	 * UPDATING_READING_ADDRESS_PLACE ) == UPDATING_READING_ADDRESS_PLACE )
-	 * up += Address.UPDATING_READING_ADDRESS_PLACE;
-	 * if ( UPDATING_READING_ALL == updateSet || ( updateSet &
-	 * UPDATING_READING_ADDRESS_OTHER ) == UPDATING_READING_ADDRESS_OTHER )
-	 * up += Address.UPDATING_READING_HOUSE + Address.UPDATING_READING_APARTMENT +
-	 * Address.UPDATING_READING_POSTAL_CODE;
-	 * if ( up == 31 )
-	 * up = 0;
-	 * if ( address != null ) {
-	 * final DBObject addr = address.getDBObject( up );
-	 * doc.put( DB_FIELD_ADDRESS, addr );
-	 * }
-	 * if ( UPDATING_READING_ALL == updateSet || ( updateSet &
-	 * UPDATING_READING_DOCUMENTS ) == UPDATING_READING_DOCUMENTS )
-	 * if ( document != null ) {
-	 * final DBObject docs = document.getDBObject();
-	 * doc.put( DB_FIELD_DOCUMENT, docs );
-	 * }
-	 * if ( UPDATING_READING_ALL == updateSet || ( updateSet &
-	 * UPDATING_READING_OTHER ) == UPDATING_READING_OTHER ) {
-	 * doc.put( DB_FIELD_CONSUMER_TYPE, consumerType.name() );
-	 * if ( statusType != null )
-	 * doc.put( DB_FIELD_STATUS_TYPE, statusType.name() );
-	 * if ( !houseType.isEmpty() ) {
-	 * final BasicDBList hType = new BasicDBList();
-	 * for ( final HouseType ht : houseType )
-	 * hType.add( ht.name() );
-	 * doc.put( DB_FIELD_HOUSE_TYPE, hType );
-	 * }
-	 * }
-	 * return new BasicDBObject( "$set", doc );
-	 * }
-	 */
 	public static Consumer findById( final String id, final short updateSet ) throws ConsumerException {
 		if ( id != null && !id.isEmpty() ) {
 			final Consumer doc = getMongoCollection().find( Filters.eq( DB_FIELD_ID, id ) ).first();

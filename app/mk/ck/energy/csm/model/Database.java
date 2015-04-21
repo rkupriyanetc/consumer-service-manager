@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import mk.ck.energy.csm.model.codecs.AddressLocationCodec;
+import mk.ck.energy.csm.model.codecs.AddressPlaceCodec;
+import mk.ck.energy.csm.model.codecs.AddressTopCodec;
 import mk.ck.energy.csm.model.codecs.TokenActionCodec;
 import mk.ck.energy.csm.model.codecs.UserCodec;
 
@@ -94,8 +97,12 @@ public class Database {
 						final Codec< Document > defaultDocumentCodec = MongoClient.getDefaultCodecRegistry().get( Document.class );
 						final UserCodec userCodec = new UserCodec( defaultDocumentCodec );
 						final TokenActionCodec tokenActionCodec = new TokenActionCodec( defaultDocumentCodec );
+						final AddressTopCodec addressTopCodec = new AddressTopCodec( defaultDocumentCodec );
+						final AddressLocationCodec addressLocationCodec = new AddressLocationCodec( defaultDocumentCodec );
+						final AddressPlaceCodec addressPlaceCodec = new AddressPlaceCodec( defaultDocumentCodec );
 						final CodecRegistry codecRegistry = CodecRegistries.fromRegistries( MongoClient.getDefaultCodecRegistry(),
-								CodecRegistries.fromCodecs( userCodec, tokenActionCodec ) );
+								CodecRegistries
+										.fromCodecs( userCodec, tokenActionCodec, addressTopCodec, addressLocationCodec, addressPlaceCodec ) );
 						final MongoClientOptions options = MongoClientOptions.builder().codecRegistry( codecRegistry ).build();
 						mongoClient = new MongoClient( new ServerAddress( config.getString( "host" ) ), Arrays.asList( credential ), options );
 					}

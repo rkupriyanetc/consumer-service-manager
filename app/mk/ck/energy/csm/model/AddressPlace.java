@@ -5,7 +5,10 @@ import java.util.Map;
 
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
+import org.bson.BsonDocument;
+import org.bson.BsonDocumentWrapper;
 import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistry;
 
 import play.i18n.Messages;
 
@@ -24,9 +27,17 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 	
 	private static final String	DB_FIELD_STREET_TYPE					= "street_type";
 	
-	public AddressPlace( final StreetType streetType, final String street ) {
-		setStreet( street );
-		setStreetType( streetType );
+	private AddressPlace() {}
+	
+	public static AddressPlace create() {
+		return new AddressPlace();
+	}
+	
+	public static AddressPlace create( final StreetType streetType, final String street ) {
+		final AddressPlace addr = new AddressPlace();
+		addr.setStreet( street );
+		addr.setStreetType( streetType );
+		return addr;
 	}
 	
 	/**
@@ -103,6 +114,11 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 			sb.append( " " );
 		sb.append( getStreet() );
 		return sb.toString();
+	}
+	
+	@Override
+	public < TDocument >BsonDocument toBsonDocument( final Class< TDocument > documentClass, final CodecRegistry codecRegistry ) {
+		return new BsonDocumentWrapper< AddressPlace >( this, codecRegistry.get( AddressPlace.class ) );
 	}
 	
 	public static MongoCollection< AddressPlace > getMongoCollection() {

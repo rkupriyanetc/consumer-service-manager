@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import mk.ck.energy.csm.model.AddressLocation;
 import mk.ck.energy.csm.model.AddressNotFoundException;
@@ -40,14 +41,13 @@ public class AccountTools extends Controller {
 		@Required
 		private String	name;
 		
-		@Required
 		private String	refId;
 		
 		@Required
 		private String	id;
 		
 		public AddrTop() {
-			id = "0";
+			id = UUID.randomUUID().toString().toLowerCase();
 		}
 		
 		public String getId() {
@@ -80,7 +80,6 @@ public class AccountTools extends Controller {
 		@Required
 		private String					id;
 		
-		@Required
 		private String					refId;
 		
 		@Required
@@ -93,8 +92,7 @@ public class AccountTools extends Controller {
 		private List< String >	administrativeCenterType;
 		
 		public AddrLocation() {
-			id = "0";
-			refId = "0";
+			id = UUID.randomUUID().toString().toLowerCase();
 			administrativeCenterType = new LinkedList<>();
 		}
 		
@@ -151,7 +149,7 @@ public class AccountTools extends Controller {
 		private String	street;
 		
 		public AddrPlace() {
-			id = "0";
+			id = UUID.randomUUID().toString().toLowerCase();
 		}
 		
 		public String getId() {
@@ -222,7 +220,7 @@ public class AccountTools extends Controller {
 					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().iterator() ) ) );
 		else {
 			final AddrTop u = filledForm.get();
-			final AddressTop at = new AddressTop( u.getName(), u.getRefId() );
+			final AddressTop at = AddressTop.create( u.getName(), u.getRefId() );
 			at.insertIntoDB();
 			// Тут тра переробити
 			filledForm.data().put( "id", at.getId() );
@@ -262,7 +260,7 @@ public class AccountTools extends Controller {
 			}
 			try {
 				final AddressTop at = AddressTop.findById( u.getRefId() );
-				final AddressLocation al = new AddressLocation( at, u.getLocation(), LocationType.valueOf( u.getLocationType() ), act );
+				final AddressLocation al = AddressLocation.create( at, u.getLocation(), LocationType.valueOf( u.getLocationType() ), act );
 				al.insertIntoDB();
 				// Тут тра переробити
 				filledForm.data().put( "id", al.getId() );
@@ -299,7 +297,7 @@ public class AccountTools extends Controller {
 					scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find().iterator() ) ) );
 		else {
 			final AddrPlace u = filledForm.get();
-			final AddressPlace ap = new AddressPlace( StreetType.valueOf( u.getStreetType() ), u.getStreet() );
+			final AddressPlace ap = AddressPlace.create( StreetType.valueOf( u.getStreetType() ), u.getStreet() );
 			ap.insertIntoDB();
 			// Тут тра переробити
 			filledForm.data().put( "id", ap.getId() );

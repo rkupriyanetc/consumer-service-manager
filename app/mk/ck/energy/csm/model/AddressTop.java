@@ -7,23 +7,37 @@ import java.util.Map;
 
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
+import org.bson.BsonDocument;
+import org.bson.BsonDocumentWrapper;
+import org.bson.codecs.configuration.CodecRegistry;
+
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 
 public class AddressTop extends CSMAbstractDocument< AddressTop > {
 	
-	private static final long		serialVersionUID						= 1L;
+	private static final long		serialVersionUID									= 1L;
 	
-	private static final String	COLLECTION_NAME_TOP_ADDRESS	= "topAddresses";
+	private static final String	COLLECTION_NAME_TOP_ADDRESS				= "topAddresses";
 	
-	private static final String	DB_FIELD_NAME								= "name";
+	private static final String	DB_FIELD_NAME											= "name";
 	
-	private static final String	DB_FIELD_REF_TO_TOP					= "ref_id";
+	private static final String	DB_FIELD_REFERENCE_TO_TOP_ADDRESS	= "top_id";
 	
-	public AddressTop( final String name, final String refId ) {
-		setName( name );
-		setRefId( refId );
+	private AddressTop					addressTop;
+	
+	private AddressTop() {}
+	
+	public static AddressTop create() {
+		return new AddressTop();
+	}
+	
+	public static AddressTop create( final String name, final String refId ) {
+		final AddressTop addr = new AddressTop();
+		addr.setName( name );
+		addr.setTopAddressId( refId );
+		return addr;
 	}
 	
 	/**
@@ -45,12 +59,31 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 	 * For example : id = 3, name = Черкаська обл., refId = 0
 	 * But when the name is the District, then name = Маньківський р-н, refId = 3
 	 */
-	public String getRefId() {
-		return getString( DB_FIELD_REF_TO_TOP );
+	public String getTopAddressId() {
+		return getString( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
 	}
 	
-	public void setRefId( final String refId ) {
-		put( DB_FIELD_REF_TO_TOP, refId );
+	public void setTopAddressId( final String addressTopId ) {
+		try {
+			this.addressTop = AddressTop.findById( addressTopId );
+			put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addressTopId );
+		}
+		catch ( final AddressNotFoundException anfe ) {
+			LOGGER.warn( "Sorry. Cannot find AddressTop by {}", addressTopId );
+		}
+	}
+	
+	public AddressTop getTopAddress() {
+		return addressTop;
+	}
+	
+	public void setTopAddress( final AddressTop addressTop ) {
+		if ( !this.addressTop.equals( addressTop ) ) {
+			this.addressTop = addressTop;
+			put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addressTop.getTopAddressId() );
+		} else
+			if ( addressTop == null )
+				put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, null );
 	}
 	
 	public static AddressTop findById( final String id ) throws AddressNotFoundException {
@@ -94,7 +127,7 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 	}
 	
 	private static boolean hasChildren( final AddressTop addr ) {
-		final AddressTop rec = getMongoCollection().find( Filters.eq( DB_FIELD_REF_TO_TOP, addr.getId() ) ).first();
+		final AddressTop rec = getMongoCollection().find( Filters.eq( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addr.getId() ) ).first();
 		final boolean b = rec != null && !rec.isEmpty();
 		if ( b )
 			return true;
@@ -120,7 +153,7 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 		if ( refId == null || refId.isEmpty() || refId.equals( "0" ) )
 			cursor = collection.find().iterator();
 		else
-			cursor = collection.find( Filters.eq( DB_FIELD_REF_TO_TOP, refId ) ).iterator();
+			cursor = collection.find( Filters.eq( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, refId ) ).iterator();
 		while ( cursor.hasNext() ) {
 			final AddressTop o = cursor.next();
 			final String name = o.getName();
@@ -135,11 +168,11 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 	public String toString() {
 		final StringBuilder sb = new StringBuilder( getName() );
 		try {
-			AddressTop at = AddressTop.findById( getRefId() );
+			AddressTop at = AddressTop.findById( getTopAddressId() );
 			while ( at != null ) {
 				sb.append( ", " );
 				sb.append( at.getName() );
-				at = AddressTop.findById( at.getRefId() );
+				at = AddressTop.findById( at.getTopAddressId() );
 			}
 			return sb.toString();
 		}
@@ -147,6 +180,11 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 			LOGGER.warn( "AddressTop.toString() Exception: {}", anfe );
 			return sb.toString();
 		}
+	}
+	
+	@Override
+	public < TDocument >BsonDocument toBsonDocument( final Class< TDocument > documentClass, final CodecRegistry codecRegistry ) {
+		return new BsonDocumentWrapper< AddressTop >( this, codecRegistry.get( AddressTop.class ) );
 	}
 	
 	public static MongoCollection< AddressTop > getMongoCollection() {

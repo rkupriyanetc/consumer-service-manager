@@ -83,16 +83,16 @@ public class UserCodec implements CollectibleCodec< User > {
 		final Document document = documentCodec.decode( reader, decoderContext );
 		final User user = User.create();
 		user.setId( document.getString( DB_FIELD_ID ) );
-		user.setEmail( document.getString( DB_FIELD_EMAIL ) );
+		user.put( DB_FIELD_EMAIL, document.getString( DB_FIELD_EMAIL ) );
 		user.setFirstName( document.getString( DB_FIELD_FIRST_NAME ) );
-		user.setName( document.getString( DB_FIELD_NAME ) );
+		user.put( DB_FIELD_NAME, document.getString( DB_FIELD_NAME ) );
 		user.setLastName( document.getString( DB_FIELD_LAST_NAME ) );
-		user.setActive( document.getBoolean( DB_FIELD_ACTIVE ) );
-		user.setEmailValidated( document.getBoolean( DB_FIELD_EMAIL_VALIDATED ) );
+		user.put( DB_FIELD_ACTIVE, document.getBoolean( DB_FIELD_ACTIVE ) );
+		user.put( DB_FIELD_EMAIL_VALIDATED, document.getBoolean( DB_FIELD_EMAIL_VALIDATED ) );
 		user.setRoles( document.get( DB_FIELD_ROLES ) );
 		user.setLinkedAccounts( document.get( DB_FIELD_LINKED_ACCOUNTS ) );
 		user.setPermission( document.get( DB_FIELD_PERMISSIONS ) );
-		user.setLastLogin( document.getLong( DB_FIELD_LAST_LOGIN ) );
+		user.put( DB_FIELD_LAST_LOGIN, document.getLong( DB_FIELD_LAST_LOGIN ) );
 		return user;
 	}
 	

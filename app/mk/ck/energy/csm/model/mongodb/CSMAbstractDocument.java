@@ -1,5 +1,6 @@
 package mk.ck.energy.csm.model.mongodb;
 
+import java.util.List;
 import java.util.UUID;
 
 import mk.ck.energy.csm.model.Database;
@@ -84,6 +85,16 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 		catch ( final MongoException me ) {
 			LOGGER.warn( "When you add a new document an error {}", me );
 		}
+	}
+	
+	@SuppressWarnings( "unchecked" )
+	protected List< Document > extractListDocuments( final Object object ) {
+		return ( List< Document > )object;
+	}
+	
+	@SuppressWarnings( "unchecked" )
+	protected List< String > extractListStringValues( final Object object ) {
+		return ( List< String > )object;
 	}
 	
 	public I remove() {

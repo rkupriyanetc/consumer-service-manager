@@ -9,13 +9,12 @@ import java.util.Set;
 
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
-import org.bson.BsonArray;
-import org.bson.BsonString;
-import org.bson.BsonValue;
+import org.bson.BsonDocument;
+import org.bson.BsonDocumentWrapper;
+import org.bson.codecs.configuration.CodecRegistry;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
 public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
@@ -30,30 +29,29 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	
 	private static final String	DB_FIELD_ADMINISTRATIVE_CENTER_TYPE	= "administrative_type";
 	
-	private static final String	DB_FIELD_REF_TO_TOP_ADDRESS					= "ref_id";
+	private static final String	DB_FIELD_REFERENCE_TO_TOP_ADDRESS		= "top_address_id";
+	
+	private final Set< String >	administrativeTypes;
 	
 	private AddressTop					topAddress;
 	
-	public AddressLocation( final AddressTop topId, final String location, final LocationType locationType,
-			final Set< AdministrativeCenterType > administrativeTypes ) {
-		setLocation( location );
-		setTopAddress( topId );
-		setAdministrativeCenterType( administrativeTypes );
-		setLocationType( locationType );
+	private AddressLocation() {
+		administrativeTypes = new LinkedHashSet<>();
 	}
 	
-	public String getRefId() {
-		return getString( DB_FIELD_REF_TO_TOP_ADDRESS );
+	public String getTopAddressId() {
+		return getString( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
 	}
 	
-	public void setRefId( final String refId ) {
-		if ( getRefId() != refId )
+	public void setTopAddressId( final String refId ) {
+		if ( !getTopAddressId().equals( refId ) )
 			try {
 				topAddress = AddressTop.findById( refId );
-				put( DB_FIELD_REF_TO_TOP_ADDRESS, refId );
+				put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, refId );
 			}
 			catch ( final AddressNotFoundException anfe ) {
-				remove( DB_FIELD_REF_TO_TOP_ADDRESS );
+				LOGGER.warn( "AddressLocation has now reference to top id NULL pointer" );
+				put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, null );
 			}
 	}
 	
@@ -82,33 +80,75 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	/**
 	 * Типи адміністративного центру: столиця, область, район,
 	 */
+	/**
+	 * public Set< AdministrativeCenterType > getAdministrativeCenterType() {
+	 * final BsonArray list = ( BsonArray )get(
+	 * DB_FIELD_ADMINISTRATIVE_CENTER_TYPE );
+	 * final Set< AdministrativeCenterType > adcts = new LinkedHashSet<>();
+	 * for ( final BsonValue key : list.getValues() ) {
+	 * final AdministrativeCenterType at = AdministrativeCenterType.valueOf( ( (
+	 * BsonString )key ).getValue() );
+	 * adcts.add( at );
+	 * }
+	 * return adcts;
+	 * }
+	 */
 	public Set< AdministrativeCenterType > getAdministrativeCenterType() {
-		final BsonArray list = ( BsonArray )get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE );
-		final Set< AdministrativeCenterType > adcts = new LinkedHashSet<>();
-		for ( final BsonValue key : list.getValues() ) {
-			final AdministrativeCenterType at = AdministrativeCenterType.valueOf( ( ( BsonString )key ).getValue() );
-			adcts.add( at );
+		final Set< AdministrativeCenterType > acts = new LinkedHashSet<>();
+		if ( administrativeTypes != null || !administrativeTypes.isEmpty() )
+			for ( final String value : administrativeTypes )
+				acts.add( AdministrativeCenterType.valueOf( value ) );
+		return acts;
+	}
+	
+	public void setAdministrativeCenterType( final Object listAdministrativeTypes ) {
+		if ( administrativeTypes != null ) {
+			administrativeTypes.addAll( extractListStringValues( administrativeTypes ) );
+			put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
 		}
-		return adcts;
 	}
 	
-	public void setAdministrativeCenterType( final Set< AdministrativeCenterType > administrativeTypes ) {
-		final BsonArray dbList = new BsonArray();
-		for ( final AdministrativeCenterType at : administrativeTypes )
-			dbList.add( new BsonString( at.name() ) );
-		put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, dbList );
+	public boolean addAdministrativeCenterType( final AdministrativeCenterType value ) {
+		final boolean bool = administrativeTypes.add( value.name() );
+		put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
+		return bool;
 	}
 	
+	/**
+	 * public void setAdministrativeCenterType( final Set<
+	 * AdministrativeCenterType > administrativeTypes ) {
+	 * final BsonArray dbList = new BsonArray();
+	 * for ( final AdministrativeCenterType at : administrativeTypes )
+	 * dbList.add( new BsonString( at.name() ) );
+	 * put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, dbList );
+	 * }
+	 */
 	public AddressTop getTopAddress() {
 		return topAddress;
 	}
 	
 	public void setTopAddress( final AddressTop topAddress ) {
-		this.topAddress = topAddress;
-		if ( topAddress != null )
-			put( DB_FIELD_REF_TO_TOP_ADDRESS, topAddress.getRefId() );
-		else
-			remove( DB_FIELD_REF_TO_TOP_ADDRESS );
+		if ( !this.topAddress.equals( topAddress ) ) {
+			this.topAddress = topAddress;
+			put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, topAddress.getTopAddressId() );
+		} else
+			if ( topAddress == null )
+				put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, null );
+	}
+	
+	public static AddressLocation create() {
+		return new AddressLocation();
+	}
+	
+	public static AddressLocation create( final AddressTop topId, final String location, final LocationType locationType,
+			final Set< AdministrativeCenterType > administrativeTypes ) {
+		final AddressLocation al = new AddressLocation();
+		al.setLocation( location );
+		al.setTopAddress( topId );
+		for ( final AdministrativeCenterType act : administrativeTypes )
+			al.addAdministrativeCenterType( act );
+		al.setLocationType( locationType );
+		return al;
 	}
 	
 	public static AddressLocation findById( final String id ) throws AddressNotFoundException {
@@ -123,8 +163,8 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	
 	public static List< AddressLocation > findByAddressTop( final String topAddrId ) throws AddressNotFoundException {
 		final List< AddressLocation > locations = new LinkedList<>();
-		final MongoCursor< AddressLocation > cursor = getMongoCollection()
-				.find( Filters.eq( DB_FIELD_REF_TO_TOP_ADDRESS, topAddrId ) ).iterator();
+		final MongoCursor< AddressLocation > cursor = getMongoCollection().find(
+				Filters.eq( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, topAddrId ) ).iterator();
 		if ( cursor == null )
 			throw new AddressNotFoundException( "Cannot find address-location by " + topAddrId );
 		while ( cursor.hasNext() ) {
@@ -175,7 +215,7 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	 */
 	public static Map< String, String > getMap( final String refId, final int isAddrTop ) {
 		final Map< String, String > references = new LinkedHashMap<>();
-		final MongoCursor< AddressLocation > o = getMongoCollection().find( Filters.eq( DB_FIELD_REF_TO_TOP_ADDRESS, refId ) )
+		final MongoCursor< AddressLocation > o = getMongoCollection().find( Filters.eq( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, refId ) )
 				.iterator();
 		while ( o.hasNext() ) {
 			final AddressLocation addr = o.next();
@@ -211,52 +251,13 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 		return getLocation().equals( al.getLocation() ) && getLocationType().equals( al.getLocationType() );
 	}
 	
-	/**
-	 * protected static String choiceFromLocationsTypes( final BasicDBList dbList
-	 * ) {
-	 * String strRet = "";
-	 * for ( final Object typeO : dbList ) {
-	 * final String typeStr = ( String )typeO;
-	 * final LocationType type = LocationType.valueOf( typeStr );
-	 * switch ( type ) {
-	 * case CITY :
-	 * strRet = LocationType.CITY.toString( Address.LOCATION_TYPE_SHORTNAME );
-	 * break;
-	 * case TOWNSHIP :
-	 * strRet = LocationType.TOWNSHIP.toString( Address.LOCATION_TYPE_SHORTNAME );
-	 * break;
-	 * case VILLAGE :
-	 * strRet = LocationType.VILLAGE.toString( Address.LOCATION_TYPE_SHORTNAME );
-	 * break;
-	 * case HAMLET :
-	 * strRet = LocationType.HAMLET.toString( Address.LOCATION_TYPE_SHORTNAME );
-	 * break;
-	 * case BOWERY :
-	 * strRet = LocationType.BOWERY.toString( Address.LOCATION_TYPE_SHORTNAME );
-	 * break;
-	 * default :
-	 * break;
-	 * }
-	 * }
-	 * return strRet;
-	 * } @Override
-	 * private void save() throws ImpossibleCreatingException {
-	 * if ( locationsTypes.contains( LocationType.CAPITAL ) ) {
-	 * final BasicDBList dbo = new BasicDBList();
-	 * dbo.add( LocationType.CAPITAL.name() );
-	 * final Document qu = new Document( DB_FIELD_LOCATIONS_TYPES, new
-	 * Document( "$in", dbo ) );
-	 * if ( getCollection( COLLECTION_NAME_LOCATION_ADDRESS ).find( qu
-	 * ).iterator().hasNext() )
-	 * throw new ImpossibleCreatingException(
-	 * "One of the country's capital already exists in the database" );
-	 * }
-	 * super.save( COLLECTION_NAME_LOCATION_ADDRESS );
-	 * }
-	 */
+	@Override
+	public < TDocument >BsonDocument toBsonDocument( final Class< TDocument > documentClass, final CodecRegistry codecRegistry ) {
+		return new BsonDocumentWrapper< AddressLocation >( this, codecRegistry.get( AddressLocation.class ) );
+	}
+	
 	public static MongoCollection< AddressLocation > getMongoCollection() {
-		final MongoDatabase db = Database.getInstance().getDatabase();
-		final MongoCollection< AddressLocation > collection = db.getCollection( COLLECTION_NAME_LOCATION_ADDRESS,
+		final MongoCollection< AddressLocation > collection = getDatabase().getCollection( COLLECTION_NAME_LOCATION_ADDRESS,
 				AddressLocation.class );
 		return collection;
 	}

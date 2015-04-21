@@ -6,41 +6,29 @@ import org.slf4j.LoggerFactory;
 
 public class Address {
 	
-	public static final short		UPDATING_READING_ALL							= 0;
+	public static final String	LOCATION_TYPE_FULLNAME				= "location.type.full";
 	
-	public static final short		UPDATING_READING_ADDRESS_LOCATION	= 1;
+	public static final String	LOCATION_TYPE_SHORTNAME				= "location.type.short";
 	
-	public static final short		UPDATING_READING_ADDRESS_PLACE		= 2;
+	public static final String	ADMINISTRATIVE_TYPE_FULLNAME	= "administrative.type.full";
 	
-	public static final short		UPDATING_READING_HOUSE						= 4;
+	public static final String	ADMINISTRATIVE_TYPE_SHORTNAME	= "administrative.type.short";
 	
-	public static final short		UPDATING_READING_APARTMENT				= 8;
+	public static final String	STREET_TYPE_FULLNAME					= "street.type.full";
 	
-	public static final short		UPDATING_READING_POSTAL_CODE			= 16;
+	public static final String	STREET_TYPE_SHORTNAME					= "street.type.short";
 	
-	public static final String	LOCATION_TYPE_FULLNAME						= "location.type.full";
+	private static final Logger	LOGGER												= LoggerFactory.getLogger( Address.class );
 	
-	public static final String	LOCATION_TYPE_SHORTNAME						= "location.type.short";
+	static final String					DB_FIELD_ADDRESS_LOCATION_ID	= "address_location_id";
 	
-	public static final String	ADMINISTRATIVE_TYPE_FULLNAME			= "administrative.type.full";
+	static final String					DB_FIELD_ADDRESS_PLACE_ID			= "address_place_id";
 	
-	public static final String	ADMINISTRATIVE_TYPE_SHORTNAME			= "administrative.type.short";
+	static final String					DB_FIELD_ADDRESS_HOUSE				= "house";
 	
-	public static final String	STREET_TYPE_FULLNAME							= "street.type.full";
+	static final String					DB_FIELD_ADDRESS_APARTMENT		= "apartment";
 	
-	public static final String	STREET_TYPE_SHORTNAME							= "street.type.short";
-	
-	private static final Logger	LOGGER														= LoggerFactory.getLogger( Address.class );
-	
-	static final String					DB_FIELD_ADDRESS_LOCATION_ID			= "address_location_id";
-	
-	static final String					DB_FIELD_ADDRESS_PLACE_ID					= "address_place_id";
-	
-	static final String					DB_FIELD_ADDRESS_HOUSE						= "house";
-	
-	static final String					DB_FIELD_ADDRESS_APARTMENT				= "apartment";
-	
-	static final String					DB_FIELD_ADDRESS_POSTAL_CODE			= "postal_code";
+	static final String					DB_FIELD_ADDRESS_POSTAL_CODE	= "postal_code";
 	
 	/**
 	 * Деяка частина адреси: населений пункт.
@@ -71,14 +59,20 @@ public class Address {
 	 */
 	private String							postalCode;
 	
-	public Address() {}
+	private Address() {}
 	
-	public Address( final Document doc ) {
-		setAddressLocationId( ( String )doc.get( DB_FIELD_ADDRESS_LOCATION_ID ) );
-		setAddressPlaceId( ( String )doc.get( DB_FIELD_ADDRESS_PLACE_ID ) );
-		apartment = ( String )doc.get( DB_FIELD_ADDRESS_APARTMENT );
-		house = ( String )doc.get( DB_FIELD_ADDRESS_HOUSE );
-		postalCode = ( String )doc.get( DB_FIELD_ADDRESS_POSTAL_CODE );
+	public static Address create() {
+		return new Address();
+	}
+	
+	public static Address create( final Document doc ) {
+		final Address addr = new Address();
+		addr.setAddressLocationId( doc.getString( DB_FIELD_ADDRESS_LOCATION_ID ) );
+		addr.setAddressPlaceId( doc.getString( DB_FIELD_ADDRESS_PLACE_ID ) );
+		addr.apartment = doc.getString( DB_FIELD_ADDRESS_APARTMENT );
+		addr.house = doc.getString( DB_FIELD_ADDRESS_HOUSE );
+		addr.postalCode = doc.getString( DB_FIELD_ADDRESS_POSTAL_CODE );
+		return addr;
 	}
 	
 	public AddressLocation getAddressLocation() {
@@ -86,11 +80,12 @@ public class Address {
 	}
 	
 	public void setAddressLocation( final AddressLocation address ) {
-		if ( !this.addressLocation.equals( address ) ) {
-			this.addressLocation = address;
-			// Тут тра переробити
-			this.addressLocationId = address.getId();
-		}
+		if ( address != null )
+			if ( !this.addressLocation.equals( address ) ) {
+				this.addressLocation = address;
+				// Тут тра переробити
+				this.addressLocationId = address.getId();
+			}
 	}
 	
 	public String getAddressLocationId() {
@@ -114,11 +109,12 @@ public class Address {
 	}
 	
 	public void setAddressPlace( final AddressPlace address ) {
-		if ( !this.addressPlace.equals( address ) ) {
-			this.addressPlace = address;
-			// Тут тра переробити
-			this.addressPlaceId = address.getId();
-		}
+		if ( address != null )
+			if ( !this.addressPlace.equals( address ) ) {
+				this.addressPlace = address;
+				// Тут тра переробити
+				this.addressPlaceId = address.getId();
+			}
 	}
 	
 	public String getAddressPlaceId() {
@@ -161,26 +157,15 @@ public class Address {
 		this.postalCode = postalCode;
 	}
 	
-	Document getDocument( final short updateSet ) {
-		final Document doc = new Document();
-		if ( UPDATING_READING_ALL == updateSet
-				|| ( updateSet & UPDATING_READING_ADDRESS_LOCATION ) == UPDATING_READING_ADDRESS_LOCATION )
-			// addressLocation.update( Filters.eq( DB_FIELD_ADDRESS_LOCATION_ID,
-			// addressLocation.getId() ) );
-			doc.put( DB_FIELD_ADDRESS_LOCATION_ID, addressLocation.getId() );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_ADDRESS_PLACE ) == UPDATING_READING_ADDRESS_PLACE )
-			// addressPlace.update( Filters.eq( DB_FIELD_ADDRESS_PLACE_ID,
-			// addressPlace.getId() ) );
-			doc.put( DB_FIELD_ADDRESS_PLACE_ID, addressPlace.getId() );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_HOUSE ) == UPDATING_READING_HOUSE )
-			if ( house != null && !house.isEmpty() )
-				doc.put( DB_FIELD_ADDRESS_HOUSE, house );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_APARTMENT ) == UPDATING_READING_APARTMENT )
-			if ( apartment != null && !apartment.isEmpty() )
-				doc.put( DB_FIELD_ADDRESS_APARTMENT, apartment );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_POSTAL_CODE ) == UPDATING_READING_POSTAL_CODE )
-			if ( postalCode != null && postalCode.isEmpty() )
-				doc.put( DB_FIELD_ADDRESS_POSTAL_CODE, postalCode );
+	Document getDocument() {
+		final Document doc = new Document( DB_FIELD_ADDRESS_LOCATION_ID, addressLocation.getId() );
+		doc.put( DB_FIELD_ADDRESS_PLACE_ID, addressPlace.getId() );
+		if ( house != null && !house.isEmpty() )
+			doc.put( DB_FIELD_ADDRESS_HOUSE, house );
+		if ( apartment != null && !apartment.isEmpty() )
+			doc.put( DB_FIELD_ADDRESS_APARTMENT, apartment );
+		if ( postalCode != null && !postalCode.isEmpty() )
+			doc.put( DB_FIELD_ADDRESS_POSTAL_CODE, postalCode );
 		return doc;
 	}
 	
