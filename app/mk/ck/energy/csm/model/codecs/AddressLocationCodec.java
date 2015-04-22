@@ -40,7 +40,9 @@ public class AddressLocationCodec implements CollectibleCodec< AddressLocation >
 		document.append( DB_FIELD_LOCATION, value.getLocation() );
 		document.append( DB_FIELD_LOCATION_TYPE, value.getString( DB_FIELD_LOCATION_TYPE ) );
 		document.append( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, value.get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE ) );
-		document.append( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, value.getTopAddressId() );
+		final String addrTop = value.getTopAddressId();
+		if ( addrTop != null && !addrTop.isEmpty() )
+			document.append( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addrTop );
 		documentCodec.encode( writer, document, encoderContext );
 	}
 	

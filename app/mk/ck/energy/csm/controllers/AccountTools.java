@@ -80,6 +80,7 @@ public class AccountTools extends Controller {
 		@Required
 		private String					id;
 		
+		@Required
 		private String					refId;
 		
 		@Required

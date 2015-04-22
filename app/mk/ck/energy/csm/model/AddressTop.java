@@ -73,6 +73,7 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 				}
 				catch ( final AddressNotFoundException anfe ) {
 					LOGGER.warn( "Sorry. Cannot find AddressTop by {}", addressTopId );
+					remove( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
 				}
 		} else
 			remove( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );

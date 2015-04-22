@@ -441,7 +441,9 @@ public class AdministrationTools extends Controller {
 									}
 									break;
 								default :
-									AddressTop.create( name, null ).insertIntoDB();
+									if ( "0".equals( id ) )
+										id = null;
+									AddressTop.create( name, id ).insertIntoDB();
 									break;
 							}
 						}

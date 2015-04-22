@@ -19,40 +19,44 @@ import com.mongodb.client.model.Filters;
 
 public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	
-	private static final long		serialVersionUID										= 1L;
+	private static final long			serialVersionUID										= 1L;
 	
-	private static final String	COLLECTION_NAME_LOCATION_ADDRESS		= "locationAddresses";
+	private static final String		COLLECTION_NAME_LOCATION_ADDRESS		= "locationAddresses";
 	
-	private static final String	DB_FIELD_LOCATION										= "location";
+	private static final String		DB_FIELD_LOCATION										= "location";
 	
-	private static final String	DB_FIELD_LOCATION_TYPE							= "location_type";
+	private static final String		DB_FIELD_LOCATION_TYPE							= "location_type";
 	
-	private static final String	DB_FIELD_ADMINISTRATIVE_CENTER_TYPE	= "administrative_type";
+	private static final String		DB_FIELD_ADMINISTRATIVE_CENTER_TYPE	= "administrative_type";
 	
-	private static final String	DB_FIELD_REFERENCE_TO_TOP_ADDRESS		= "top_address_id";
+	private static final String		DB_FIELD_REFERENCE_TO_TOP_ADDRESS		= "top_address_id";
 	
-	private final Set< String >	administrativeTypes;
+	private final List< String >	administrativeTypes;
 	
-	private AddressTop					topAddress;
+	private AddressTop						topAddress;
 	
 	private AddressLocation() {
-		administrativeTypes = new LinkedHashSet<>();
+		administrativeTypes = new LinkedList<>();
 	}
 	
 	public String getTopAddressId() {
 		return getString( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
 	}
 	
-	public void setTopAddressId( final String refId ) {
-		if ( !getTopAddressId().equals( refId ) )
-			try {
-				topAddress = AddressTop.findById( refId );
-				put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, refId );
-			}
-			catch ( final AddressNotFoundException anfe ) {
-				LOGGER.warn( "AddressLocation has now reference to top id NULL pointer" );
-				put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, null );
-			}
+	public void setTopAddressId( final String addressTopId ) {
+		if ( addressTopId != null && !addressTopId.isEmpty() ) {
+			final String topId = getTopAddressId();
+			if ( !addressTopId.equals( topId ) )
+				try {
+					topAddress = AddressTop.findById( addressTopId );
+					put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addressTopId );
+				}
+				catch ( final AddressNotFoundException anfe ) {
+					LOGGER.warn( "AddressLocation has now reference to top id NULL pointer" );
+					remove( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
+				}
+		} else
+			remove( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
 	}
 	
 	/**
@@ -103,7 +107,7 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	
 	public void setAdministrativeCenterType( final Object listAdministrativeTypes ) {
 		if ( administrativeTypes != null ) {
-			administrativeTypes.addAll( extractListStringValues( administrativeTypes ) );
+			administrativeTypes.addAll( extractListStringValues( listAdministrativeTypes ) );
 			put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
 		}
 	}
@@ -128,12 +132,13 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	}
 	
 	public void setTopAddress( final AddressTop topAddress ) {
-		if ( !this.topAddress.equals( topAddress ) ) {
-			this.topAddress = topAddress;
-			put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, topAddress.getTopAddressId() );
+		if ( topAddress != null ) {
+			if ( !topAddress.equals( this.topAddress ) ) {
+				this.topAddress = topAddress;
+				put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, topAddress.getId() );
+			}
 		} else
-			if ( topAddress == null )
-				put( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, null );
+			remove( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
 	}
 	
 	public static AddressLocation create() {

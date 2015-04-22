@@ -16,29 +16,33 @@
         }
         
         <div class="row">
-          <div class="col-md-2 col-xs-2">
+          <div class="col-md-6 col-xs-6">
             @inputText(
               addrForm("id"),
               '_label -> Messages("Id"),
-              'size -> 4,
               'disabled -> "disabled"
             )
           </div>
-          <div class="col-md-2 col-xs-2">
+          <div class="col-md-6 col-xs-6">
             @inputText(
               addrForm("refId"),
-              '_label -> Messages("RefId"),
-              'size -> 4
+              '_label -> Messages("RefId")
             )
           </div>
-          <div class="col-md-3 col-xs-3">
+        </div>
+        
+        <div class="row">
+          <div class="col-md-5 col-xs-5">
             @inputText(
               addrForm("location"),
               '_label -> Messages("Location")
             )
           </div>
+          <div class="col-md-4 col-xs-4">
+            @_selectPartial(addrForm, "locationType", mk.ck.energy.csm.model.LocationType.optionsFullname(), Messages("LocationType"))
+          </div>
           <div class="col-md-3 col-xs-3">
-            @_selectPartial(addrForm, "locationsTypes", mk.ck.energy.csm.model.LocationType.optionsFullname(), Messages("LocationsTypes"), true)
+            @_selectPartial(addrForm, "administrativeCenterType", mk.ck.energy.csm.model.AdministrativeCenterType.optionsFullname(), Messages("AdministrativeCenterType"), true)
           </div>
         </div>
         
@@ -51,13 +55,13 @@
         @if(items != null ) {
           @items.map { item =>
             <div class="row">
-              <div class="col-md-2 col-xs-2">
+              <div class="col-md-4 col-xs-4">
                 _id : @item.getId()
               </div>
-              <div class="col-md-2 col-xs-2">
+              <div class="col-md-4 col-xs-4">
                 refId : @item.getTopAddressId()
               </div>
-              <div class="col-md-6 col-xs-6">
+              <div class="col-md-3 col-xs-3">
                 name : @item.getLocationType() @item.getLocation()
               </div>
               
