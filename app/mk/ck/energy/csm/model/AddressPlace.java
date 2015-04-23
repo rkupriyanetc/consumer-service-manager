@@ -14,7 +14,6 @@ import play.i18n.Messages;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
 public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
@@ -122,8 +121,8 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 	}
 	
 	public static MongoCollection< AddressPlace > getMongoCollection() {
-		final MongoDatabase db = Database.getInstance().getDatabase();
-		final MongoCollection< AddressPlace > collection = db.getCollection( COLLECTION_NAME_PLACE_ADDRESS, AddressPlace.class );
+		final MongoCollection< AddressPlace > collection = getDatabase().getCollection( COLLECTION_NAME_PLACE_ADDRESS,
+				AddressPlace.class );
 		return collection;
 	}
 	

@@ -10,6 +10,7 @@ import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWrapper;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.conversions.Bson;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -91,6 +92,16 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 			}
 		} else
 			remove( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
+	}
+	
+	public void save() {
+		final Bson value = Filters.and( Filters.eq( DB_FIELD_NAME, getName() ),
+				Filters.eq( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, getTopAddressId() ) );
+		final AddressTop addr = getCollection().find( value, AddressTop.class ).first();
+		if ( addr == null )
+			insertIntoDB();
+		else
+			update( value );
 	}
 	
 	public static AddressTop findById( final String id ) throws AddressNotFoundException {

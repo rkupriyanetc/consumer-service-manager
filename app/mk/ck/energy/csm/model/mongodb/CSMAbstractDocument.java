@@ -87,6 +87,10 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 		}
 	}
 	
+	public I remove() {
+		return getCollection().findOneAndDelete( Filters.eq( DB_FIELD_ID, id ) );
+	}
+	
 	@SuppressWarnings( "unchecked" )
 	protected List< Document > extractListDocuments( final Object object ) {
 		return ( List< Document > )object;
@@ -95,10 +99,6 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 	@SuppressWarnings( "unchecked" )
 	protected List< String > extractListStringValues( final Object object ) {
 		return ( List< String > )object;
-	}
-	
-	public I remove() {
-		return getCollection().findOneAndDelete( Filters.eq( DB_FIELD_ID, id ) );
 	}
 	
 	public static MongoDatabase getDatabase() {
