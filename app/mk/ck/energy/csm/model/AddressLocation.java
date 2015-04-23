@@ -12,6 +12,7 @@ import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWrapper;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.conversions.Bson;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -139,6 +140,18 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 			}
 		} else
 			remove( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
+	}
+	
+	public void save() {
+		final Bson value = Filters.and( Filters.eq( DB_FIELD_LOCATION, getLocation() ),
+				Filters.eq( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, getTopAddressId() ),
+				Filters.eq( DB_FIELD_LOCATION_TYPE, getString( DB_FIELD_LOCATION_TYPE ) ),
+				Filters.eq( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE ) ) );
+		final AddressLocation addr = getCollection().find( value, AddressLocation.class ).first();
+		if ( addr == null )
+			insertIntoDB();
+		else
+			update( value );
 	}
 	
 	public static AddressLocation create() {

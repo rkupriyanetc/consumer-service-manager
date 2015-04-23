@@ -9,6 +9,7 @@ import org.bson.BsonDocument;
 import org.bson.BsonDocumentWrapper;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.conversions.Bson;
 
 import play.i18n.Messages;
 
@@ -59,6 +60,16 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 	
 	public void setStreetType( final StreetType streetType ) {
 		put( DB_FIELD_STREET_TYPE, streetType.name() );
+	}
+	
+	public void save() {
+		final Bson value = Filters.and( Filters.eq( DB_FIELD_STREET_NAME, getStreet() ),
+				Filters.eq( DB_FIELD_STREET_TYPE, get( DB_FIELD_STREET_TYPE ) ) );
+		final AddressPlace addr = getCollection().find( value, AddressPlace.class ).first();
+		if ( addr == null )
+			insertIntoDB();
+		else
+			update( value );
 	}
 	
 	public static AddressPlace find( final String streetName, final StreetType streetType ) throws AddressNotFoundException {

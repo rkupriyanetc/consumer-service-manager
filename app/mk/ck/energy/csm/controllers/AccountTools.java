@@ -208,8 +208,8 @@ public class AccountTools extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		return ok( addressTop.render(
 				ADDRTOP_FORM,
-				scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
-						.iterator() ) ) );
+				scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find()
+						.sort( Filters.and( Filters.eq( "top_id", 1 ), Filters.eq( "name", 1 ) ) ).iterator() ) ) );
 	}
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
@@ -223,14 +223,14 @@ public class AccountTools extends Controller {
 			final AddrTop u = filledForm.get();
 			final AddressTop at = AddressTop.create( u.getName(), u.getRefId() );
 			LOGGER.trace( "Address top saved {}", at );
-			at.insertIntoDB();
+			at.save();
 			// Тут тра переробити
 			filledForm.data().put( "id", at.getId() );
 			LOGGER.trace( "Address top saved {}", at );
 			return ok( addressTop.render(
 					filledForm,
-					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
-							.iterator() ) ) );
+					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find()
+							.sort( Filters.and( Filters.eq( "top_id", 1 ), Filters.eq( "name", 1 ) ) ).iterator() ) ) );
 		}
 	}
 	
@@ -263,7 +263,7 @@ public class AccountTools extends Controller {
 			try {
 				final AddressTop at = AddressTop.findById( u.getRefId() );
 				final AddressLocation al = AddressLocation.create( at, u.getLocation(), LocationType.valueOf( u.getLocationType() ), act );
-				al.insertIntoDB();
+				al.save();
 				// Тут тра переробити
 				filledForm.data().put( "id", al.getId() );
 				LOGGER.trace( "Address location saved {}", al );
@@ -300,7 +300,7 @@ public class AccountTools extends Controller {
 		else {
 			final AddrPlace u = filledForm.get();
 			final AddressPlace ap = AddressPlace.create( StreetType.valueOf( u.getStreetType() ), u.getStreet() );
-			ap.insertIntoDB();
+			ap.save();
 			// Тут тра переробити
 			filledForm.data().put( "id", ap.getId() );
 			LOGGER.trace( "Address place saved {}", ap );

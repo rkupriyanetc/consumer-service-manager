@@ -100,8 +100,6 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 		final AddressTop addr = getCollection().find( value, AddressTop.class ).first();
 		if ( addr == null )
 			insertIntoDB();
-		else
-			update( value );
 	}
 	
 	public static AddressTop findById( final String id ) throws AddressNotFoundException {
@@ -123,6 +121,7 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 	public static List< AddressTop > findLikeName( final String pattern ) throws AddressNotFoundException {
 		if ( pattern == null || pattern.isEmpty() )
 			throw new IllegalArgumentException( "The parameter should not be empty" );
+		// не працює тут
 		final List< AddressTop > list = new LinkedList<>();
 		final MongoCursor< AddressTop > cursor = getMongoCollection().find( Filters.regex( DB_FIELD_NAME, "/" + pattern + "/" ) )
 				.iterator();

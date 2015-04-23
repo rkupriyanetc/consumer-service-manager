@@ -434,7 +434,7 @@ public class AdministrationTools extends Controller {
 									try {
 										final List< AddressTop > addr = AddressTop.findLikeName( id );
 										// Тут тра переробити
-										AddressTop.create( name, addr.get( 0 ).getId() ).insertIntoDB();
+										AddressTop.create( name, addr.get( 0 ).getId() ).save();
 									}
 									catch ( final AddressNotFoundException anfe ) {
 										LOGGER.error( "Cannot find addressTop", anfe );
@@ -443,7 +443,7 @@ public class AdministrationTools extends Controller {
 								default :
 									if ( "0".equals( id ) )
 										id = null;
-									AddressTop.create( name, id ).insertIntoDB();
+									AddressTop.create( name, id ).save();
 									break;
 							}
 						}
@@ -552,7 +552,7 @@ public class AdministrationTools extends Controller {
 										break;
 								}
 							}
-							AddressLocation.create( addr.get( 0 ), name, lt, at ).insertIntoDB();
+							AddressLocation.create( addr.get( 0 ), name, lt, at ).save();
 						}
 					}
 				}
@@ -727,7 +727,7 @@ public class AdministrationTools extends Controller {
 										break;
 								}
 							}
-							AddressLocation.create( addr.get( 0 ), name, lt, at ).insertIntoDB();
+							AddressLocation.create( addr.get( 0 ), name, lt, at ).save();
 						}
 					}
 				}
@@ -800,7 +800,7 @@ public class AdministrationTools extends Controller {
 							type.appendChild( document.createTextNode( typeStr ) );
 							street.appendChild( type );
 						} else
-							AddressPlace.create( st, nameStr ).insertIntoDB();
+							AddressPlace.create( st, nameStr ).save();
 					}
 					final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 					transformerFactory.setAttribute( "indent-number", 2 );
@@ -894,7 +894,7 @@ public class AdministrationTools extends Controller {
 									st = StreetType.UNCERTAIN;
 									break;
 							}
-							AddressPlace.create( st, name ).insertIntoDB();
+							AddressPlace.create( st, name ).save();
 						}
 					}
 				}
