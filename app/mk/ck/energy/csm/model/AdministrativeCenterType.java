@@ -17,7 +17,11 @@ public enum AdministrativeCenterType {
 	/**
 	 * Районний центр
 	 */
-	DISTRICT;
+	DISTRICT,
+	/**
+	 * Невизначений тип адміністративного центру
+	 */
+	UNSPECIFIED, ;
 	
 	public static Map< String, String > optionsFullname() {
 		final Map< String, String > vals = new LinkedHashMap<>();

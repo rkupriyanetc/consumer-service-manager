@@ -95,6 +95,7 @@ text.about.play_authenticate=Cras sit amet nibh libero, in gravida nulla. Nulla 
 text.feedback.contact=Write to establish a link
 
 
+street.type.full.uncertain=
 street.type.full.area=Area
 street.type.full.boulevard=Boulevard
 street.type.full.avenue=Avenue
@@ -103,6 +104,7 @@ street.type.full.lane=Lane
 street.type.full.cul_de_sac=Cul_de_sac
 street.type.full.descent=Descent
 
+street.type.short.uncertain=
 street.type.short.area=ar.
 street.type.short.boulevard=blv.
 street.type.short.avenue=avn.
@@ -111,6 +113,7 @@ street.type.short.lane=ln.
 street.type.short.cul_de_sac=cul.
 street.type.short.descent=dsc.
 
+location.type.full.unspecified=Unspecified
 location.type.full.city=City
 location.type.full.hamlet=Hamlet
 location.type.full.township=Township
@@ -120,7 +123,9 @@ location.type.full.bowery=Bowery
 administrative.type.full.capital=Capital center
 administrative.type.full.regional=Regional center
 administrative.type.full.district=District center
+administrative.type.full.unspecified=Unspecified
 
+location.type.short.unspecified=
 location.type.short.city=c.
 location.type.short.hamlet=h.
 location.type.short.township=tsh.
@@ -130,6 +135,7 @@ location.type.short.bowery=bow.
 administrative.type.short.capital=capital
 administrative.type.short.regional=reg.
 administrative.type.short.district=dstr.
+administrative.type.short.unspecified=
 
 
 playauthenticate.login.email.placeholder=Your e-mail address

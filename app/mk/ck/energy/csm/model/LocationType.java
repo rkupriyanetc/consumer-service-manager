@@ -25,7 +25,11 @@ public enum LocationType {
 	/**
 	 * Окрема садиба
 	 */
-	BOWERY;
+	BOWERY,
+	/**
+	 * Невизначений тип населенного пункту
+	 */
+	UNSPECIFIED, ;
 	
 	public static Map< String, String > optionsFullname() {
 		final Map< String, String > vals = new LinkedHashMap<>();

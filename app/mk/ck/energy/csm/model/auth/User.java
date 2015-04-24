@@ -195,7 +195,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	 */
 	public void setRoles( final Object listRoles ) {
 		if ( listRoles != null ) {
-			roles.addAll( extractListDocuments( listRoles ) );
+			roles.addAll( extractAsListDocuments( listRoles ) );
 			put( DB_FIELD_ROLES, listRoles );
 		}
 	}
@@ -220,7 +220,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	 */
 	public void setLinkedAccounts( final Object listLinkedAccounts ) {
 		if ( listLinkedAccounts != null ) {
-			linkeds.addAll( extractListDocuments( listLinkedAccounts ) );
+			linkeds.addAll( extractAsListDocuments( listLinkedAccounts ) );
 			put( DB_FIELD_LINKED_ACCOUNTS, listLinkedAccounts );
 		}
 	}
@@ -246,7 +246,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	 */
 	public void setPermission( final Object listPermission ) {
 		if ( listPermission != null ) {
-			permissions.addAll( extractListDocuments( listPermission ) );
+			permissions.addAll( extractAsListDocuments( listPermission ) );
 			put( DB_FIELD_PERMISSIONS, listPermission );
 		}
 	}

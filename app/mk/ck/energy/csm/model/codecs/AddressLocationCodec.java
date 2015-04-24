@@ -2,6 +2,7 @@ package mk.ck.energy.csm.model.codecs;
 
 import mk.ck.energy.csm.model.AddressLocation;
 
+import org.bson.BsonArray;
 import org.bson.BsonReader;
 import org.bson.BsonValue;
 import org.bson.BsonWriter;
@@ -39,7 +40,7 @@ public class AddressLocationCodec implements CollectibleCodec< AddressLocation >
 		final Document document = new Document( DB_FIELD_ID, value.getId() );
 		document.append( DB_FIELD_LOCATION, value.getLocation() );
 		document.append( DB_FIELD_LOCATION_TYPE, value.getString( DB_FIELD_LOCATION_TYPE ) );
-		document.append( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, value.get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE ) );
+		document.append( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, value.get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, BsonArray.class ) );
 		final String addrTop = value.getTopAddressId();
 		if ( addrTop != null && !addrTop.isEmpty() )
 			document.append( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addrTop );
@@ -58,7 +59,7 @@ public class AddressLocationCodec implements CollectibleCodec< AddressLocation >
 		addr.setId( document.getString( DB_FIELD_ID ) );
 		addr.put( DB_FIELD_LOCATION, document.getString( DB_FIELD_LOCATION ) );
 		addr.put( DB_FIELD_LOCATION_TYPE, document.getString( DB_FIELD_LOCATION_TYPE ) );
-		addr.setAdministrativeCenterType( document.get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE ) );
+		addr.setAdministrativeCenterType( document.get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, BsonArray.class ) );
 		addr.setTopAddressId( document.getString( DB_FIELD_REFERENCE_TO_TOP_ADDRESS ) );
 		return addr;
 	}

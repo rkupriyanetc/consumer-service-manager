@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import mk.ck.energy.csm.model.Database;
 
+import org.bson.BsonArray;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -92,13 +93,12 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 	}
 	
 	@SuppressWarnings( "unchecked" )
-	protected List< Document > extractListDocuments( final Object object ) {
+	protected List< Document > extractAsListDocuments( final Object object ) {
 		return ( List< Document > )object;
 	}
 	
-	@SuppressWarnings( "unchecked" )
-	protected List< String > extractListStringValues( final Object object ) {
-		return ( List< String > )object;
+	protected BsonArray extractAsBsonArrayValues( final Object object ) {
+		return ( BsonArray )object;
 	}
 	
 	public static MongoDatabase getDatabase() {

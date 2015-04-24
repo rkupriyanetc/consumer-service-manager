@@ -9,8 +9,11 @@ import java.util.Set;
 
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
+import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWrapper;
+import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 
@@ -20,24 +23,24 @@ import com.mongodb.client.model.Filters;
 
 public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	
-	private static final long			serialVersionUID										= 1L;
+	private static final long		serialVersionUID										= 1L;
 	
-	private static final String		COLLECTION_NAME_LOCATION_ADDRESS		= "locationAddresses";
+	private static final String	COLLECTION_NAME_LOCATION_ADDRESS		= "locationAddresses";
 	
-	private static final String		DB_FIELD_LOCATION										= "location";
+	private static final String	DB_FIELD_LOCATION										= "location";
 	
-	private static final String		DB_FIELD_LOCATION_TYPE							= "location_type";
+	private static final String	DB_FIELD_LOCATION_TYPE							= "location_type";
 	
-	private static final String		DB_FIELD_ADMINISTRATIVE_CENTER_TYPE	= "administrative_type";
+	private static final String	DB_FIELD_ADMINISTRATIVE_CENTER_TYPE	= "administrative_type";
 	
-	private static final String		DB_FIELD_REFERENCE_TO_TOP_ADDRESS		= "top_address_id";
+	private static final String	DB_FIELD_REFERENCE_TO_TOP_ADDRESS		= "top_address_id";
 	
-	private final List< String >	administrativeTypes;
+	private final BsonArray			administrativeTypes;
 	
-	private AddressTop						topAddress;
+	private AddressTop					topAddress;
 	
 	private AddressLocation() {
-		administrativeTypes = new LinkedList<>();
+		administrativeTypes = new BsonArray();
 	}
 	
 	public String getTopAddressId() {
@@ -101,20 +104,20 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	public Set< AdministrativeCenterType > getAdministrativeCenterType() {
 		final Set< AdministrativeCenterType > acts = new LinkedHashSet<>();
 		if ( administrativeTypes != null || !administrativeTypes.isEmpty() )
-			for ( final String value : administrativeTypes )
-				acts.add( AdministrativeCenterType.valueOf( value ) );
+			for ( final BsonValue value : administrativeTypes.getValues() )
+				acts.add( AdministrativeCenterType.valueOf( value.asString().getValue() ) );
 		return acts;
 	}
 	
 	public void setAdministrativeCenterType( final Object listAdministrativeTypes ) {
 		if ( administrativeTypes != null ) {
-			administrativeTypes.addAll( extractListStringValues( listAdministrativeTypes ) );
+			administrativeTypes.addAll( extractAsBsonArrayValues( listAdministrativeTypes ) );
 			put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
 		}
 	}
 	
 	public boolean addAdministrativeCenterType( final AdministrativeCenterType value ) {
-		final boolean bool = administrativeTypes.add( value.name() );
+		final boolean bool = administrativeTypes.add( new BsonString( value.name() ) );
 		put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
 		return bool;
 	}
@@ -200,8 +203,8 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	 */
 	public static List< AddressLocation > findLikeLocationName( final String pattern ) throws AddressNotFoundException {
 		final List< AddressLocation > locations = new LinkedList<>();
-		final MongoCursor< AddressLocation > cursor = getMongoCollection().find(
-				Filters.regex( DB_FIELD_LOCATION, "/" + pattern + "/" ) ).iterator();
+		final MongoCursor< AddressLocation > cursor = getMongoCollection().find( Filters.regex( DB_FIELD_LOCATION, pattern ) )
+				.iterator();
 		if ( cursor == null )
 			throw new AddressNotFoundException( "Cannot find address-location by " + pattern );
 		while ( cursor.hasNext() ) {

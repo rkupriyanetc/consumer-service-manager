@@ -123,8 +123,7 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 			throw new IllegalArgumentException( "The parameter should not be empty" );
 		// не працює тут
 		final List< AddressTop > list = new LinkedList<>();
-		final MongoCursor< AddressTop > cursor = getMongoCollection().find( Filters.regex( DB_FIELD_NAME, "/" + pattern + "/" ) )
-				.iterator();
+		final MongoCursor< AddressTop > cursor = getMongoCollection().find( Filters.regex( DB_FIELD_NAME, pattern ) ).iterator();
 		if ( cursor == null )
 			throw new AddressNotFoundException( "Address " + pattern + " not found" );
 		while ( cursor.hasNext() ) {

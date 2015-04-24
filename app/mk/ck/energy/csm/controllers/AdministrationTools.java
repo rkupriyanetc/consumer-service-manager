@@ -472,6 +472,7 @@ public class AdministrationTools extends Controller {
 							final NodeList childNodes = node.getChildNodes();
 							String name = "";
 							String nameType = "";
+							String admType = "";
 							String id = "";
 							String nodeName = "";
 							String ref = "";
@@ -492,8 +493,11 @@ public class AdministrationTools extends Controller {
 											id = content;
 											ref = "references";
 											break;
-										case "type" :
+										case "location_type" :
 											nameType = content;
+											break;
+										case "adm_type" :
+											admType = content;
 											break;
 									}
 								}
@@ -517,27 +521,19 @@ public class AdministrationTools extends Controller {
 									}
 									break;
 							}
+							LocationType lt;
+							try {
+								lt = LocationType.valueOf( nameType );
+							}
+							catch ( final Exception e ) {
+								lt = LocationType.UNSPECIFIED;
+								LOGGER.warn( "LocationType.valueOf({}) exception", nameType );
+							}
 							final Set< AdministrativeCenterType > at = new LinkedHashSet<>();
-							final StringTokenizer st = new StringTokenizer( nameType, "," );
-							LocationType lt = null;
+							final StringTokenizer st = new StringTokenizer( admType, "," );
 							while ( st.hasMoreTokens() ) {
 								final String token = st.nextToken().trim();
 								switch ( token ) {
-									case "с." :
-										lt = LocationType.VILLAGE;
-										break;
-									case "смт." :
-										lt = LocationType.TOWNSHIP;
-										break;
-									case "м." :
-										lt = LocationType.CITY;
-										break;
-									case "х." :
-										lt = LocationType.HAMLET;
-										break;
-									case "сад." :
-										lt = LocationType.BOWERY;
-										break;
 									case "р-н" :
 										at.add( AdministrativeCenterType.DISTRICT );
 										break;
@@ -548,7 +544,8 @@ public class AdministrationTools extends Controller {
 										at.add( AdministrativeCenterType.CAPITAL );
 										break;
 									default :
-										LOGGER.debug( "This token {} is no LocationType or AdministrativeCenterType", token );
+										at.add( AdministrativeCenterType.UNSPECIFIED );
+										LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
 										break;
 								}
 							}
@@ -594,7 +591,7 @@ public class AdministrationTools extends Controller {
 						final String key = step.getReferences().get( 0 );
 						refId.appendChild( document.createTextNode( key ) );
 						location.appendChild( refId );
-						final Element type = document.createElement( "type" );
+						final Element type = document.createElement( "location_type" );
 						type.appendChild( document.createTextNode( typeStr ) );
 						location.appendChild( type );
 					}
@@ -647,6 +644,7 @@ public class AdministrationTools extends Controller {
 							final NodeList childNodes = node.getChildNodes();
 							String name = "";
 							String nameType = "";
+							String admType = "";
 							String id = "";
 							String nodeName = "";
 							String ref = "";
@@ -667,8 +665,11 @@ public class AdministrationTools extends Controller {
 											id = content;
 											ref = "references";
 											break;
-										case "type" :
+										case "location_type" :
 											nameType = content;
+											break;
+										case "adm_type" :
+											admType = content;
 											break;
 									}
 								}
@@ -693,26 +694,18 @@ public class AdministrationTools extends Controller {
 									break;
 							}
 							final Set< AdministrativeCenterType > at = new LinkedHashSet<>();
-							final StringTokenizer st = new StringTokenizer( nameType, "," );
-							LocationType lt = null;
+							final StringTokenizer st = new StringTokenizer( admType, "," );
+							LocationType lt;
+							try {
+								lt = LocationType.valueOf( nameType );
+							}
+							catch ( final Exception e ) {
+								lt = LocationType.UNSPECIFIED;
+								LOGGER.warn( "LocationType.valueOf({}) exception", nameType );
+							}
 							while ( st.hasMoreTokens() ) {
 								final String token = st.nextToken().trim();
 								switch ( token ) {
-									case "с." :
-										lt = LocationType.VILLAGE;
-										break;
-									case "смт." :
-										lt = LocationType.TOWNSHIP;
-										break;
-									case "м." :
-										lt = LocationType.CITY;
-										break;
-									case "х." :
-										lt = LocationType.HAMLET;
-										break;
-									case "сад." :
-										lt = LocationType.BOWERY;
-										break;
 									case "р-н" :
 										at.add( AdministrativeCenterType.DISTRICT );
 										break;
@@ -723,6 +716,7 @@ public class AdministrationTools extends Controller {
 										at.add( AdministrativeCenterType.CAPITAL );
 										break;
 									default :
+										at.add( AdministrativeCenterType.UNSPECIFIED );
 										LOGGER.debug( "This token {} is no LocationType or AdministrativeCenterType", token );
 										break;
 								}

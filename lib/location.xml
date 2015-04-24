@@ -3,26 +3,31 @@
   <location>
     <name>Київ</name>
     <references>Київська обл.</references>
-    <type>столиця, обл., DISTRICT, м.</type>
+    <location_type>м.</location_type>
+    <adm_type>столиця, обл., DISTRICT</adm_type>
   </location>
   <location>
     <name>Черкаси</name>
     <references>Черкаська обл.</references>
-    <type>обл., DISTRICT, м.</type>
+    <location_type>м.</location_type>
+    <adm_type>обл., DISTRICT</adm_type>
   </location>
   <location>
     <name>Львів</name>
     <references>Львівська обл.</references>
-    <type>обл., DISTRICT, м.</type>
+    <location_type>м.</location_type>
+    <adm_type>обл., DISTRICT</adm_type>
   </location>
   <location>
     <name>Маньківка</name>
     <references>Маньківський р-н</references>
-    <type>смт., DISTRICT</type>
+    <location_type>смт.</location_type>
+    <adm_type>DISTRICT</adm_type>
   </location>
   <location>
     <name>Жашків</name>
     <references>Жашківський р-н</references>
-    <type>м., DISTRICT</type>
+    <location_type>м.</location_type>
+    <adm_type>DISTRICT</adm_type>
   </location>
 </locations>
