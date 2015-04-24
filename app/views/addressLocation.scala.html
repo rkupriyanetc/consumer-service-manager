@@ -62,7 +62,7 @@
                 refId : @item.getTopAddressId()
               </div>
               <div class="col-md-3 col-xs-3">
-                name : @item.getLocationType() @item.getLocation()
+                name : @item.getLocationType().toString(mk.ck.energy.csm.model.Address.LOCATION_TYPE_SHORTNAME) @item.getLocation()
               </div>
               
               <div class="col-md-1 col-sm-1">
