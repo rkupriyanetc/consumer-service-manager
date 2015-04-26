@@ -17,6 +17,7 @@ import org.bson.conversions.Bson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
+import com.mongodb.util.JSON;
 
 public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	
@@ -106,9 +107,9 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 		return acts;
 	}
 	
-	public void setAdministrativeCenterType( final Object listAdministrativeTypes ) {
+	public void setAdministrativeCenterType( final String listAdministrativeTypes ) {
 		if ( administrativeTypes != null ) {
-			administrativeTypes.addAll( extractListStringValues( listAdministrativeTypes ) );
+			administrativeTypes.addAll( extractListStringValues( JSON.parse( listAdministrativeTypes ) ) );
 			put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
 		}
 	}
