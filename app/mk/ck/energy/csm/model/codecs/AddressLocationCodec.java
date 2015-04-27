@@ -1,7 +1,10 @@
 package mk.ck.energy.csm.model.codecs;
 
+import java.util.List;
+
 import mk.ck.energy.csm.model.AddressLocation;
 
+import org.bson.BsonArray;
 import org.bson.BsonReader;
 import org.bson.BsonValue;
 import org.bson.BsonWriter;
@@ -11,10 +14,12 @@ import org.bson.codecs.CollectibleCodec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.DocumentCodec;
 import org.bson.codecs.EncoderContext;
-
-import com.mongodb.util.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AddressLocationCodec implements CollectibleCodec< AddressLocation > {
+	
+	protected static final Logger		LOGGER															= LoggerFactory.getLogger( AddressLocationCodec.class );
 	
 	private static final String			DB_FIELD_ID													= "_id";
 	
@@ -41,7 +46,7 @@ public class AddressLocationCodec implements CollectibleCodec< AddressLocation >
 		final Document document = new Document( DB_FIELD_ID, value.getId() );
 		document.append( DB_FIELD_LOCATION, value.getLocation() );
 		document.append( DB_FIELD_LOCATION_TYPE, value.getString( DB_FIELD_LOCATION_TYPE ) );
-		document.append( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, JSON.serialize( value.get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE ) ) );
+		document.append( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, value.get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE ) );
 		final String addrTop = value.getTopAddressId();
 		if ( addrTop != null && !addrTop.isEmpty() )
 			document.append( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, addrTop );
@@ -60,7 +65,21 @@ public class AddressLocationCodec implements CollectibleCodec< AddressLocation >
 		addr.setId( document.getString( DB_FIELD_ID ) );
 		addr.put( DB_FIELD_LOCATION, document.getString( DB_FIELD_LOCATION ) );
 		addr.put( DB_FIELD_LOCATION_TYPE, document.getString( DB_FIELD_LOCATION_TYPE ) );
-		addr.setAdministrativeCenterType( JSON.serialize( document.get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE ) ) );
+		List< ? > list;
+		final Object o = document.get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE );
+		try {
+			list = List.class.cast( o );
+			addr.setAdministrativeCenterType( addr.listStringAsBsonArray( addr.extractAsListStringValues( list ) ) );
+		}
+		catch ( final ClassCastException cce ) {
+			try {
+				list = BsonArray.class.cast( o );
+				addr.setAdministrativeCenterType( list );
+			}
+			catch ( final ClassCastException ce ) {
+				LOGGER.warn( "Error casting array of AdministrativeCenterType {}", o );
+			}
+		}
 		addr.setTopAddressId( document.getString( DB_FIELD_REFERENCE_TO_TOP_ADDRESS ) );
 		return addr;
 	}
