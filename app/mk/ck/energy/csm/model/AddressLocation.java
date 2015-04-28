@@ -97,10 +97,13 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	}
 	
 	public void setAdministrativeCenterType( final Object listAdministrativeTypes ) {
-		if ( administrativeTypes != null ) {
-			administrativeTypes.addAll( ( BsonArray )listAdministrativeTypes );
-			put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
-		}
+		if ( listAdministrativeTypes != null ) {
+			if ( administrativeTypes != null ) {
+				administrativeTypes.addAll( ( BsonArray )listAdministrativeTypes );
+				put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
+			}
+		} else
+			remove( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE );
 	}
 	
 	public boolean addAdministrativeCenterType( final AdministrativeCenterType value ) {

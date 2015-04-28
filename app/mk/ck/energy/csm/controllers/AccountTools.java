@@ -89,7 +89,6 @@ public class AccountTools extends Controller {
 		@Required
 		private String					locationType;
 		
-		@Required
 		private List< String >	administrativeCenterType;
 		
 		public AddrLocation() {

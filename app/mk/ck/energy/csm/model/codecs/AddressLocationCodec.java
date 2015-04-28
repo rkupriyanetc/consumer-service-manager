@@ -67,19 +67,22 @@ public class AddressLocationCodec implements CollectibleCodec< AddressLocation >
 		addr.put( DB_FIELD_LOCATION_TYPE, document.getString( DB_FIELD_LOCATION_TYPE ) );
 		List< ? > list;
 		final Object o = document.get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE );
-		try {
-			list = List.class.cast( o );
-			addr.setAdministrativeCenterType( addr.listStringAsBsonArray( addr.extractAsListStringValues( list ) ) );
-		}
-		catch ( final ClassCastException cce ) {
+		if ( o == null )
+			addr.setAdministrativeCenterType( null );
+		else
 			try {
-				list = BsonArray.class.cast( o );
-				addr.setAdministrativeCenterType( list );
+				if ( List.class.isInstance( o ) ) {
+					list = List.class.cast( o );
+					addr.setAdministrativeCenterType( addr.listStringAsBsonArray( addr.extractAsListStringValues( list ) ) );
+				} else
+					if ( BsonArray.class.isInstance( o ) ) {
+						list = BsonArray.class.cast( o );
+						addr.setAdministrativeCenterType( list );
+					}
 			}
-			catch ( final ClassCastException ce ) {
+			catch ( final ClassCastException cce ) {
 				LOGGER.warn( "Error casting array of AdministrativeCenterType {}", o );
 			}
-		}
 		addr.setTopAddressId( document.getString( DB_FIELD_REFERENCE_TO_TOP_ADDRESS ) );
 		return addr;
 	}
