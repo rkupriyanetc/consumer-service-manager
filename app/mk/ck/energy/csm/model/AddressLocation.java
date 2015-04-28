@@ -39,6 +39,8 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	
 	private AddressTop					topAddress;
 	
+	private boolean							isRegisteredAdministrativeTypes;
+	
 	private AddressLocation() {
 		administrativeTypes = new BsonArray();
 	}
@@ -71,7 +73,10 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	}
 	
 	public void setLocation( final String location ) {
-		put( DB_FIELD_LOCATION, location );
+		if ( location != null && !location.isEmpty() )
+			put( DB_FIELD_LOCATION, location );
+		else
+			remove( DB_FIELD_LOCATION );
 	}
 	
 	/**
@@ -82,7 +87,10 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	}
 	
 	public void setLocationType( final LocationType locationType ) {
-		put( DB_FIELD_LOCATION_TYPE, locationType.name() );
+		if ( locationType != null )
+			put( DB_FIELD_LOCATION_TYPE, locationType.name() );
+		else
+			remove( DB_FIELD_LOCATION_TYPE );
 	}
 	
 	/**
@@ -90,7 +98,7 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	 */
 	public Set< AdministrativeCenterType > getAdministrativeCenterType() {
 		final Set< AdministrativeCenterType > acts = new LinkedHashSet<>();
-		if ( administrativeTypes != null || !administrativeTypes.isEmpty() )
+		if ( administrativeTypes != null && !administrativeTypes.isEmpty() )
 			for ( final BsonValue value : administrativeTypes.getValues() )
 				acts.add( AdministrativeCenterType.valueOf( value.asString().getValue() ) );
 		return acts;
@@ -98,17 +106,26 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	
 	public void setAdministrativeCenterType( final Object listAdministrativeTypes ) {
 		if ( listAdministrativeTypes != null ) {
-			if ( administrativeTypes != null ) {
-				administrativeTypes.addAll( ( BsonArray )listAdministrativeTypes );
-				put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
+			administrativeTypes.addAll( ( BsonArray )listAdministrativeTypes );
+			if ( !administrativeTypes.isEmpty() ) {
+				if ( !isRegisteredAdministrativeTypes ) {
+					put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
+					isRegisteredAdministrativeTypes = true;
+				}
+			} else {
+				remove( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE );
+				isRegisteredAdministrativeTypes = false;
 			}
-		} else
+		} else {
 			remove( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE );
+			isRegisteredAdministrativeTypes = false;
+		}
 	}
 	
 	public boolean addAdministrativeCenterType( final AdministrativeCenterType value ) {
 		final boolean bool = administrativeTypes.add( new BsonString( value.name() ) );
-		put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
+		if ( !isRegisteredAdministrativeTypes )
+			put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
 		return bool;
 	}
 	
@@ -135,14 +152,25 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 			remove( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
 	}
 	
+	// c936fa76-2634-43e1-8059-5fc151706328
 	public void save() {
+		AddressLocation alExists = null;
+		final String capital = AdministrativeCenterType.CAPITAL.name();
+		final MongoCollection< AddressLocation > collection = getCollection();
+		if ( administrativeTypes.contains( capital ) ) {
+			final Bson capitalBson = Filters.in( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, new BsonArray().add( new BsonString( capital ) ) );
+			alExists = collection.find( capitalBson ).first();
+		}
 		final Bson value = Filters.and( Filters.eq( DB_FIELD_LOCATION, getLocation() ),
 				Filters.eq( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, getTopAddressId() ),
 				Filters.eq( DB_FIELD_LOCATION_TYPE, getString( DB_FIELD_LOCATION_TYPE ) ),
 				Filters.eq( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE ) ) );
-		final AddressLocation addr = getCollection().find( value, AddressLocation.class ).first();
+		final AddressLocation addr = collection.find( value, AddressLocation.class ).first();
 		if ( addr == null )
-			insertIntoDB();
+			if ( alExists == null )
+				insertIntoDB();
+			else
+				LOGGER.warn( "Cannot save AddressLocation bun only one CAPITAL city exists there is" );
 		else
 			update( value );
 	}
