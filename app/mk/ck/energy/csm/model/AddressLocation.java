@@ -124,8 +124,10 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	
 	public boolean addAdministrativeCenterType( final AdministrativeCenterType value ) {
 		final boolean bool = administrativeTypes.add( new BsonString( value.name() ) );
-		if ( !isRegisteredAdministrativeTypes )
+		if ( !isRegisteredAdministrativeTypes ) {
 			put( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, administrativeTypes );
+			isRegisteredAdministrativeTypes = true;
+		}
 		return bool;
 	}
 	
@@ -155,10 +157,10 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	// c936fa76-2634-43e1-8059-5fc151706328
 	public void save() {
 		AddressLocation alExists = null;
-		final String capital = AdministrativeCenterType.CAPITAL.name();
+		final BsonString capital = new BsonString( AdministrativeCenterType.CAPITAL.name() );
 		final MongoCollection< AddressLocation > collection = getCollection();
 		if ( administrativeTypes.contains( capital ) ) {
-			final Bson capitalBson = Filters.in( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, new BsonArray().add( new BsonString( capital ) ) );
+			final Bson capitalBson = Filters.elemMatch( Filters.eq( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, capital ) );
 			alExists = collection.find( capitalBson ).first();
 		}
 		final Bson value = Filters.and( Filters.eq( DB_FIELD_LOCATION, getLocation() ),
