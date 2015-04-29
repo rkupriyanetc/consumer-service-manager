@@ -217,13 +217,24 @@ public class AccountTools extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< AddrTop > filledForm = ADDRTOP_FORM.bindFromRequest();
 		if ( filledForm.hasErrors() )
-			return badRequest( addressTop.render( filledForm,
-					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().iterator() ) ) );
+			return badRequest( addressTop.render(
+					filledForm,
+					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find()
+							.sort( Filters.and( Filters.eq( "top_id", 1 ), Filters.eq( "name", 1 ) ) ).iterator() ) ) );
 		else {
 			final AddrTop u = filledForm.get();
 			final AddressTop at = AddressTop.create( u.getName(), u.getRefId() );
-			LOGGER.trace( "Address top saved {}", at );
-			at.save();
+			try {
+				at.save();
+				LOGGER.trace( "Address top saved {}", at );
+			}
+			catch ( final ImpossibleCreatingException ice ) {
+				filledForm.reject( ice.getMessage() );
+				return badRequest( addressTop.render(
+						filledForm,
+						scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find()
+								.sort( Filters.and( Filters.eq( "top_id", 1 ), Filters.eq( "name", 1 ) ) ).iterator() ) ) );
+			}
 			// Тут тра переробити
 			filledForm.data().put( "id", at.getId() );
 			LOGGER.trace( "Address top saved {}", at );
@@ -239,8 +250,12 @@ public class AccountTools extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		return ok( addressLocation.render(
 				ADDRLOCATION_FORM,
-				scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find()
-						.sort( Filters.eq( "top_address_id", 1 ) ).iterator() ) ) );
+				scala.collection.JavaConversions.asScalaIterator( AddressLocation
+						.getMongoCollection()
+						.find()
+						.sort(
+								Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
+										Filters.eq( "location_type", 1 ) ) ).iterator() ) ) );
 	}
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
@@ -248,8 +263,14 @@ public class AccountTools extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< AddrLocation > filledForm = ADDRLOCATION_FORM.bindFromRequest();
 		if ( filledForm.hasErrors() )
-			return badRequest( addressLocation.render( filledForm,
-					scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find().iterator() ) ) );
+			return badRequest( addressLocation.render(
+					filledForm,
+					scala.collection.JavaConversions.asScalaIterator( AddressLocation
+							.getMongoCollection()
+							.find()
+							.sort(
+									Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
+											Filters.eq( "location_type", 1 ) ) ).iterator() ) ) );
 		else {
 			final AddrLocation u = filledForm.get();
 			final Set< AdministrativeCenterType > act = new LinkedHashSet<>();
@@ -270,21 +291,35 @@ public class AccountTools extends Controller {
 				LOGGER.trace( "Address location saved {}", al );
 			}
 			catch ( final AddressNotFoundException anfe ) {
-				LOGGER.warn( "Address Not Found in doTestLocationAddress() method!" );
-				filledForm.reject( "Address Not Found in doTestLocationAddress() method!" );
-				return badRequest( addressLocation.render( filledForm,
-						scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find().iterator() ) ) );
+				filledForm.reject( anfe.getMessage() );
+				return badRequest( addressLocation.render(
+						filledForm,
+						scala.collection.JavaConversions.asScalaIterator( AddressLocation
+								.getMongoCollection()
+								.find()
+								.sort(
+										Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
+												Filters.eq( "location_type", 1 ) ) ).iterator() ) ) );
 			}
 			catch ( final ImpossibleCreatingException ice ) {
-				LOGGER.warn( "Cannot save AddressLocation bun only one CAPITAL city. Your: {}", al );
-				filledForm.reject( "Allowed only one CAPITAL city in DB" );
-				return badRequest( addressLocation.render( filledForm,
-						scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find().iterator() ) ) );
+				filledForm.reject( ice.getMessage() );
+				return badRequest( addressLocation.render(
+						filledForm,
+						scala.collection.JavaConversions.asScalaIterator( AddressLocation
+								.getMongoCollection()
+								.find()
+								.sort(
+										Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
+												Filters.eq( "location_type", 1 ) ) ).iterator() ) ) );
 			}
 			return ok( addressLocation.render(
 					filledForm,
-					scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find()
-							.sort( Filters.eq( "top_address_id", 1 ) ).iterator() ) ) );
+					scala.collection.JavaConversions.asScalaIterator( AddressLocation
+							.getMongoCollection()
+							.find()
+							.sort(
+									Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
+											Filters.eq( "location_type", 1 ) ) ).iterator() ) ) );
 		}
 	}
 	

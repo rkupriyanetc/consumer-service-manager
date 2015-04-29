@@ -94,12 +94,17 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 			remove( DB_FIELD_REFERENCE_TO_TOP_ADDRESS );
 	}
 	
-	public void save() {
+	public void save() throws ImpossibleCreatingException {
 		final Bson value = Filters.and( Filters.eq( DB_FIELD_NAME, getName() ),
 				Filters.eq( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, getTopAddressId() ) );
 		final AddressTop addr = getCollection().find( value, AddressTop.class ).first();
 		if ( addr == null )
 			insertIntoDB();
+		else {
+			final String top = this.toString();
+			LOGGER.warn( "Cannot save AddressTop. Top address exists: {}", top );
+			throw new ImpossibleCreatingException( "Top address exists " + top );
+		}
 	}
 	
 	public static AddressTop findById( final String id ) throws AddressNotFoundException {

@@ -169,11 +169,14 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 			final AddressLocation addr = collection.find( value, AddressLocation.class ).first();
 			if ( addr == null )
 				insertIntoDB();
-			else
-				update( Filters.eq( DB_FIELD_ID, addr.getId() ), addr );
+			else {
+				final String location = this.toString();
+				LOGGER.warn( "Cannot save AddressLocation. Location address exists: {}", location );
+				throw new ImpossibleCreatingException( "Location address exists " + location );
+			}
 		} else {
-			LOGGER.warn( "Cannot save AddressLocation bun only one CAPITAL city exists there is. Your: {}", this );
-			throw new ImpossibleCreatingException( "Allowed only one CAPITAL city in DB" );
+			LOGGER.warn( "Cannot save AddressLocation bun only one CAPITAL city. Your: {}", this );
+			throw new ImpossibleCreatingException( "Allowed only one CAPITAL city!" );
 		}
 	}
 	

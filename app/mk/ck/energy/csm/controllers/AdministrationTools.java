@@ -434,17 +434,22 @@ public class AdministrationTools extends Controller {
 								case "references" :
 									try {
 										final List< AddressTop > addr = AddressTop.findLikeName( id );
-										// Тут тра переробити
-										AddressTop.create( name, addr.get( 0 ).getId() ).save();
+										final AddressTop at = AddressTop.create( name, addr.get( 0 ).getId() );
+										at.save();
+										LOGGER.trace( "Address top saved {}", at );
 									}
-									catch ( final AddressNotFoundException anfe ) {
-										LOGGER.error( "Cannot find addressTop", anfe );
-									}
+									catch ( final AddressNotFoundException anfe ) {}
+									catch ( final ImpossibleCreatingException ice ) {}
 									break;
 								default :
 									if ( "0".equals( id ) )
 										id = null;
-									AddressTop.create( name, id ).save();
+									try {
+										final AddressTop aat = AddressTop.create( name, id );
+										aat.save();
+										LOGGER.trace( "Address top saved {}", aat );
+									}
+									catch ( final ImpossibleCreatingException ice ) {}
 									break;
 							}
 						}
