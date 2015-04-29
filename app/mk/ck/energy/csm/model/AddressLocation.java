@@ -157,10 +157,11 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	// c936fa76-2634-43e1-8059-5fc151706328
 	public void save() {
 		AddressLocation alExists = null;
-		final BsonString capital = new BsonString( AdministrativeCenterType.CAPITAL.name() );
+		final String capital = AdministrativeCenterType.CAPITAL.name();
 		final MongoCollection< AddressLocation > collection = getCollection();
-		if ( administrativeTypes.contains( capital ) ) {
-			final Bson capitalBson = Filters.elemMatch( Filters.eq( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, capital ) );
+		if ( administrativeTypes.contains( new BsonString( capital ) ) ) {
+			final Bson capitalBson = Filters.eq( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE,
+					Filters.eq( "$elemMatch", Filters.eq( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, capital ) ) );
 			alExists = collection.find( capitalBson ).first();
 		}
 		final Bson value = Filters.and( Filters.eq( DB_FIELD_LOCATION, getLocation() ),

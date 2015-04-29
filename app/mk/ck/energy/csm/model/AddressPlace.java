@@ -7,7 +7,6 @@ import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWrapper;
-import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 
@@ -64,7 +63,7 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 	
 	public void save() {
 		final Bson value = Filters.and( Filters.eq( DB_FIELD_STREET_NAME, getStreet() ),
-				Filters.eq( DB_FIELD_STREET_TYPE, get( DB_FIELD_STREET_TYPE ) ) );
+				Filters.eq( DB_FIELD_STREET_TYPE, getString( DB_FIELD_STREET_TYPE ) ) );
 		final AddressPlace addr = getCollection().find( value, AddressPlace.class ).first();
 		if ( addr == null )
 			insertIntoDB();
@@ -74,7 +73,7 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 	
 	public static AddressPlace find( final String streetName, final StreetType streetType ) throws AddressNotFoundException {
 		final AddressPlace doc = getMongoCollection().find(
-				Filters.and( new Document( DB_FIELD_STREET_NAME, streetName ), new Document( DB_FIELD_STREET_TYPE, streetType.name() ) ) )
+				Filters.and( Filters.eq( DB_FIELD_STREET_NAME, streetName ), Filters.eq( DB_FIELD_STREET_TYPE, streetType.name() ) ) )
 				.first();
 		if ( doc == null )
 			throw new AddressNotFoundException( StreetType.optionsShortname().get( streetType.name() ) + " " + streetName
@@ -84,7 +83,7 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 	
 	public static AddressPlace findById( final String id ) throws AddressNotFoundException {
 		if ( id != null && !id.isEmpty() ) {
-			final AddressPlace doc = getMongoCollection().find( new Document( DB_FIELD_ID, id ) ).first();
+			final AddressPlace doc = getMongoCollection().find( Filters.eq( DB_FIELD_ID, id ) ).first();
 			if ( doc == null )
 				throw new AddressNotFoundException( "Cannot find address-place by " + id );
 			return doc;
@@ -94,8 +93,7 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 	
 	public static Map< String, String > getMap() {
 		final Map< String, String > references = new LinkedHashMap< String, String >( 0 );
-		final Document sort = new Document( DB_FIELD_STREET_TYPE, 1 );
-		sort.put( DB_FIELD_STREET_NAME, 1 );
+		final Bson sort = Filters.and( Filters.eq( DB_FIELD_STREET_TYPE, 1 ), Filters.eq( DB_FIELD_STREET_NAME, 1 ) );
 		final MongoCursor< AddressPlace > cursor = getMongoCollection().find().sort( sort ).iterator();
 		while ( cursor.hasNext() ) {
 			final AddressPlace place = cursor.next();

@@ -1,7 +1,6 @@
 package mk.ck.energy.csm.model;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import org.bson.Document;
 
 public class Documents {
 	
@@ -47,8 +46,8 @@ public class Documents {
 		this.idCode = id;
 	}
 	
-	DBObject getDBObject() {
-		final DBObject doc = new BasicDBObject();
+	Document getDocument() {
+		final Document doc = new Document();
 		if ( idCode != null && !idCode.isEmpty() )
 			doc.put( DB_FIELD_ID_CODE, idCode );
 		if ( passportSeries != null && !passportSeries.isEmpty() )
