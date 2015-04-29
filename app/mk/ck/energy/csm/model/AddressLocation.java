@@ -155,27 +155,26 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	}
 	
 	// c936fa76-2634-43e1-8059-5fc151706328
-	public void save() {
+	public void save() throws ImpossibleCreatingException {
 		AddressLocation alExists = null;
 		final String capital = AdministrativeCenterType.CAPITAL.name();
 		final MongoCollection< AddressLocation > collection = getCollection();
-		if ( administrativeTypes.contains( new BsonString( capital ) ) ) {
-			final Bson capitalBson = Filters.eq( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE,
-					Filters.eq( "$elemMatch", Filters.eq( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, capital ) ) );
-			alExists = collection.find( capitalBson ).first();
-		}
-		final Bson value = Filters.and( Filters.eq( DB_FIELD_LOCATION, getLocation() ),
-				Filters.eq( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, getTopAddressId() ),
-				Filters.eq( DB_FIELD_LOCATION_TYPE, getString( DB_FIELD_LOCATION_TYPE ) ),
-				Filters.eq( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE ) ) );
-		final AddressLocation addr = collection.find( value, AddressLocation.class ).first();
-		if ( addr == null )
-			if ( alExists == null )
+		if ( administrativeTypes.contains( new BsonString( capital ) ) )
+			alExists = collection.find( Filters.in( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, capital ) ).first();
+		if ( alExists == null ) {
+			final Bson value = Filters.and( Filters.eq( DB_FIELD_LOCATION, getLocation() ),
+					Filters.eq( DB_FIELD_REFERENCE_TO_TOP_ADDRESS, getTopAddressId() ),
+					Filters.eq( DB_FIELD_LOCATION_TYPE, getString( DB_FIELD_LOCATION_TYPE ) ),
+					Filters.eq( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE, get( DB_FIELD_ADMINISTRATIVE_CENTER_TYPE ) ) );
+			final AddressLocation addr = collection.find( value, AddressLocation.class ).first();
+			if ( addr == null )
 				insertIntoDB();
 			else
-				LOGGER.warn( "Cannot save AddressLocation bun only one CAPITAL city exists there is" );
-		else
-			update( value );
+				update( Filters.eq( DB_FIELD_ID, addr.getId() ), addr );
+		} else {
+			LOGGER.warn( "Cannot save AddressLocation bun only one CAPITAL city exists there is. Your: {}", this );
+			throw new ImpossibleCreatingException( "Allowed only one CAPITAL city in DB" );
+		}
 	}
 	
 	public static AddressLocation create() {

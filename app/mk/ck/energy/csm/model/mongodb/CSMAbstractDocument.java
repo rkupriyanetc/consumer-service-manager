@@ -43,17 +43,16 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 	}
 	
 	public String createId() {
-		if ( id == null )
+		if ( getString( DB_FIELD_ID ) == null )
 			setId( UUID.randomUUID().toString().toLowerCase() );
 		return id;
 	}
 	
-	public UpdateResult update( final Bson updateValue ) {
+	public UpdateResult update( final Bson query, final Bson updateValue ) {
 		UpdateResult ur;
 		try {
-			createId();
-			ur = getCollection().updateOne( Filters.eq( DB_FIELD_ID, id ), Filters.eq( "$set", updateValue ),
-					new UpdateOptions().upsert( true ) );
+			// createId();
+			ur = getCollection().updateOne( query, Filters.eq( "$set", updateValue ), new UpdateOptions().upsert( true ) );
 			LOGGER.trace( "Saved class {}. ID is {}. UpdateResult is {}", getClass(), id, ur.isModifiedCountAvailable() );
 			return ur;
 		}

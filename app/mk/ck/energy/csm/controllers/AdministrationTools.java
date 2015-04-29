@@ -45,6 +45,7 @@ import mk.ck.energy.csm.model.Consumer;
 import mk.ck.energy.csm.model.ConsumerStatusType;
 import mk.ck.energy.csm.model.Database;
 import mk.ck.energy.csm.model.HouseType;
+import mk.ck.energy.csm.model.ImpossibleCreatingException;
 import mk.ck.energy.csm.model.LocationType;
 import mk.ck.energy.csm.model.Meter;
 import mk.ck.energy.csm.model.MeterDevice;
@@ -549,7 +550,14 @@ public class AdministrationTools extends Controller {
 										break;
 								}
 							}
-							AddressLocation.create( addr.get( 0 ), name, lt, at ).save();
+							AddressLocation al = null;
+							try {
+								al = AddressLocation.create( addr.get( 0 ), name, lt, at );
+								al.save();
+							}
+							catch ( final ImpossibleCreatingException ice ) {
+								LOGGER.warn( "Cannot save AddressLocation bun only one CAPITAL city. Your: {}", al );
+							}
 						}
 					}
 				}
@@ -721,7 +729,14 @@ public class AdministrationTools extends Controller {
 										break;
 								}
 							}
-							AddressLocation.create( addr.get( 0 ), name, lt, at ).save();
+							AddressLocation al = null;
+							try {
+								al = AddressLocation.create( addr.get( 0 ), name, lt, at );
+								al.save();
+							}
+							catch ( final ImpossibleCreatingException ice ) {
+								LOGGER.warn( "Cannot save AddressLocation bun only one CAPITAL city. Your: {}", al );
+							}
 						}
 					}
 				}

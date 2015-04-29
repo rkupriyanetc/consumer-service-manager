@@ -252,11 +252,11 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	}
 	
 	public UpdateResult updateRoles() {
-		return update( Filters.eq( "$set", Filters.eq( DB_FIELD_ROLES, roles ) ) );
+		return update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( "$set", Filters.eq( DB_FIELD_ROLES, roles ) ) );
 	}
 	
 	public UpdateResult updateLinkedAccounts() {
-		return update( Filters.eq( "$set", Filters.eq( DB_FIELD_LINKED_ACCOUNTS, linkeds ) ) );
+		return update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( "$set", Filters.eq( DB_FIELD_LINKED_ACCOUNTS, linkeds ) ) );
 	}
 	
 	public static User create( final AuthUser authUser ) {
@@ -384,27 +384,27 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		// do all other merging stuff here - like resources, etc.
 		if ( getEmail() == null ) {
 			setEmail( otherUser.getEmail() );
-			update( Filters.eq( DB_FIELD_EMAIL, getEmail() ) );
+			update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( DB_FIELD_EMAIL, getEmail() ) );
 		}
 		final String otherName = otherUser.getName();
 		if ( getName() == null && otherName != null ) {
 			setName( otherName );
-			update( Filters.eq( DB_FIELD_NAME, otherName ) );
+			update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( DB_FIELD_NAME, otherName ) );
 		}
 		final String otherFName = otherUser.getFirstName();
 		if ( getFirstName() == null && otherFName != null ) {
 			setFirstName( otherFName );
-			update( Filters.eq( DB_FIELD_FIRST_NAME, otherFName ) );
+			update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( DB_FIELD_FIRST_NAME, otherFName ) );
 		}
 		final String otherLName = otherUser.getLastName();
 		if ( getLastName() == null && otherLName != null ) {
 			setLastName( otherLName );
-			update( Filters.eq( DB_FIELD_LAST_NAME, otherLName ) );
+			update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( DB_FIELD_LAST_NAME, otherLName ) );
 		}
 		// deactivate the merged user that got added to this one
 		otherUser.setActive( false );
 		// Зберегти лише linkedAccounts, Email, Name. А також otherUser.Active
-		otherUser.update( Filters.eq( DB_FIELD_ACTIVE, false ) );
+		otherUser.update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( DB_FIELD_ACTIVE, false ) );
 	}
 	
 	public static void merge( final AuthUser oldAuthUser, final AuthUser newAuthUser ) {
@@ -430,7 +430,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		final long lastLogin = System.currentTimeMillis();
 		setLastLogin( lastLogin );
 		// Зберегти лише LastLogin
-		update( Filters.eq( DB_FIELD_LAST_LOGIN, lastLogin ) );
+		update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( DB_FIELD_LAST_LOGIN, lastLogin ) );
 	}
 	
 	public static String getCollectorId() {
@@ -502,7 +502,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		// You might want to wrap this into a transaction
 		setEmailValidated( true );
 		// Зберегти лише EmailValidated
-		update( Filters.eq( DB_FIELD_EMAIL_VALIDATED, true ) );
+		update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( DB_FIELD_EMAIL_VALIDATED, true ) );
 		TokenAction.deleteByUser( this, TokenType.EMAIL_VERIFICATION );
 	}
 	
@@ -515,7 +515,7 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 			linkeds.remove( existing.getDocument() );
 		addLinkedAccount( LinkedAccount.getInstance( authUser ) );
 		// Зберегти лише LinkedAccount
-		update( Filters.eq( DB_FIELD_LINKED_ACCOUNTS, linkeds ) );
+		update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( DB_FIELD_LINKED_ACCOUNTS, linkeds ) );
 	}
 	
 	public void resetPassword( final UsernamePasswordAuthUser authUser, final boolean create ) {

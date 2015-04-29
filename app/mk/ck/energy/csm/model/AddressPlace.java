@@ -68,7 +68,7 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 		if ( addr == null )
 			insertIntoDB();
 		else
-			update( value );
+			update( Filters.eq( DB_FIELD_ID, addr.getId() ), addr );
 	}
 	
 	public static AddressPlace find( final String streetName, final StreetType streetType ) throws AddressNotFoundException {
