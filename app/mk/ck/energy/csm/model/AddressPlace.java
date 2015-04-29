@@ -61,14 +61,17 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 		put( DB_FIELD_STREET_TYPE, streetType.name() );
 	}
 	
-	public void save() {
+	public void save() throws ImpossibleCreatingException {
 		final Bson value = Filters.and( Filters.eq( DB_FIELD_STREET_NAME, getStreet() ),
 				Filters.eq( DB_FIELD_STREET_TYPE, getString( DB_FIELD_STREET_TYPE ) ) );
 		final AddressPlace addr = getCollection().find( value, AddressPlace.class ).first();
 		if ( addr == null )
 			insertIntoDB();
-		else
-			update( Filters.eq( DB_FIELD_ID, addr.getId() ), addr );
+		else {
+			final String street = this.toString();
+			LOGGER.warn( "Cannot save AddressPlace. Place address exists: {}", street );
+			throw new ImpossibleCreatingException( "Place address exists " + street );
+		}
 	}
 	
 	public static AddressPlace find( final String streetName, final StreetType streetType ) throws AddressNotFoundException {

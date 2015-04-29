@@ -856,7 +856,11 @@ public class AdministrationTools extends Controller {
 							type.appendChild( document.createTextNode( typeStr ) );
 							street.appendChild( type );
 						} else
-							AddressPlace.create( st, nameStr ).save();
+							try {
+								final AddressPlace al = AddressPlace.create( st, nameStr );
+								al.save();
+							}
+							catch ( final ImpossibleCreatingException ice ) {}
 					}
 					final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 					transformerFactory.setAttribute( "indent-number", 2 );
@@ -950,7 +954,11 @@ public class AdministrationTools extends Controller {
 									st = StreetType.UNCERTAIN;
 									break;
 							}
-							AddressPlace.create( st, name ).save();
+							try {
+								final AddressPlace al = AddressPlace.create( st, name );
+								al.save();
+							}
+							catch ( final ImpossibleCreatingException ice ) {}
 						}
 					}
 				}

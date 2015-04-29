@@ -329,7 +329,7 @@ public class AccountTools extends Controller {
 		return ok( addressPlace.render(
 				ADDRPLACE_FORM,
 				scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find()
-						.sort( Filters.eq( "street", 1 ) ).iterator() ) ) );
+						.sort( Filters.and( Filters.eq( "street", 1 ), Filters.eq( "street_type", -1 ) ) ).iterator() ) ) );
 	}
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
@@ -337,19 +337,30 @@ public class AccountTools extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< AddrPlace > filledForm = ADDRPLACE_FORM.bindFromRequest();
 		if ( filledForm.hasErrors() )
-			return badRequest( addressPlace.render( filledForm,
-					scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find().iterator() ) ) );
+			return badRequest( addressPlace.render(
+					filledForm,
+					scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find()
+							.sort( Filters.and( Filters.eq( "street", 1 ), Filters.eq( "street_type", -1 ) ) ).iterator() ) ) );
 		else {
 			final AddrPlace u = filledForm.get();
 			final AddressPlace ap = AddressPlace.create( StreetType.valueOf( u.getStreetType() ), u.getStreet() );
-			ap.save();
+			try {
+				ap.save();
+			}
+			catch ( final ImpossibleCreatingException ice ) {
+				filledForm.reject( ice.getMessage() );
+				return badRequest( addressPlace.render(
+						filledForm,
+						scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find()
+								.sort( Filters.and( Filters.eq( "street", 1 ), Filters.eq( "street_type", -1 ) ) ).iterator() ) ) );
+			}
 			// Тут тра переробити
 			filledForm.data().put( "id", ap.getId() );
 			LOGGER.trace( "Address place saved {}", ap );
 			return ok( addressPlace.render(
 					filledForm,
 					scala.collection.JavaConversions.asScalaIterator( AddressPlace.getMongoCollection().find()
-							.sort( Filters.eq( "street", 1 ) ).iterator() ) ) );
+							.sort( Filters.and( Filters.eq( "street", 1 ), Filters.eq( "street_type", -1 ) ) ).iterator() ) ) );
 		}
 	}
 	

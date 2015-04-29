@@ -93,4 +93,8 @@ public enum StreetType {
 			return false;
 		return name().equals( o.name() );
 	}
+	
+	public String toString( final String method ) {
+		return Messages.get( method + "." + name().toLowerCase() );
+	}
 }
