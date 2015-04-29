@@ -75,7 +75,6 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 		createId();
 		try {
 			getCollection().insertOne( ( I )this );
-			LOGGER.trace( "Added a new document {}", this );
 		}
 		catch ( final MongoWriteException mwe ) {
 			LOGGER.warn( "When you add a new document an error {}", mwe );

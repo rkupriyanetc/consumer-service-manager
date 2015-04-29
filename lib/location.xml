@@ -30,4 +30,9 @@
     <location_type>м.</location_type>
     <adm_type>DISTRICT</adm_type>
   </location>
+  <location>
+    <name>Нестерівка</name>
+    <references>Маньківський р-н</references>
+    <location_type>с.</location_type>
+  </location>
 </locations>

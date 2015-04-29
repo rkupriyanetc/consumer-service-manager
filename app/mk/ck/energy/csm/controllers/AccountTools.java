@@ -255,7 +255,7 @@ public class AccountTools extends Controller {
 						.find()
 						.sort(
 								Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
-										Filters.eq( "location_type", 1 ) ) ).iterator() ) ) );
+										Filters.eq( "location_type", 1 ), Filters.eq( "location", 1 ) ) ).iterator() ) ) );
 	}
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
@@ -270,7 +270,7 @@ public class AccountTools extends Controller {
 							.find()
 							.sort(
 									Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
-											Filters.eq( "location_type", 1 ) ) ).iterator() ) ) );
+											Filters.eq( "location_type", 1 ), Filters.eq( "location", 1 ) ) ).iterator() ) ) );
 		else {
 			final AddrLocation u = filledForm.get();
 			final Set< AdministrativeCenterType > act = new LinkedHashSet<>();
@@ -299,7 +299,7 @@ public class AccountTools extends Controller {
 								.find()
 								.sort(
 										Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
-												Filters.eq( "location_type", 1 ) ) ).iterator() ) ) );
+												Filters.eq( "location_type", 1 ), Filters.eq( "location", 1 ) ) ).iterator() ) ) );
 			}
 			catch ( final ImpossibleCreatingException ice ) {
 				filledForm.reject( ice.getMessage() );
@@ -310,7 +310,7 @@ public class AccountTools extends Controller {
 								.find()
 								.sort(
 										Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
-												Filters.eq( "location_type", 1 ) ) ).iterator() ) ) );
+												Filters.eq( "location_type", 1 ), Filters.eq( "location", 1 ) ) ).iterator() ) ) );
 			}
 			return ok( addressLocation.render(
 					filledForm,
@@ -319,7 +319,7 @@ public class AccountTools extends Controller {
 							.find()
 							.sort(
 									Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
-											Filters.eq( "location_type", 1 ) ) ).iterator() ) ) );
+											Filters.eq( "location_type", 1 ), Filters.eq( "location", 1 ) ) ).iterator() ) ) );
 		}
 	}
 	
@@ -360,14 +360,16 @@ public class AccountTools extends Controller {
 			return ok( addressTop.render(
 					ADDRTOP_FORM,
 					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find()
-							.sort( Filters.eq( "top_id", 1 ) ).iterator() ) ) );
+							.sort( Filters.and( Filters.eq( "top_id", 1 ), Filters.eq( "name", 1 ) ) ).iterator() ) ) );
 		}
 		catch ( final Exception e ) {
 			flash( Application.FLASH_MESSAGE_KEY, e.getMessage() );
 			final Form< AddrTop > filledForm = ADDRTOP_FORM.bindFromRequest();
 			filledForm.reject( e.getMessage() );
-			return badRequest( addressTop.render( filledForm,
-					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find().iterator() ) ) );
+			return badRequest( addressTop.render(
+					filledForm,
+					scala.collection.JavaConversions.asScalaIterator( AddressTop.getMongoCollection().find()
+							.sort( Filters.and( Filters.eq( "top_id", 1 ), Filters.eq( "name", 1 ) ) ).iterator() ) ) );
 		}
 	}
 	
@@ -377,8 +379,12 @@ public class AccountTools extends Controller {
 			AddressLocation.remove( AddressLocation.findById( id ) );
 			return ok( addressLocation.render(
 					ADDRLOCATION_FORM,
-					scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find()
-							.sort( Filters.eq( "_id", 1 ) ).iterator() ) ) );
+					scala.collection.JavaConversions.asScalaIterator( AddressLocation
+							.getMongoCollection()
+							.find()
+							.sort(
+									Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
+											Filters.eq( "location_type", 1 ), Filters.eq( "location", 1 ) ) ).iterator() ) ) );
 		}
 		catch ( final Exception e ) {
 			flash( Application.FLASH_MESSAGE_KEY, e.getMessage() );
@@ -386,8 +392,12 @@ public class AccountTools extends Controller {
 			filledForm.reject( e.getMessage() );
 			return badRequest( addressLocation.render(
 					filledForm,
-					scala.collection.JavaConversions.asScalaIterator( AddressLocation.getMongoCollection().find()
-							.sort( Filters.eq( "top_address_id", 1 ) ).iterator() ) ) );
+					scala.collection.JavaConversions.asScalaIterator( AddressLocation
+							.getMongoCollection()
+							.find()
+							.sort(
+									Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
+											Filters.eq( "location_type", 1 ), Filters.eq( "location", 1 ) ) ).iterator() ) ) );
 		}
 	}
 }

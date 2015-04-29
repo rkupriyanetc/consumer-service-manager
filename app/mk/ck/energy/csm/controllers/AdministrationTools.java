@@ -491,7 +491,7 @@ public class AdministrationTools extends Controller {
 										case "name" :
 											name = content;
 											break;
-										case "refId" :
+										case "ref_id" :
 											id = content;
 											ref = "refId";
 											break;
@@ -528,14 +528,27 @@ public class AdministrationTools extends Controller {
 									break;
 							}
 							LocationType lt;
-							try {
-								lt = LocationType.valueOf( nameType );
+							switch ( nameType ) {
+								case "с." :
+									lt = LocationType.VILLAGE;
+									break;
+								case "м." :
+									lt = LocationType.CITY;
+									break;
+								case "смт." :
+									lt = LocationType.TOWNSHIP;
+									break;
+								case "х." :
+									lt = LocationType.HAMLET;
+									break;
+								case "сад." :
+									lt = LocationType.BOWERY;
+									break;
+								default :
+									lt = LocationType.UNSPECIFIED;
+									break;
 							}
-							catch ( final Exception e ) {
-								lt = LocationType.UNSPECIFIED;
-								LOGGER.warn( "LocationType.valueOf({}) exception", nameType );
-							}
-							final Set< AdministrativeCenterType > at = new LinkedHashSet<>();
+							Set< AdministrativeCenterType > at = new LinkedHashSet<>();
 							final StringTokenizer st = new StringTokenizer( admType, "," );
 							while ( st.hasMoreTokens() ) {
 								final String token = st.nextToken().trim();
@@ -550,19 +563,27 @@ public class AdministrationTools extends Controller {
 										at.add( AdministrativeCenterType.CAPITAL );
 										break;
 									default :
-										at.add( AdministrativeCenterType.UNSPECIFIED );
-										LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
+										try {
+											final AdministrativeCenterType act = AdministrativeCenterType.valueOf( token );
+											at.add( act );
+										}
+										catch ( final IllegalArgumentException iae ) {
+											LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
+										}
+										catch ( final NullPointerException npe ) {
+											LOGGER.debug( "Parameter should not be empty in valueOf({})", token );
+										}
 										break;
 								}
 							}
 							AddressLocation al = null;
+							if ( at.isEmpty() )
+								at = null;
 							try {
 								al = AddressLocation.create( addr.get( 0 ), name, lt, at );
 								al.save();
 							}
-							catch ( final ImpossibleCreatingException ice ) {
-								LOGGER.warn( "Cannot save AddressLocation bun only one CAPITAL city. Your: {}", al );
-							}
+							catch ( final ImpossibleCreatingException ice ) {}
 						}
 					}
 				}
@@ -600,7 +621,7 @@ public class AdministrationTools extends Controller {
 						final Element name = document.createElement( "name" );
 						name.appendChild( document.createTextNode( nameStr ) );
 						location.appendChild( name );
-						final Element refId = document.createElement( "refId" );
+						final Element refId = document.createElement( "ref_id" );
 						final String key = step.getReferences().get( 0 );
 						refId.appendChild( document.createTextNode( key ) );
 						location.appendChild( refId );
@@ -670,7 +691,7 @@ public class AdministrationTools extends Controller {
 										case "name" :
 											name = content;
 											break;
-										case "refId" :
+										case "ref_id" :
 											id = content;
 											ref = "refId";
 											break;
@@ -706,16 +727,29 @@ public class AdministrationTools extends Controller {
 									}
 									break;
 							}
-							final Set< AdministrativeCenterType > at = new LinkedHashSet<>();
-							final StringTokenizer st = new StringTokenizer( admType, "," );
 							LocationType lt;
-							try {
-								lt = LocationType.valueOf( nameType );
+							switch ( nameType ) {
+								case "с." :
+									lt = LocationType.VILLAGE;
+									break;
+								case "м." :
+									lt = LocationType.CITY;
+									break;
+								case "смт." :
+									lt = LocationType.TOWNSHIP;
+									break;
+								case "х." :
+									lt = LocationType.HAMLET;
+									break;
+								case "сад." :
+									lt = LocationType.BOWERY;
+									break;
+								default :
+									lt = LocationType.UNSPECIFIED;
+									break;
 							}
-							catch ( final Exception e ) {
-								lt = LocationType.UNSPECIFIED;
-								LOGGER.warn( "LocationType.valueOf({}) exception", nameType );
-							}
+							Set< AdministrativeCenterType > at = new LinkedHashSet<>();
+							final StringTokenizer st = new StringTokenizer( admType, "," );
 							while ( st.hasMoreTokens() ) {
 								final String token = st.nextToken().trim();
 								switch ( token ) {
@@ -729,19 +763,27 @@ public class AdministrationTools extends Controller {
 										at.add( AdministrativeCenterType.CAPITAL );
 										break;
 									default :
-										at.add( AdministrativeCenterType.UNSPECIFIED );
-										LOGGER.debug( "This token {} is no LocationType or AdministrativeCenterType", token );
+										try {
+											final AdministrativeCenterType act = AdministrativeCenterType.valueOf( token );
+											at.add( act );
+										}
+										catch ( final IllegalArgumentException iae ) {
+											LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
+										}
+										catch ( final NullPointerException npe ) {
+											LOGGER.debug( "Parameter should not be empty in valueOf({})", token );
+										}
 										break;
 								}
 							}
 							AddressLocation al = null;
+							if ( at.isEmpty() )
+								at = null;
 							try {
 								al = AddressLocation.create( addr.get( 0 ), name, lt, at );
 								al.save();
 							}
-							catch ( final ImpossibleCreatingException ice ) {
-								LOGGER.warn( "Cannot save AddressLocation bun only one CAPITAL city. Your: {}", al );
-							}
+							catch ( final ImpossibleCreatingException ice ) {}
 						}
 					}
 				}

@@ -189,8 +189,11 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 		final AddressLocation al = new AddressLocation();
 		al.setLocation( location );
 		al.setTopAddress( topId );
-		for ( final AdministrativeCenterType act : administrativeTypes )
-			al.addAdministrativeCenterType( act );
+		if ( administrativeTypes != null )
+			for ( final AdministrativeCenterType act : administrativeTypes )
+				al.addAdministrativeCenterType( act );
+		else
+			al.setAdministrativeCenterType( null );
 		al.setLocationType( locationType );
 		return al;
 	}
