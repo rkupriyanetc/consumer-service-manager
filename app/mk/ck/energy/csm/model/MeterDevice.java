@@ -1,38 +1,39 @@
 package mk.ck.energy.csm.model;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoException;
-import com.mongodb.QueryBuilder;
+import org.bson.BsonDocument;
+import org.bson.BsonDocumentWrapper;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.conversions.Bson;
 
-public class MeterDevice {
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
+
+public class MeterDevice extends CSMAbstractDocument< MeterDevice > {
 	
-	private static final Logger	LOGGER									= LoggerFactory.getLogger( MeterDevice.class );
+	private static final long		serialVersionUID								= 1L;
 	
-	static final String					DB_FIELD_ID							= "_id";
+	private static final String	COLLECTION_NAME_METERS_DEVICES	= "metersDevices";
 	
-	static final String					DB_FIELD_NAME						= "name";
+	static final String					DB_FIELD_NAME										= "name";
 	
-	static final String					DB_FIELD_PHASING				= "phasing";
+	static final String					DB_FIELD_PHASING								= "phasing";
 	
-	static final String					DB_FIELD_METHOD_TYPE		= "method";
+	static final String					DB_FIELD_METHOD_TYPE						= "method";
 	
-	static final String					DB_FIELD_INDUCTIVE_TYPE	= "inductive";
+	static final String					DB_FIELD_INDUCTIVE_TYPE					= "inductive";
 	
-	static final String					DB_FIELD_REGISTER_TYPE	= "register";
+	static final String					DB_FIELD_REGISTER_TYPE					= "register";
 	
-	static final String					DB_FIELD_PRECISION			= "precision";
+	static final String					DB_FIELD_PRECISION							= "precision";
 	
-	static final String					DB_FIELD_INTERVAL				= "interval";
+	static final String					DB_FIELD_INTERVAL								= "interval";
 	
 	public enum MethodType {
 		INDUCTION, ELECTRONIC,
@@ -46,28 +47,6 @@ public class MeterDevice {
 		STATE, SELF_REGIONAL, DISTRICT,
 	}
 	
-	private long					id;
-	
-	/*
-	 * Тип, назва лічильника
-	 */
-	private String				name;
-	
-	/*
-	 * Одно- чи Три- фазний
-	 */
-	private byte					phasing;
-	
-	private MethodType		methodType;
-	
-	private InductiveType	inductiveType;
-	
-	private RegisterType	registerType;
-	
-	private double				precision;
-	
-	private byte					interval;
-	
 	private MeterDevice() {}
 	
 	public static MeterDevice create( final String name, final byte phasing, final MethodType methodType,
@@ -75,7 +54,7 @@ public class MeterDevice {
 		final MeterDevice meter = new MeterDevice();
 		meter.setName( name );
 		meter.setPhasing( phasing == 1 || phasing == 3 ? phasing : 1 );
-		meter.setMethodType( methodType == null ? MethodType.INDUCTION : methodType );
+		meter.setMethodType( methodType == null ? MethodType.ELECTRONIC : methodType );
 		meter.setInductiveType( inductiveType == null ? InductiveType.ACTIVE : inductiveType );
 		meter.setRegisterType( registerType == null ? RegisterType.STATE : registerType );
 		meter.setPrecision( precision );
@@ -83,177 +62,135 @@ public class MeterDevice {
 		return meter;
 	}
 	
-	public static MeterDevice create( final DBObject dbo ) {
-		if ( dbo == null )
-			return null;
-		final MeterDevice devices = new MeterDevice();
-		devices.id = ( Long )dbo.get( DB_FIELD_ID );
-		devices.name = ( String )dbo.get( DB_FIELD_NAME );
-		devices.inductiveType = InductiveType.valueOf( ( String )dbo.get( DB_FIELD_INDUCTIVE_TYPE ) );
-		devices.methodType = MethodType.valueOf( ( String )dbo.get( DB_FIELD_METHOD_TYPE ) );
-		devices.registerType = RegisterType.valueOf( ( String )dbo.get( DB_FIELD_REGISTER_TYPE ) );
-		devices.phasing = ( Byte )dbo.get( DB_FIELD_PHASING );
-		devices.interval = ( Byte )dbo.get( DB_FIELD_INTERVAL );
-		devices.precision = ( Double )dbo.get( DB_FIELD_PRECISION );
-		return devices;
-	}
-	
-	public long getId() {
-		return id;
-	}
-	
+	/*
+	 * Тип, назва лічильника
+	 */
 	public String getName() {
-		return name;
+		return getString( DB_FIELD_NAME );
 	}
 	
 	public void setName( final String name ) {
-		this.name = name;
+		put( DB_FIELD_NAME, name );
 	}
 	
+	/*
+	 * Одно- чи Три- фазний
+	 */
 	public byte getPhasing() {
-		return phasing;
+		final Integer phasing = getInteger( DB_FIELD_PHASING );
+		if ( phasing != null )
+			return phasing.byteValue();
+		else
+			return 1;
 	}
 	
 	public void setPhasing( final byte phasing ) {
-		this.phasing = phasing;
+		put( DB_FIELD_PHASING, phasing );
 	}
 	
 	public MethodType getMethodType() {
-		return methodType;
+		return MethodType.valueOf( getString( DB_FIELD_METHOD_TYPE ) );
 	}
 	
 	public void setMethodType( final MethodType methodType ) {
-		this.methodType = methodType;
+		put( DB_FIELD_METHOD_TYPE, methodType.name() );
 	}
 	
 	public InductiveType getInductiveType() {
-		return inductiveType;
+		return InductiveType.valueOf( getString( DB_FIELD_INDUCTIVE_TYPE ) );
 	}
 	
 	public void setInductiveType( final InductiveType inductiveType ) {
-		this.inductiveType = inductiveType;
+		put( DB_FIELD_INDUCTIVE_TYPE, inductiveType.name() );
 	}
 	
 	public RegisterType getRegisterType() {
-		return registerType;
+		return RegisterType.valueOf( getString( DB_FIELD_REGISTER_TYPE ) );
 	}
 	
 	public void setRegisterType( final RegisterType registerType ) {
-		this.registerType = registerType;
+		put( DB_FIELD_REGISTER_TYPE, registerType.name() );
 	}
 	
 	public double getPrecision() {
-		return precision;
+		return getDouble( DB_FIELD_PRECISION );
 	}
 	
 	public void setPrecision( final double precision ) {
-		this.precision = precision;
+		put( DB_FIELD_PRECISION, precision );
 	}
 	
 	public byte getInterval() {
-		return interval;
+		final Integer interval = getInteger( DB_FIELD_INTERVAL );
+		if ( interval != null )
+			return interval.byteValue();
+		else
+			return 0;
 	}
 	
 	public void setInterval( final byte interval ) {
-		this.interval = interval;
+		put( DB_FIELD_INTERVAL, interval );
 	}
 	
-	public static MeterDevice findById( final long id ) throws MeterDeviceNotFoundException {
-		if ( id > 0 )
-			try {
-				final DBObject doc = getMetersDevicesCollection().findOne( QueryBuilder.start( DB_FIELD_ID ).is( id ).get() );
-				final MeterDevice device = MeterDevice.create( doc );
-				return device;
-			}
-			catch ( final MongoException me ) {
-				throw new MeterDeviceNotFoundException( "Exception in MeterDevice.findById( id ) of DBCollection", me );
-			}
+	public static MeterDevice findById( final String id ) throws MeterDeviceNotFoundException {
+		if ( id == null || id.isEmpty() )
+			throw new IllegalArgumentException( "The parameter should not be empty" );
+		final MeterDevice device = getMongoCollection().find( Filters.eq( DB_FIELD_ID, id ), MeterDevice.class ).first();
+		if ( device != null )
+			return device;
 		else
-			throw new MeterDeviceNotFoundException( "ID must be greater than zero in MeterDevice.findById( id )" );
+			throw new MeterDeviceNotFoundException( "MeterDevice by id: " + id + " not found" );
 	}
 	
-	public static List< MeterDevice > findLikeName( final String name ) throws MeterDeviceNotFoundException {
-		if ( !( name == null ) ) {
-			final Pattern pattern = Pattern.compile( name, Pattern.CASE_INSENSITIVE );
-			final List< MeterDevice > devices = new ArrayList< MeterDevice >( 0 );
-			try {
-				final DBCursor cur = getMetersDevicesCollection().find( new BasicDBObject( DB_FIELD_NAME, pattern ) );
-				if ( cur == null )
-					throw new MeterDeviceNotFoundException( "MeterDevice by " + name + " not found" );
-				while ( cur.hasNext() ) {
-					final DBObject doc = cur.next();
-					final MeterDevice device = MeterDevice.create( doc );
-					devices.add( device );
-				}
-				return devices;
-			}
-			catch ( final MongoException me ) {
-				throw new MeterDeviceNotFoundException( "Exception in MeterDevice.findByName( name ) of DBCollection", me );
-			}
-		} else
-			throw new MeterDeviceNotFoundException( "Name should not be null in MeterDevice.findByName( name )" );
-	}
-	
-	private long getOrCreateId() {
-		long id = 1;
-		try {
-			final DBObject doc = new BasicDBObject( DB_FIELD_NAME, this.name );
-			final DBObject rec = getMetersDevicesCollection().find( doc ).one();
-			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( Long )rec.get( DB_FIELD_ID );
-			else {
-				final DBCursor cursor = getMetersDevicesCollection().find().sort( new BasicDBObject( DB_FIELD_ID, -1 ) ).limit( 1 );
-				if ( cursor.hasNext() ) {
-					final Object o = cursor.next().get( DB_FIELD_ID );
-					final Long i = ( Long )o;
-					id = i.longValue() + 1;
-				}
-			}
+	public static List< MeterDevice > findLikeName( final String pattern ) throws MeterDeviceNotFoundException {
+		if ( pattern == null || pattern.isEmpty() )
+			throw new IllegalArgumentException( "The parameter should not be empty" );
+		final List< MeterDevice > devices = new LinkedList<>();
+		final MongoCursor< MeterDevice > cursor = getMongoCollection().find(
+				Filters.regex( DB_FIELD_NAME, Pattern.compile( pattern, Pattern.CASE_INSENSITIVE ) ), MeterDevice.class ).iterator();
+		if ( cursor == null )
+			throw new MeterDeviceNotFoundException( "MeterDevice by " + pattern + " not found" );
+		while ( cursor.hasNext() ) {
+			final MeterDevice o = cursor.next();
+			devices.add( o );
 		}
-		catch ( final MongoException me ) {
-			LOGGER.debug( "Cannon find ID in MeterDevice.getOrCreateId(). {}", me );
-		}
-		catch ( final NullPointerException npe ) {
-			LOGGER.debug( "Cannon find ID in MeterDevice.getOrCreateId(). {}", npe );
-		}
-		return id;
+		return devices;
 	}
 	
-	DBObject getDBObject() {
-		final DBObject doc = new BasicDBObject( DB_FIELD_NAME, name );
-		doc.put( DB_FIELD_PHASING, phasing );
-		if ( methodType != null )
-			doc.put( DB_FIELD_METHOD_TYPE, methodType.name() );
-		if ( inductiveType != null )
-			doc.put( DB_FIELD_INDUCTIVE_TYPE, inductiveType.name() );
-		if ( registerType != null )
-			doc.put( DB_FIELD_REGISTER_TYPE, registerType.name() );
-		if ( precision > 0 )
-			doc.put( DB_FIELD_PRECISION, precision );
-		if ( interval > 0 )
-			doc.put( DB_FIELD_INTERVAL, interval );
-		return doc;
-	}
-	
-	public void save() {
-		final DBObject doc = getDBObject();
-		doc.put( DB_FIELD_ID, getOrCreateId() );
-		getMetersDevicesCollection().save( doc );
+	public void save() throws ImpossibleCreatingException {
+		final Bson value = Filters.and( Filters.eq( DB_FIELD_NAME, getName() ), Filters.eq( DB_FIELD_PHASING, getPhasing() ) );
+		final MeterDevice meter = getCollection().find( value, MeterDevice.class ).first();
+		if ( meter == null )
+			insertIntoDB();
+		else {
+			final String meterName = this.toString();
+			LOGGER.warn( "Cannot save MeterDevice. MeterDevice already exists: {}", meterName );
+			throw new ImpossibleCreatingException( "MeterDevice already exists " + meterName );
+		}
 	}
 	
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer( "ID - " );
-		sb.append( this.id );
-		sb.append( " " );
-		sb.append( this.name );
+		final StringBuffer sb = new StringBuffer( "Марка - " );
+		sb.append( getName() );
 		sb.append( " F - " );
-		sb.append( this.phasing );
+		sb.append( getPhasing() );
 		return sb.toString();
 	}
 	
-	private static DBCollection getMetersDevicesCollection() {
-		return null;// Database.getInstance().getDatabase().getCollection(
-								// "metersDevices" );
+	@Override
+	public < TDocument >BsonDocument toBsonDocument( final Class< TDocument > documentClass, final CodecRegistry codecRegistry ) {
+		return new BsonDocumentWrapper< MeterDevice >( this, codecRegistry.get( MeterDevice.class ) );
+	}
+	
+	public static MongoCollection< MeterDevice > getMongoCollection() {
+		final MongoCollection< MeterDevice > collection = getDatabase().getCollection( COLLECTION_NAME_METERS_DEVICES,
+				MeterDevice.class );
+		return collection;
+	}
+	
+	@Override
+	protected MongoCollection< MeterDevice > getCollection() {
+		return getMongoCollection();
 	}
 }

@@ -102,8 +102,8 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 			insertIntoDB();
 		else {
 			final String top = this.toString();
-			LOGGER.warn( "Cannot save AddressTop. Top address exists: {}", top );
-			throw new ImpossibleCreatingException( "Top address exists " + top );
+			LOGGER.warn( "Cannot save AddressTop. Top address already exists: {}", top );
+			throw new ImpossibleCreatingException( "Top address already exists " + top );
 		}
 	}
 	

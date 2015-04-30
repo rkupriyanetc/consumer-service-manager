@@ -69,8 +69,8 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 			insertIntoDB();
 		else {
 			final String street = this.toString();
-			LOGGER.warn( "Cannot save AddressPlace. Place address exists: {}", street );
-			throw new ImpossibleCreatingException( "Place address exists " + street );
+			LOGGER.warn( "Cannot save AddressPlace. Place address already exists: {}", street );
+			throw new ImpossibleCreatingException( "Place address already exists " + street );
 		}
 	}
 	

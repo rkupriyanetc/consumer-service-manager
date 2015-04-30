@@ -171,8 +171,8 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 				insertIntoDB();
 			else {
 				final String location = this.toString();
-				LOGGER.warn( "Cannot save AddressLocation. Location address exists: {}", location );
-				throw new ImpossibleCreatingException( "Location address exists " + location );
+				LOGGER.warn( "Cannot save AddressLocation. Location address already exists: {}", location );
+				throw new ImpossibleCreatingException( "Location address already exists " + location );
 			}
 		} else {
 			LOGGER.warn( "Cannot save AddressLocation bun only one CAPITAL city. Your: {}", this );

@@ -20,4 +20,8 @@
     <name>Жашківський р-н</name>
     <references>Черкаська обл.</references>
   </region>
+  <region>
+    <name>Вінницька обл.</name>
+    <refId>0</refId>
+  </region>
 </regions>
