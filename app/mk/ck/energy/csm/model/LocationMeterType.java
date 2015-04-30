@@ -1,6 +1,6 @@
 package mk.ck.energy.csm.model;
 
-public enum PlaceMeterInstall {
+public enum LocationMeterType {
 	/**
 	 * Встановлено в контейнері
 	 */

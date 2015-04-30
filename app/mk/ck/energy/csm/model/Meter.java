@@ -1,22 +1,48 @@
 package mk.ck.energy.csm.model;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoException;
+import org.bson.BsonDocument;
+import org.bson.BsonDocumentWrapper;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.conversions.Bson;
 
-public class Meter {
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
+
+public class Meter extends CSMAbstractDocument< Meter > {
+	
+	private static final long		serialVersionUID							= 1L;
+	
+	private static final String	COLLECTION_NAME_METERS				= "meters";
+	
+	static final String					DB_FIELD_CONSUMER_ID					= "consumer_id";
+	
+	static final String					DB_FIELD_METER_DEVICE_ID			= "meter_device_id";
+	
+	static final String					DB_FIELD_NUMBER								= "number";
+	
+	static final String					DB_FIELD_DIGITS								= "digits";
+	
+	static final String					DB_FIELD_ORDER								= "order";
+	
+	static final String					DB_FIELD_DATE_INSTALL					= "date_install";
+	
+	static final String					DB_FIELD_DATE_UNINSTALL				= "date_uninstall";
+	
+	static final String					DB_FIELD_DATE_TESTING					= "date_testing";
+	
+	static final String					DB_FIELD_MASTER_NAME					= "master_name";
+	
+	static final String					DB_FIELD_MIGHT_OUTTURN				= "might_outturn";
+	
+	static final String					DB_FIELD_LOCATION_METER_TYPE	= "location_meter";
 	
 	public static Date					MAXDATE;
 	
@@ -32,127 +58,41 @@ public class Meter {
 		}
 	}
 	
-	public static final short		UPDATING_READING_ALL						= 0;
-	
-	public static final short		UPDATING_READING_NUMBER					= 1;
-	
-	public static final short		UPDATING_READING_DIGITS					= 2;
-	
-	public static final short		UPDATING_READING_UNINSTALL_DATE	= 4;
-	
-	public static final short		UPDATING_READING_ORDER					= 8;
-	
-	public static final short		UPDATING_READING_TESTING_DATE		= 16;
-	
-	public static final short		UPDATING_READING_INSPECTOR			= 32;
-	
-	public static final short		UPDATING_READING_PLACE_INSTALL	= 64;
-	
-	public static final short		UPDATING_READING_MIGHTOUTTURN		= 128;
-	
-	public static final short		UPDATING_READING_PLUMBS					= 256;
-	
-	private static final Logger	LOGGER													= LoggerFactory.getLogger( Meter.class );
-	
-	private static final String	DB_FIELD_USER_ID								= "user_id";
-	
-	private long								id;
-	
-	private long								meterDeviceId;
-	
 	private MeterDevice					meterDevice;
-	
-	/*
-	 * Номер лвчильника
-	 */
-	private String							number;
-	
-	/*
-	 * Кількість значних цифр
-	 */
-	private byte								digits;
-	
-	/*
-	 * Початок дії ( дата встановлення ) лічильника
-	 */
-	private long								installDate;
-	
-	/*
-	 * Закінчення дії ( дата зняття ) лічильника
-	 */
-	private long								uninstallDate;
-	
-	/*
-	 * Номер розпорядження, згідно якого лічильник було встановлено
-	 */
-	private short								order;
-	
-	/*
-	 * Остання дата повірки лічильника
-	 */
-	private long								testingDate;
-	
-	/*
-	 * Інспектор, що встановив лічильник
-	 */
-	private String							inspector;
-	
-	/*
-	 * Місце установки лічильника
-	 */
-	private PlaceMeterInstall		placeInstall;
-	
-	/*
-	 * Можлива потужність ( 5 А - 150 А )
-	 */
-	private byte								mightOutturn;
 	
 	/*
 	 * Можливі пломби
 	 */
 	private final List< Plumb >	plumbs;
 	
-	public Meter( final MeterDevice meterDevice, final String number, final byte digits, final long installDate, final short order,
-			final String inspector, final PlaceMeterInstall placeInstall ) {
-		this.meterDevice = meterDevice;
-		this.meterDeviceId = meterDevice.getId();
-		this.number = number;
-		this.digits = digits;
-		this.installDate = installDate;
-		this.order = order;
-		this.inspector = inspector;
-		this.uninstallDate = MAXDATE.getTime();
-		this.placeInstall = placeInstall == null ? PlaceMeterInstall.APARTMENT : placeInstall;
-		this.plumbs = new ArrayList< Plumb >( 0 );
+	private Meter() {
+		plumbs = new LinkedList<>();
 	}
 	
-	public Meter( final DBObject dbo ) {
-		this.id = ( ( Long )dbo.get( "_id" ) ).longValue();
-		try {
-			this.meterDevice = MeterDevice.findById( ( ( Long )dbo.get( "meter_device_id" ) ).longValue() );
-		}
-		catch ( final MeterDeviceNotFoundException mde ) {
-			LOGGER.error( "Cannot create Meter because meter device id not found" );
-		}
-		this.number = ( String )dbo.get( "number" );
-		this.digits = ( ( Byte )dbo.get( "digits" ) ).byteValue();
-		this.installDate = ( ( Long )dbo.get( "install_date" ) ).longValue();
-		this.uninstallDate = ( ( Long )dbo.get( "uninstall_date" ) ).longValue();
-		this.order = ( ( Short )dbo.get( "uninstall_date" ) ).shortValue();
-		this.testingDate = ( ( Long )dbo.get( "testing_date" ) ).longValue();
-		this.mightOutturn = ( ( Byte )dbo.get( "might_outturn" ) ).byteValue();
-		this.inspector = ( String )dbo.get( "inspector" );
-		final String placeInstall = ( String )dbo.get( "place_install" );
-		if ( placeInstall != null && !placeInstall.isEmpty() )
-			this.placeInstall = PlaceMeterInstall.valueOf( placeInstall );
-		this.plumbs = new ArrayList< Plumb >( 0 );
-		final BasicDBList getList = ( BasicDBList )dbo.get( "plumbs" );
-		for ( final Object o : getList )
-			this.plumbs.add( ( Plumb )o );
+	public static Meter create() {
+		return new Meter();
 	}
 	
-	public long getId() {
-		return id;
+	public static Meter create( final MeterDevice meterDevice, final String number, final byte digits, final long dateInstall,
+			final short order, final String masterName, final LocationMeterType locationMeter ) {
+		final Meter meter = new Meter();
+		meter.setMeterDevice( meterDevice );
+		meter.setNumber( number );
+		meter.setDigits( digits );
+		meter.setDateInstall( dateInstall );
+		meter.setOrder( order );
+		meter.setMasterName( masterName );
+		meter.setDateUninstall( MAXDATE.getTime() );
+		meter.setLocationMeter( locationMeter == null ? LocationMeterType.APARTMENT : locationMeter );
+		return meter;
+	}
+	
+	public String getConsumerId() {
+		return getString( DB_FIELD_CONSUMER_ID );
+	}
+	
+	public void setConsumerId( final String consumerId ) {
+		put( DB_FIELD_CONSUMER_ID, consumerId );
 	}
 	
 	public MeterDevice getMeterDevice() {
@@ -160,80 +100,144 @@ public class Meter {
 	}
 	
 	public void setMeterDevice( final MeterDevice meterDevice ) {
-		this.meterDevice = meterDevice;
-		this.meterDeviceId = meterDevice.getId();
+		if ( meterDevice != null ) {
+			if ( !meterDevice.equals( this.meterDevice ) ) {
+				this.meterDevice = meterDevice;
+				put( DB_FIELD_METER_DEVICE_ID, meterDevice.getId() );
+			}
+		} else
+			remove( DB_FIELD_METER_DEVICE_ID );
 	}
 	
+	public String getMeterDeviceId() {
+		return getString( DB_FIELD_METER_DEVICE_ID );
+	}
+	
+	public void setMeterDeviceId( final String meterDeviceId ) {
+		if ( meterDeviceId != null && !meterDeviceId.isEmpty() ) {
+			final String deviceId = getMeterDeviceId();
+			if ( !meterDeviceId.equals( deviceId ) )
+				try {
+					this.meterDevice = MeterDevice.findById( meterDeviceId );
+					put( DB_FIELD_METER_DEVICE_ID, meterDeviceId );
+				}
+				catch ( final MeterDeviceNotFoundException mdnfe ) {
+					LOGGER.warn( "Sorry. Cannot find MeterDevice by {}", meterDeviceId );
+					remove( DB_FIELD_METER_DEVICE_ID );
+				}
+		} else
+			remove( DB_FIELD_METER_DEVICE_ID );
+	}
+	
+	/*
+	 * Номер лічильника
+	 */
 	public String getNumber() {
-		return number;
+		return getString( DB_FIELD_NUMBER );
 	}
 	
 	public void setNumber( final String number ) {
-		this.number = number;
+		put( DB_FIELD_NUMBER, number );
 	}
 	
+	/*
+	 * Кількість значних цифр
+	 */
 	public byte getDigits() {
-		return digits;
+		final Integer digits = getInteger( DB_FIELD_DIGITS );
+		if ( digits != null )
+			return digits.byteValue();
+		else
+			return 0;
 	}
 	
 	public void setDigits( final byte digits ) {
-		this.digits = digits;
+		put( DB_FIELD_DIGITS, digits );
 	}
 	
-	public long getInstallDate() {
-		return installDate;
+	/*
+	 * Початок дії ( дата встановлення ) лічильника
+	 */
+	public long getDateInstall() {
+		return getLong( DB_FIELD_DATE_INSTALL );
 	}
 	
-	public void setInstallDate( final long installDate ) {
-		this.installDate = installDate;
+	public void setDateInstall( final long dateInstall ) {
+		put( DB_FIELD_DATE_INSTALL, dateInstall );
 	}
 	
-	public long getUninstallDate() {
-		return uninstallDate;
+	/*
+	 * Закінчення дії ( дата зняття ) лічильника
+	 */
+	public long getDateUninstall() {
+		return getLong( DB_FIELD_DATE_UNINSTALL );
 	}
 	
-	public void setUninstallDate( final long uninstallDate ) {
-		this.uninstallDate = uninstallDate;
+	public void setDateUninstall( final long dateUninstall ) {
+		put( DB_FIELD_DATE_UNINSTALL, dateUninstall );
 	}
 	
+	/*
+	 * Номер розпорядження, згідно якого лічильник було встановлено
+	 */
 	public short getOrder() {
-		return order;
+		final Integer order = getInteger( DB_FIELD_ORDER );
+		if ( order != null )
+			return order.shortValue();
+		else
+			return 0;
 	}
 	
 	public void setOrder( final short order ) {
-		this.order = order;
+		put( DB_FIELD_ORDER, order );
 	}
 	
-	public long getTestingDate() {
-		return testingDate;
+	/*
+	 * Остання дата повірки лічильника
+	 */
+	public long getDateTesting() {
+		return getLong( DB_FIELD_DATE_TESTING );
 	}
 	
-	public void setTestingDate( final long testingDate ) {
-		this.testingDate = testingDate;
+	public void setDateTesting( final long testingDate ) {
+		put( DB_FIELD_DATE_TESTING, testingDate );
 	}
 	
-	public String getInspector() {
-		return inspector;
+	/*
+	 * Майстер, що встановив лічильник
+	 */
+	public String getMasterName() {
+		return getString( DB_FIELD_MASTER_NAME );
 	}
 	
-	public void setInspector( final String inspector ) {
-		this.inspector = inspector;
+	public void setMasterName( final String masterName ) {
+		put( DB_FIELD_MASTER_NAME, masterName );
 	}
 	
-	public PlaceMeterInstall getPlaceInstall() {
-		return placeInstall;
+	/*
+	 * Місце установки лічильника
+	 */
+	public LocationMeterType getLocationMeter() {
+		return LocationMeterType.valueOf( getString( DB_FIELD_LOCATION_METER_TYPE ) );
 	}
 	
-	public void setPlaceInstall( final PlaceMeterInstall placeInstall ) {
-		this.placeInstall = placeInstall;
+	public void setLocationMeter( final LocationMeterType locationMeter ) {
+		put( DB_FIELD_LOCATION_METER_TYPE, locationMeter.name() );
 	}
 	
+	/*
+	 * Можлива потужність ( 5 А - 150 А )
+	 */
 	public byte getMightOutturn() {
-		return mightOutturn;
+		final Integer might = getInteger( DB_FIELD_MIGHT_OUTTURN );
+		if ( might != null )
+			return might.byteValue();
+		else
+			return 0;
 	}
 	
 	public void setMightOutturn( final byte mightOutturn ) {
-		this.mightOutturn = mightOutturn;
+		put( DB_FIELD_MIGHT_OUTTURN, mightOutturn );
 	}
 	
 	public List< Plumb > getPlumbs() {
@@ -249,85 +253,32 @@ public class Meter {
 		if ( o == null || !( o instanceof Meter ) )
 			return false;
 		final Meter meter = ( Meter )o;
-		return meter.getMeterDevice().getId() == meterDevice.getId() && meter.getNumber().compareTo( number ) == 0
-				&& meter.getInstallDate() == installDate;
+		return meter.getMeterDevice().equals( getMeterDevice() ) && meter.getNumber().equals( getNumber() )
+				&& meter.getDateInstall() == getDateInstall();
 	}
 	
-	DBObject getDBObject( final short updateSet ) {
-		final DBObject doc = new BasicDBObject( "meter_device_id", meterDeviceId );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_NUMBER ) == UPDATING_READING_NUMBER )
-			if ( number != null )
-				doc.put( "number", number );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_DIGITS ) == UPDATING_READING_DIGITS )
-			if ( digits > 0 )
-				doc.put( "digits", digits );
-		doc.put( "install_date", installDate );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_UNINSTALL_DATE ) == UPDATING_READING_UNINSTALL_DATE )
-			if ( uninstallDate != MAXDATE.getTime() )
-				doc.put( "uninstall_date", uninstallDate );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_ORDER ) == UPDATING_READING_ORDER )
-			doc.put( "order", order );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_INSPECTOR ) == UPDATING_READING_INSPECTOR )
-			if ( inspector != null )
-				doc.put( "inspector", inspector );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_TESTING_DATE ) == UPDATING_READING_TESTING_DATE )
-			if ( testingDate > 0 )
-				doc.put( "testing_date", testingDate );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_MIGHTOUTTURN ) == UPDATING_READING_MIGHTOUTTURN )
-			if ( mightOutturn > 4 )
-				doc.put( "might_outturn", mightOutturn );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_PLACE_INSTALL ) == UPDATING_READING_PLACE_INSTALL )
-			doc.put( "place_install", placeInstall.name() );
-		if ( UPDATING_READING_ALL == updateSet || ( updateSet & UPDATING_READING_PLUMBS ) == UPDATING_READING_PLUMBS ) {
-			final BasicDBList dbPlumbs = new BasicDBList();
-			for ( final Plumb p : plumbs )
-				dbPlumbs.add( p.getDBObject() );
-			if ( !dbPlumbs.isEmpty() )
-				doc.put( "plumbs", dbPlumbs );
+	public void save() throws ImpossibleCreatingException {
+		final Bson value = Filters.and( Filters.eq( DB_FIELD_METER_DEVICE_ID, getMeterDevice().getId() ),
+				Filters.eq( DB_FIELD_NUMBER, getNumber() ), Filters.eq( DB_FIELD_DATE_INSTALL, getDateInstall() ) );
+		final Meter meter = getCollection().find( value, Meter.class ).first();
+		if ( meter == null )
+			insertIntoDB();
+		else {
+			final String meterName = this.toString();
+			LOGGER.warn( "Cannot save Meter. Meter already exists: {}", meterName );
+			throw new ImpossibleCreatingException( "Meter already exists " + meterName );
 		}
-		return doc;
-	}
-	
-	public void save( final short updateSet ) {
-		final DBObject query = new BasicDBObject( "_id", getOrCreateId() );
-		final DBObject doc = getDBObject( updateSet );
-		getMetersCollection().update( query, new BasicDBObject( "$set", doc ), true, false );
-	}
-	
-	private long getOrCreateId() {
-		long id = 1;
-		try {
-			final DBObject doc = new BasicDBObject( "_id", this.id );
-			// doc.put( "name", name );
-			final DBObject rec = getMetersCollection().find( doc ).one();
-			if ( rec != null && !rec.toMap().isEmpty() )
-				id = ( ( Long )rec.get( "_id" ) ).longValue();
-			else {
-				final DBCursor cursor = getMetersCollection().find().sort( new BasicDBObject( "_id", -1 ) ).limit( 1 );
-				if ( cursor.hasNext() ) {
-					final Object o = cursor.next().get( "_id" );
-					final Long i = ( Long )o;
-					id = i.longValue() + 1;
-				}
-			}
-		}
-		catch ( final MongoException me ) {
-			LOGGER.debug( "Cannon find ID in MeterDevice.getOrCreateId(). {}", me );
-		}
-		catch ( final NullPointerException npe ) {
-			LOGGER.debug( "Cannon find ID in MeterDevice.getOrCreateId(). {}", npe );
-		}
-		return id;
 	}
 	
 	public static List< Meter > findByConsumerId( final String consumerId ) throws MeterNotFoundException {
 		if ( consumerId != null && !consumerId.isEmpty() ) {
-			final DBCursor cur = getMetersCollection().find( new BasicDBObject( DB_FIELD_USER_ID, consumerId ) );
+			final MongoCursor< Meter > cur = getMongoCollection().find( Filters.eq( DB_FIELD_CONSUMER_ID, consumerId ) )
+					.sort( Filters.eq( DB_FIELD_DATE_INSTALL, 1 ) ).iterator();
 			final List< Meter > userMeters = new LinkedList<>();
 			if ( cur == null )
 				throw new MeterNotFoundException( "The Consumer was found by " + consumerId );
 			while ( cur.hasNext() ) {
-				final Meter o = new Meter( cur.next() );
+				final Meter o = cur.next();
 				userMeters.add( o );
 			}
 			return userMeters;
@@ -335,8 +286,29 @@ public class Meter {
 			throw new IllegalArgumentException( "UserId should not be empty in Meter.findByUserId( userId )" );
 	}
 	
-	private static DBCollection getMetersCollection() {
-		return null;// Database.getInstance().getDatabase().getCollection( "meters"
-								// );
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer( "Марка - " );
+		sb.append( getMeterDevice().getName() );
+		sb.append( " № " );
+		sb.append( getNumber() );
+		sb.append( " дата: " );
+		sb.append( getDateInstall() );
+		return sb.toString();
+	}
+	
+	@Override
+	public < TDocument >BsonDocument toBsonDocument( final Class< TDocument > documentClass, final CodecRegistry codecRegistry ) {
+		return new BsonDocumentWrapper< Meter >( this, codecRegistry.get( Meter.class ) );
+	}
+	
+	public static MongoCollection< Meter > getMongoCollection() {
+		final MongoCollection< Meter > collection = getDatabase().getCollection( COLLECTION_NAME_METERS, Meter.class );
+		return collection;
+	}
+	
+	@Override
+	protected MongoCollection< Meter > getCollection() {
+		return getMongoCollection();
 	}
 }

@@ -40,7 +40,7 @@ public class MeteringData {
 		DAY, NIGHT, PEAK,
 	}
 	
-	private long										meterDeviceId;
+	private String									meterDeviceId;
 	
 	private MeterDevice							meterDevice;
 	

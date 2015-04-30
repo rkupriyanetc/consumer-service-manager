@@ -46,10 +46,10 @@ import mk.ck.energy.csm.model.ConsumerStatusType;
 import mk.ck.energy.csm.model.Database;
 import mk.ck.energy.csm.model.HouseType;
 import mk.ck.energy.csm.model.ImpossibleCreatingException;
+import mk.ck.energy.csm.model.LocationMeterType;
 import mk.ck.energy.csm.model.LocationType;
 import mk.ck.energy.csm.model.Meter;
 import mk.ck.energy.csm.model.MeterDevice;
-import mk.ck.energy.csm.model.PlaceMeterInstall;
 import mk.ck.energy.csm.model.Plumb;
 import mk.ck.energy.csm.model.PlumbType;
 import mk.ck.energy.csm.model.StreetType;
@@ -1008,7 +1008,10 @@ public class AdministrationTools extends Controller {
 						final MeterDevice meterDevice = MeterDevice.create( meterName, phasing,
 								MeterDevice.MethodType.values()[ methodType ], MeterDevice.InductiveType.values()[ inductiveType ],
 								MeterDevice.RegisterType.values()[ registerType ], meterPrecision, meterInterval );
-						meterDevice.save();
+						try {
+							meterDevice.save();
+						}
+						catch ( final ImpossibleCreatingException ice ) {}
 					}
 				}
 				catch ( final SQLFeatureNotSupportedException sfnse ) {
@@ -1212,11 +1215,11 @@ public class AdministrationTools extends Controller {
 								str = Messages.get( METER_CODE_PLACE_NAME + "." + String.valueOf( meterPlaceId ) );
 							else
 								str = null;
-							PlaceMeterInstall place;
+							LocationMeterType place;
 							if ( str == null )
-								place = PlaceMeterInstall.OTHER;
+								place = LocationMeterType.OTHER;
 							else
-								place = PlaceMeterInstall.valueOf( str );
+								place = LocationMeterType.valueOf( str );
 							// Meter Inspector
 							String inspector = result.getString( 15 );
 							// Meter Number
@@ -1234,7 +1237,7 @@ public class AdministrationTools extends Controller {
 							Date installDate = result.getDate( 18 );
 							// Meter Order
 							final short order = result.getShort( 19 );
-							final Meter meter = new Meter( devices.get( 0 ), number, digits, installDate.getTime(), order, inspector, place );
+							final Meter meter = Meter.create( devices.get( 0 ), number, digits, installDate.getTime(), order, inspector, place );
 							final byte amp = result.getByte( 20 );
 							if ( amp > 0 )
 								meter.setMightOutturn( amp );

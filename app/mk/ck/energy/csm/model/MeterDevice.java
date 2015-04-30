@@ -49,19 +49,6 @@ public class MeterDevice extends CSMAbstractDocument< MeterDevice > {
 	
 	private MeterDevice() {}
 	
-	public static MeterDevice create( final String name, final byte phasing, final MethodType methodType,
-			final InductiveType inductiveType, final RegisterType registerType, final double precision, final byte interval ) {
-		final MeterDevice meter = new MeterDevice();
-		meter.setName( name );
-		meter.setPhasing( phasing == 1 || phasing == 3 ? phasing : 1 );
-		meter.setMethodType( methodType == null ? MethodType.ELECTRONIC : methodType );
-		meter.setInductiveType( inductiveType == null ? InductiveType.ACTIVE : inductiveType );
-		meter.setRegisterType( registerType == null ? RegisterType.STATE : registerType );
-		meter.setPrecision( precision );
-		meter.setInterval( interval );
-		return meter;
-	}
-	
 	/*
 	 * Тип, назва лічильника
 	 */
@@ -132,6 +119,23 @@ public class MeterDevice extends CSMAbstractDocument< MeterDevice > {
 		put( DB_FIELD_INTERVAL, interval );
 	}
 	
+	public static MeterDevice create() {
+		return new MeterDevice();
+	}
+	
+	public static MeterDevice create( final String name, final byte phasing, final MethodType methodType,
+			final InductiveType inductiveType, final RegisterType registerType, final double precision, final byte interval ) {
+		final MeterDevice meter = new MeterDevice();
+		meter.setName( name );
+		meter.setPhasing( phasing == 1 || phasing == 3 ? phasing : 1 );
+		meter.setPrecision( precision );
+		meter.setInterval( interval );
+		meter.setMethodType( methodType == null ? MethodType.ELECTRONIC : methodType );
+		meter.setInductiveType( inductiveType == null ? InductiveType.ACTIVE : inductiveType );
+		meter.setRegisterType( registerType == null ? RegisterType.STATE : registerType );
+		return meter;
+	}
+	
 	public static MeterDevice findById( final String id ) throws MeterDeviceNotFoundException {
 		if ( id == null || id.isEmpty() )
 			throw new IllegalArgumentException( "The parameter should not be empty" );
@@ -167,6 +171,14 @@ public class MeterDevice extends CSMAbstractDocument< MeterDevice > {
 			LOGGER.warn( "Cannot save MeterDevice. MeterDevice already exists: {}", meterName );
 			throw new ImpossibleCreatingException( "MeterDevice already exists " + meterName );
 		}
+	}
+	
+	@Override
+	public boolean equals( final Object o ) {
+		if ( o == null || !( o instanceof MeterDevice ) )
+			return false;
+		final MeterDevice meterDevice = ( MeterDevice )o;
+		return meterDevice.getId().equals( getId() );
 	}
 	
 	@Override
