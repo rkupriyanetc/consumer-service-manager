@@ -10,12 +10,14 @@ import mk.ck.energy.csm.model.auth.UserNotFoundException;
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
 import org.bson.BsonArray;
+import org.bson.BsonDocument;
+import org.bson.BsonDocumentWrapper;
 import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistry;
 
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
 /**
@@ -23,58 +25,31 @@ import com.mongodb.client.model.Filters;
  */
 public class Consumer extends CSMAbstractDocument< Consumer > {
 	
-	private static final long		serialVersionUID									= 1L;
+	private static final long		serialVersionUID					= 1L;
 	
-	private static final String	COLLECTION_NAME_CONSUMERS					= "consumers";
+	private static final String	COLLECTION_NAME_CONSUMERS	= "consumers";
 	
-	public static final short		UPDATING_READING_ALL							= 0;
+	private static final String	DB_FIELD_USER_ID					= "user_id";
 	
-	public static final short		UPDATING_READING_USER							= 1;
+	private static final String	DB_FIELD_FULLNAME					= "full_name";
 	
-	public static final short		UPDATING_READING_FULLNAME					= 2;
-	
-	public static final short		UPDATING_READING_ADDRESS_LOCATION	= 4;
-	
-	public static final short		UPDATING_READING_ADDRESS_PLACE		= 8;
-	
-	public static final short		UPDATING_READING_ADDRESS_OTHER		= 16;
-	
-	public static final short		UPDATING_READING_ADDRESS_FULL			= 32;
-	
-	public static final short		UPDATING_READING_DOCUMENTS				= 64;
-	
-	public static final short		UPDATING_READING_OTHER						= 128;
-	
-	public static final short		UPDATING_READING_ACTIVE						= 256;
-	
-	public static final short		READING_ID												= 16384;
-	
-	/**
-	 * This are fields names
-	 */
-	static final String					DB_FIELD_ID												= "_id";
-	
-	static final String					DB_FIELD_USER_ID									= "user_id";
-	
-	static final String					DB_FIELD_FULLNAME									= "full_name";
-	
-	static final String					DB_FIELD_ADDRESS									= "address";
+	private static final String	DB_FIELD_ADDRESS					= "address";
 	
 	/**
 	 * if User authorized then active is true
 	 */
-	static final String					DB_FIELD_ACTIVE										= "active";
+	private static final String	DB_FIELD_ACTIVE						= "active";
 	
 	/**
 	 * The Consumer document about passport and ID
 	 */
-	static final String					DB_FIELD_DOCUMENT									= "document";
+	private static final String	DB_FIELD_DOCUMENT					= "document";
 	
-	static final String					DB_FIELD_CONSUMER_TYPE						= "type";
+	private static final String	DB_FIELD_CONSUMER_TYPE		= "type";
 	
-	static final String					DB_FIELD_STATUS_TYPE							= "status";
+	private static final String	DB_FIELD_STATUS_TYPE			= "status";
 	
-	static final String					DB_FIELD_HOUSE_TYPE								= "house_type";
+	private static final String	DB_FIELD_HOUSE_TYPE				= "house_type";
 	
 	/**
 	 * auth.User
@@ -279,9 +254,13 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 				Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ), Filters.eq( DB_FIELD_USER_ID, user.getId() ) ) );
 	}
 	
+	@Override
+	public < TDocument >BsonDocument toBsonDocument( final Class< TDocument > documentClass, final CodecRegistry codecRegistry ) {
+		return new BsonDocumentWrapper< Consumer >( this, codecRegistry.get( Consumer.class ) );
+	}
+	
 	public static MongoCollection< Consumer > getMongoCollection() {
-		final MongoDatabase db = Database.getInstance().getDatabase();
-		final MongoCollection< Consumer > collection = db.getCollection( COLLECTION_NAME_CONSUMERS, Consumer.class );
+		final MongoCollection< Consumer > collection = getDatabase().getCollection( COLLECTION_NAME_CONSUMERS, Consumer.class );
 		return collection;
 	}
 	

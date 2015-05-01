@@ -16,27 +16,27 @@ public class MeterCodec implements CollectibleCodec< Meter > {
 	
 	private static final String			DB_FIELD_ID										= "_id";
 	
-	static final String							DB_FIELD_CONSUMER_ID					= "consumer_id";
+	private static final String			DB_FIELD_CONSUMER_ID					= "consumer_id";
 	
-	static final String							DB_FIELD_METER_DEVICE_ID			= "meter_device_id";
+	private static final String			DB_FIELD_METER_DEVICE_ID			= "meter_device_id";
 	
-	static final String							DB_FIELD_NUMBER								= "number";
+	private static final String			DB_FIELD_NUMBER								= "number";
 	
-	static final String							DB_FIELD_DIGITS								= "digits";
+	private static final String			DB_FIELD_DIGITS								= "digits";
 	
-	static final String							DB_FIELD_ORDER								= "order";
+	private static final String			DB_FIELD_ORDER								= "order";
 	
-	static final String							DB_FIELD_DATE_INSTALL					= "date_install";
+	private static final String			DB_FIELD_DATE_INSTALL					= "date_install";
 	
-	static final String							DB_FIELD_DATE_UNINSTALL				= "date_uninstall";
+	private static final String			DB_FIELD_DATE_UNINSTALL				= "date_uninstall";
 	
-	static final String							DB_FIELD_DATE_TESTING					= "date_testing";
+	private static final String			DB_FIELD_DATE_TESTING					= "date_testing";
 	
-	static final String							DB_FIELD_MASTER_NAME					= "master_name";
+	private static final String			DB_FIELD_MASTER_NAME					= "master_name";
 	
-	static final String							DB_FIELD_MIGHT_OUTTURN				= "might_outturn";
+	private static final String			DB_FIELD_MIGHT_OUTTURN				= "might_outturn";
 	
-	static final String							DB_FIELD_LOCATION_METER_TYPE	= "location_meter";
+	private static final String			DB_FIELD_LOCATION_METER_TYPE	= "location_meter";
 	
 	private final Codec< Document >	documentCodec;
 	
@@ -54,15 +54,15 @@ public class MeterCodec implements CollectibleCodec< Meter > {
 		document.append( DB_FIELD_CONSUMER_ID, value.getString( DB_FIELD_CONSUMER_ID ) );
 		document.append( DB_FIELD_METER_DEVICE_ID, value.getString( DB_FIELD_METER_DEVICE_ID ) );
 		document.append( DB_FIELD_NUMBER, value.getString( DB_FIELD_NUMBER ) );
-		document.append( DB_FIELD_DIGITS, value.get( DB_FIELD_DIGITS ) );
-		document.append( DB_FIELD_ORDER, value.get( DB_FIELD_ORDER ) );
+		document.append( DB_FIELD_DIGITS, value.getDigits() );
+		document.append( DB_FIELD_ORDER, value.getOrder() );
 		document.append( DB_FIELD_DATE_INSTALL, value.getLong( DB_FIELD_DATE_INSTALL ) );
 		final Long un = value.getLong( DB_FIELD_DATE_UNINSTALL );
 		if ( un != null )
 			document.append( DB_FIELD_DATE_UNINSTALL, un.longValue() );
 		document.append( DB_FIELD_DATE_TESTING, value.getLong( DB_FIELD_DATE_TESTING ) );
 		document.append( DB_FIELD_MASTER_NAME, value.getString( DB_FIELD_MASTER_NAME ) );
-		document.append( DB_FIELD_MIGHT_OUTTURN, value.get( DB_FIELD_MIGHT_OUTTURN ) );
+		document.append( DB_FIELD_MIGHT_OUTTURN, value.getMightOutturn() );
 		document.append( DB_FIELD_LOCATION_METER_TYPE, value.getString( DB_FIELD_LOCATION_METER_TYPE ) );
 		documentCodec.encode( writer, document, encoderContext );
 	}

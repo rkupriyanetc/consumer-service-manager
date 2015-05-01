@@ -22,27 +22,27 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	
 	private static final String	COLLECTION_NAME_METERS				= "meters";
 	
-	static final String					DB_FIELD_CONSUMER_ID					= "consumer_id";
+	private static final String	DB_FIELD_CONSUMER_ID					= "consumer_id";
 	
-	static final String					DB_FIELD_METER_DEVICE_ID			= "meter_device_id";
+	private static final String	DB_FIELD_METER_DEVICE_ID			= "meter_device_id";
 	
-	static final String					DB_FIELD_NUMBER								= "number";
+	private static final String	DB_FIELD_NUMBER								= "number";
 	
-	static final String					DB_FIELD_DIGITS								= "digits";
+	private static final String	DB_FIELD_DIGITS								= "digits";
 	
-	static final String					DB_FIELD_ORDER								= "order";
+	private static final String	DB_FIELD_ORDER								= "order";
 	
-	static final String					DB_FIELD_DATE_INSTALL					= "date_install";
+	private static final String	DB_FIELD_DATE_INSTALL					= "date_install";
 	
-	static final String					DB_FIELD_DATE_UNINSTALL				= "date_uninstall";
+	private static final String	DB_FIELD_DATE_UNINSTALL				= "date_uninstall";
 	
-	static final String					DB_FIELD_DATE_TESTING					= "date_testing";
+	private static final String	DB_FIELD_DATE_TESTING					= "date_testing";
 	
-	static final String					DB_FIELD_MASTER_NAME					= "master_name";
+	private static final String	DB_FIELD_MASTER_NAME					= "master_name";
 	
-	static final String					DB_FIELD_MIGHT_OUTTURN				= "might_outturn";
+	private static final String	DB_FIELD_MIGHT_OUTTURN				= "might_outturn";
 	
-	static final String					DB_FIELD_LOCATION_METER_TYPE	= "location_meter";
+	private static final String	DB_FIELD_LOCATION_METER_TYPE	= "location_meter";
 	
 	public static Date					MAXDATE;
 	
@@ -144,9 +144,9 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	 * Кількість значних цифр
 	 */
 	public byte getDigits() {
-		final Integer digits = getInteger( DB_FIELD_DIGITS );
+		final Object digits = get( DB_FIELD_DIGITS );
 		if ( digits != null )
-			return digits.byteValue();
+			return ( byte )digits;
 		else
 			return 0;
 	}
@@ -181,9 +181,9 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	 * Номер розпорядження, згідно якого лічильник було встановлено
 	 */
 	public short getOrder() {
-		final Integer order = getInteger( DB_FIELD_ORDER );
+		final Object order = get( DB_FIELD_ORDER );
 		if ( order != null )
-			return order.shortValue();
+			return ( short )order;
 		else
 			return 0;
 	}
@@ -229,9 +229,9 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	 * Можлива потужність ( 5 А - 150 А )
 	 */
 	public byte getMightOutturn() {
-		final Integer might = getInteger( DB_FIELD_MIGHT_OUTTURN );
+		final Object might = get( DB_FIELD_MIGHT_OUTTURN );
 		if ( might != null )
-			return might.byteValue();
+			return ( byte )might;
 		else
 			return 0;
 	}

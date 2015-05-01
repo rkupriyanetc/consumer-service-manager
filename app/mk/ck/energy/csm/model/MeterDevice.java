@@ -21,19 +21,19 @@ public class MeterDevice extends CSMAbstractDocument< MeterDevice > {
 	
 	private static final String	COLLECTION_NAME_METERS_DEVICES	= "metersDevices";
 	
-	static final String					DB_FIELD_NAME										= "name";
+	private static final String	DB_FIELD_NAME										= "name";
 	
-	static final String					DB_FIELD_PHASING								= "phasing";
+	private static final String	DB_FIELD_PHASING								= "phasing";
 	
-	static final String					DB_FIELD_METHOD_TYPE						= "method";
+	private static final String	DB_FIELD_METHOD_TYPE						= "method";
 	
-	static final String					DB_FIELD_INDUCTIVE_TYPE					= "inductive";
+	private static final String	DB_FIELD_INDUCTIVE_TYPE					= "inductive";
 	
-	static final String					DB_FIELD_REGISTER_TYPE					= "register";
+	private static final String	DB_FIELD_REGISTER_TYPE					= "register";
 	
-	static final String					DB_FIELD_PRECISION							= "precision";
+	private static final String	DB_FIELD_PRECISION							= "precision";
 	
-	static final String					DB_FIELD_INTERVAL								= "interval";
+	private static final String	DB_FIELD_INTERVAL								= "interval";
 	
 	public enum MethodType {
 		INDUCTION, ELECTRONIC,
@@ -64,9 +64,9 @@ public class MeterDevice extends CSMAbstractDocument< MeterDevice > {
 	 * Одно- чи Три- фазний
 	 */
 	public byte getPhasing() {
-		final Integer phasing = getInteger( DB_FIELD_PHASING );
+		final Object phasing = get( DB_FIELD_PHASING );
 		if ( phasing != null )
-			return phasing.byteValue();
+			return ( byte )phasing;
 		else
 			return 1;
 	}
@@ -108,9 +108,9 @@ public class MeterDevice extends CSMAbstractDocument< MeterDevice > {
 	}
 	
 	public byte getInterval() {
-		final Integer interval = getInteger( DB_FIELD_INTERVAL );
+		final Object interval = get( DB_FIELD_INTERVAL );
 		if ( interval != null )
-			return interval.byteValue();
+			return ( byte )interval;
 		else
 			return 0;
 	}

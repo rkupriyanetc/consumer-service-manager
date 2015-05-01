@@ -12,36 +12,38 @@ import org.bson.codecs.DecoderContext;
 import org.bson.codecs.DocumentCodec;
 import org.bson.codecs.EncoderContext;
 
-public class MeterDeviceCodec implements CollectibleCodec< MeterDevice > {
+public class ConsumerCodec implements CollectibleCodec< Consumer > {
 	
 	private static final String			DB_FIELD_ID							= "_id";
 	
-	private static final String			DB_FIELD_NAME						= "name";
+	private static final String			DB_FIELD_USER_ID				= "user_id";
 	
-	private static final String			DB_FIELD_PHASING				= "phasing";
+	private static final String			DB_FIELD_FULLNAME				= "full_name";
 	
-	private static final String			DB_FIELD_METHOD_TYPE		= "method";
+	private static final String			DB_FIELD_ADDRESS				= "address";
 	
-	private static final String			DB_FIELD_INDUCTIVE_TYPE	= "inductive";
+	private static final String			DB_FIELD_ACTIVE					= "active";
 	
-	private static final String			DB_FIELD_REGISTER_TYPE	= "register";
+	private static final String			DB_FIELD_DOCUMENT				= "document";
 	
-	private static final String			DB_FIELD_PRECISION			= "precision";
+	private static final String			DB_FIELD_CONSUMER_TYPE	= "type";
 	
-	private static final String			DB_FIELD_INTERVAL				= "interval";
+	private static final String			DB_FIELD_STATUS_TYPE		= "status";
+	
+	private static final String			DB_FIELD_HOUSE_TYPE			= "house_type";
 	
 	private final Codec< Document >	documentCodec;
 	
-	public MeterDeviceCodec() {
+	public ConsumerCodec() {
 		this.documentCodec = new DocumentCodec();
 	}
 	
-	public MeterDeviceCodec( final Codec< Document > codec ) {
+	public ConsumerCodec( final Codec< Document > codec ) {
 		this.documentCodec = codec;
 	}
 	
 	@Override
-	public void encode( final BsonWriter writer, final MeterDevice value, final EncoderContext encoderContext ) {
+	public void encode( final BsonWriter writer, final Consumer value, final EncoderContext encoderContext ) {
 		final Document document = new Document( DB_FIELD_ID, value.getId() );
 		document.append( DB_FIELD_NAME, value.getName() );
 		document.append( DB_FIELD_PHASING, value.getPhasing() );
@@ -54,14 +56,14 @@ public class MeterDeviceCodec implements CollectibleCodec< MeterDevice > {
 	}
 	
 	@Override
-	public Class< MeterDevice > getEncoderClass() {
-		return MeterDevice.class;
+	public Class< Consumer > getEncoderClass() {
+		return Consumer.class;
 	}
 	
 	@Override
-	public MeterDevice decode( final BsonReader reader, final DecoderContext decoderContext ) {
+	public Consumer decode( final BsonReader reader, final DecoderContext decoderContext ) {
 		final Document document = documentCodec.decode( reader, decoderContext );
-		final MeterDevice meter = MeterDevice.create();
+		final Consumer meter = Consumer.create();
 		meter.setId( document.getString( DB_FIELD_ID ) );
 		meter.put( DB_FIELD_NAME, document.getString( DB_FIELD_NAME ) );
 		meter.setPhasing( ( byte )document.get( DB_FIELD_PHASING ) );
@@ -74,12 +76,12 @@ public class MeterDeviceCodec implements CollectibleCodec< MeterDevice > {
 	}
 	
 	@Override
-	public boolean documentHasId( final MeterDevice document ) {
+	public boolean documentHasId( final Consumer document ) {
 		return document.getId() == null;
 	}
 	
 	@Override
-	public MeterDevice generateIdIfAbsentFromDocument( final MeterDevice document ) {
+	public Consumer generateIdIfAbsentFromDocument( final Consumer document ) {
 		if ( documentHasId( document ) ) {
 			document.createId();
 			return document;
