@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import mk.ck.energy.csm.model.codecs.AddressLocationCodec;
 import mk.ck.energy.csm.model.codecs.AddressPlaceCodec;
 import mk.ck.energy.csm.model.codecs.AddressTopCodec;
+import mk.ck.energy.csm.model.codecs.ConsumerCodec;
 import mk.ck.energy.csm.model.codecs.MeterCodec;
 import mk.ck.energy.csm.model.codecs.MeterDeviceCodec;
 import mk.ck.energy.csm.model.codecs.TokenActionCodec;
@@ -104,9 +105,10 @@ public class Database {
 						final AddressPlaceCodec addressPlaceCodec = new AddressPlaceCodec( defaultDocumentCodec );
 						final MeterDeviceCodec meterDeviceCodec = new MeterDeviceCodec( defaultDocumentCodec );
 						final MeterCodec meterCodec = new MeterCodec( defaultDocumentCodec );
+						final ConsumerCodec consumerCodec = new ConsumerCodec( defaultDocumentCodec );
 						final CodecRegistry codecRegistry = CodecRegistries.fromRegistries( MongoClient.getDefaultCodecRegistry(),
 								CodecRegistries.fromCodecs( userCodec, tokenActionCodec, addressTopCodec, addressLocationCodec,
-										addressPlaceCodec, meterDeviceCodec, meterCodec ) );
+										addressPlaceCodec, meterDeviceCodec, meterCodec, consumerCodec ) );
 						final MongoClientOptions options = MongoClientOptions.builder().codecRegistry( codecRegistry ).build();
 						mongoClient = new MongoClient( new ServerAddress( config.getString( "host" ) ), Arrays.asList( credential ), options );
 					}

@@ -339,7 +339,7 @@ public class Account extends Controller {
 			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressHouse" ), u.getHouse() );
 			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressApartment" ), u.getApartment() );
 			try {
-				final Consumer consumer = Consumer.findById( u.getId(), Consumer.UPDATING_READING_ALL );
+				final Consumer consumer = Consumer.findById( u.getId() );
 				consumer.joinConsumerElectricity( User.findById( u.getUserId() ) );
 			}
 			catch ( final ConsumerException ce ) {

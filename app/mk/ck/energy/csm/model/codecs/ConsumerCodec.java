@@ -1,6 +1,6 @@
 package mk.ck.energy.csm.model.codecs;
 
-import mk.ck.energy.csm.model.MeterDevice;
+import mk.ck.energy.csm.model.Consumer;
 
 import org.bson.BsonReader;
 import org.bson.BsonValue;
@@ -24,7 +24,7 @@ public class ConsumerCodec implements CollectibleCodec< Consumer > {
 	
 	private static final String			DB_FIELD_ACTIVE					= "active";
 	
-	private static final String			DB_FIELD_DOCUMENT				= "document";
+	private static final String			DB_FIELD_DOCUMENTS			= "documents";
 	
 	private static final String			DB_FIELD_CONSUMER_TYPE	= "type";
 	
@@ -45,13 +45,14 @@ public class ConsumerCodec implements CollectibleCodec< Consumer > {
 	@Override
 	public void encode( final BsonWriter writer, final Consumer value, final EncoderContext encoderContext ) {
 		final Document document = new Document( DB_FIELD_ID, value.getId() );
-		document.append( DB_FIELD_NAME, value.getName() );
-		document.append( DB_FIELD_PHASING, value.getPhasing() );
-		document.append( DB_FIELD_PRECISION, value.getPrecision() );
-		document.append( DB_FIELD_INTERVAL, value.getInterval() );
-		document.append( DB_FIELD_METHOD_TYPE, value.getString( DB_FIELD_METHOD_TYPE ) );
-		document.append( DB_FIELD_INDUCTIVE_TYPE, value.getString( DB_FIELD_INDUCTIVE_TYPE ) );
-		document.append( DB_FIELD_REGISTER_TYPE, value.getString( DB_FIELD_REGISTER_TYPE ) );
+		document.append( DB_FIELD_USER_ID, value.getString( DB_FIELD_USER_ID ) );
+		document.append( DB_FIELD_FULLNAME, value.getString( DB_FIELD_FULLNAME ) );
+		document.append( DB_FIELD_ADDRESS, value.getAddress() );
+		document.append( DB_FIELD_ACTIVE, value.isActive() );
+		document.append( DB_FIELD_DOCUMENTS, value.getDocuments() );
+		document.append( DB_FIELD_CONSUMER_TYPE, value.getString( DB_FIELD_CONSUMER_TYPE ) );
+		document.append( DB_FIELD_STATUS_TYPE, value.getString( DB_FIELD_STATUS_TYPE ) );
+		document.append( DB_FIELD_HOUSE_TYPE, value.getString( DB_FIELD_HOUSE_TYPE ) );
 		documentCodec.encode( writer, document, encoderContext );
 	}
 	
@@ -63,16 +64,16 @@ public class ConsumerCodec implements CollectibleCodec< Consumer > {
 	@Override
 	public Consumer decode( final BsonReader reader, final DecoderContext decoderContext ) {
 		final Document document = documentCodec.decode( reader, decoderContext );
-		final Consumer meter = Consumer.create();
-		meter.setId( document.getString( DB_FIELD_ID ) );
-		meter.put( DB_FIELD_NAME, document.getString( DB_FIELD_NAME ) );
-		meter.setPhasing( ( byte )document.get( DB_FIELD_PHASING ) );
-		meter.setPrecision( document.getDouble( DB_FIELD_PRECISION ) );
-		meter.setInterval( ( byte )document.get( DB_FIELD_INTERVAL ) );
-		meter.put( DB_FIELD_METHOD_TYPE, document.getString( DB_FIELD_METHOD_TYPE ) );
-		meter.put( DB_FIELD_INDUCTIVE_TYPE, document.getString( DB_FIELD_INDUCTIVE_TYPE ) );
-		meter.put( DB_FIELD_REGISTER_TYPE, document.getString( DB_FIELD_REGISTER_TYPE ) );
-		return meter;
+		final Consumer consumer = Consumer.create( document.getString( DB_FIELD_ID ) );
+		consumer.setUserId( DB_FIELD_USER_ID );
+		consumer.put( DB_FIELD_FULLNAME, document.getString( DB_FIELD_FULLNAME ) );
+		consumer.put( DB_FIELD_ADDRESS, document.get( DB_FIELD_ADDRESS ) );
+		consumer.setActive( document.getBoolean( DB_FIELD_ACTIVE ) );
+		consumer.put( DB_FIELD_DOCUMENTS, document.get( DB_FIELD_DOCUMENTS ) );
+		consumer.put( DB_FIELD_CONSUMER_TYPE, document.getString( DB_FIELD_CONSUMER_TYPE ) );
+		consumer.put( DB_FIELD_STATUS_TYPE, document.getString( DB_FIELD_STATUS_TYPE ) );
+		consumer.put( DB_FIELD_HOUSE_TYPE, document.getString( DB_FIELD_HOUSE_TYPE ) );
+		return consumer;
 	}
 	
 	@Override
@@ -90,7 +91,7 @@ public class ConsumerCodec implements CollectibleCodec< Consumer > {
 	}
 	
 	@Override
-	public BsonValue getDocumentId( final MeterDevice document ) {
+	public BsonValue getDocumentId( final Consumer document ) {
 		if ( !documentHasId( document ) )
 			throw new IllegalStateException( "The document does not contain an _id" );
 		return BsonValue.class.cast( document.getId() );

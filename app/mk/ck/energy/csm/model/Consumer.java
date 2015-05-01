@@ -43,7 +43,7 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	/**
 	 * The Consumer document about passport and ID
 	 */
-	private static final String	DB_FIELD_DOCUMENT					= "document";
+	private static final String	DB_FIELD_DOCUMENTS				= "documents";
 	
 	private static final String	DB_FIELD_CONSUMER_TYPE		= "type";
 	
@@ -92,51 +92,6 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		return new Consumer( id );
 	}
 	
-	/**
-	 * private Consumer( final DBObject dbo, final short readingSet ) throws
-	 * ImpossibleCreatingException {
-	 * if ( dbo != null ) {
-	 * id = ( String )dbo.get( DB_FIELD_ID );
-	 * userId = ( String )dbo.get( DB_FIELD_USER_ID );
-	 * if ( UPDATING_READING_ALL == readingSet || ( readingSet &
-	 * UPDATING_READING_FULLNAME ) == UPDATING_READING_FULLNAME )
-	 * fullName = ( String )dbo.get( DB_FIELD_FULLNAME );
-	 * if ( UPDATING_READING_ALL == readingSet || ( readingSet &
-	 * UPDATING_READING_ACTIVE ) == UPDATING_READING_ACTIVE )
-	 * active = ( ( Boolean )dbo.get( DB_FIELD_ACTIVE ) ).booleanValue();
-	 * if ( UPDATING_READING_ALL == readingSet || ( readingSet &
-	 * UPDATING_READING_ADDRESS_FULL ) == UPDATING_READING_ADDRESS_FULL )
-	 * address = ( Address )dbo.get( DB_FIELD_ADDRESS ); final long idPlace = ( (
-	 * Long )dbo.get( "address.addressPlace_id" )
-	 * ).longValue();
-	 * final Address address = new Address();
-	 * try {
-	 * address.setAddressLocation( AddressLocation.findById( idLocation ) );
-	 * address.setAddressPlace( AddressPlace.findById( idPlace ) );
-	 * }
-	 * catch ( final AddressNotFoundException anfe ) {
-	 * LOGGER.error( "Can not find address" );
-	 * }
-	 * address.setHouse( ( String )dbo.get( "address.house" ) );
-	 * address.setApartment( ( String )dbo.get( "address.apartment" ) );
-	 * address.setPostalCode( ( String )dbo.get( "address.postal_code" ) );
-	 * if ( UPDATING_READING_ALL == readingSet || ( readingSet &
-	 * UPDATING_READING_DOCUMENTS ) == UPDATING_READING_DOCUMENTS )
-	 * document = ( Documents )dbo.get( DB_FIELD_DOCUMENT );
-	 * // ( String )dbo.get( "document.passport_series" ), ( String )dbo.get(
-	 * // "document.passport_number" ) );
-	 * if ( UPDATING_READING_ALL == readingSet || ( readingSet &
-	 * UPDATING_READING_OTHER ) == UPDATING_READING_OTHER ) {
-	 * consumerType = ConsumerType.valueOf( ( String )dbo.get(
-	 * DB_FIELD_CONSUMER_TYPE ) );
-	 * statusType = ConsumerStatusType.valueOf( ( String )dbo.get(
-	 * DB_FIELD_STATUS_TYPE ) );
-	 * }
-	 * } else
-	 * throw new ImpossibleCreatingException(
-	 * "The parameter dbObject should not be null in create Consumer" );
-	 * }
-	 */
 	public User getUser() {
 		return user;
 	}
@@ -145,20 +100,21 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		return getString( DB_FIELD_USER_ID );
 	}
 	
-	// Тут тра переробити
 	public void setUserId( final String userId ) {
-		final String id = getUserId();
-		if ( !userId.equals( id ) ) {
-			put( DB_FIELD_USER_ID, userId );
-			try {
-				// Тут тра переробити
-				user = User.findById( userId );
-				update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( DB_FIELD_USER_ID, userId ) );
-			}
-			catch ( final UserNotFoundException unfe ) {
-				LOGGER.warn( "It's a complete lie" );
-			}
-		}
+		if ( userId != null && !userId.isEmpty() ) {
+			final String id = getUserId();
+			if ( !userId.equals( id ) )
+				try {
+					user = User.findById( userId );
+					put( DB_FIELD_USER_ID, userId );
+				}
+				catch ( final UserNotFoundException unfe ) {
+					LOGGER.warn( "It's a complete lie" );
+					remove( DB_FIELD_USER_ID );
+					throw new IllegalArgumentException( "It's a complete lie! ID User is : " + userId );
+				}
+		} else
+			remove( DB_FIELD_USER_ID );
 	}
 	
 	public String getFullName() {
@@ -185,12 +141,12 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		put( DB_FIELD_ACTIVE, active );
 	}
 	
-	public Documents getDocument() {
-		return ( Documents )get( DB_FIELD_DOCUMENT );
+	public Documents getDocuments() {
+		return ( Documents )get( DB_FIELD_DOCUMENTS );
 	}
 	
-	public void setDocuments( final Documents document ) {
-		put( DB_FIELD_DOCUMENT, document );
+	public void setDocuments( final Documents documents ) {
+		put( DB_FIELD_DOCUMENTS, documents );
 	}
 	
 	public ConsumerType getConsumerType() {
@@ -237,7 +193,7 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		return meters.add( meter );
 	}
 	
-	public static Consumer findById( final String id, final short updateSet ) throws ConsumerException {
+	public static Consumer findById( final String id ) throws ConsumerException {
 		if ( id != null && !id.isEmpty() ) {
 			final Consumer doc = getMongoCollection().find( Filters.eq( DB_FIELD_ID, id ) ).first();
 			if ( doc == null )
