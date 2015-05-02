@@ -64,9 +64,20 @@ public class MeterDeviceCodec implements CollectibleCodec< MeterDevice > {
 		final MeterDevice meter = MeterDevice.create();
 		meter.setId( document.getString( DB_FIELD_ID ) );
 		meter.put( DB_FIELD_NAME, document.getString( DB_FIELD_NAME ) );
-		meter.setPhasing( ( byte )document.get( DB_FIELD_PHASING ) );
+		Object o = document.get( DB_FIELD_PHASING );
+		byte bp;
+		if ( o != null )
+			bp = ( ( Integer )o ).byteValue();
+		else
+			bp = ( byte )1;
+		meter.setPhasing( bp );
 		meter.setPrecision( document.getDouble( DB_FIELD_PRECISION ) );
-		meter.setInterval( ( byte )document.get( DB_FIELD_INTERVAL ) );
+		o = document.get( DB_FIELD_INTERVAL );
+		if ( o != null )
+			bp = ( ( Integer )o ).byteValue();
+		else
+			bp = ( byte )1;
+		meter.setInterval( bp );
 		meter.put( DB_FIELD_METHOD_TYPE, document.getString( DB_FIELD_METHOD_TYPE ) );
 		meter.put( DB_FIELD_INDUCTIVE_TYPE, document.getString( DB_FIELD_INDUCTIVE_TYPE ) );
 		meter.put( DB_FIELD_REGISTER_TYPE, document.getString( DB_FIELD_REGISTER_TYPE ) );
