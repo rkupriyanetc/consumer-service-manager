@@ -283,7 +283,7 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
-		sb.append( getString( DB_FIELD_LOCATION_TYPE ) );
+		sb.append( getLocationType().toString( Address.LOCATION_TYPE_SHORTNAME ) );
 		if ( sb.length() > 0 )
 			sb.append( " " );
 		sb.append( getString( DB_FIELD_LOCATION ) );

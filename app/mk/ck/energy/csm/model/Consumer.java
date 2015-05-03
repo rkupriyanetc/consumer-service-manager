@@ -49,7 +49,11 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	
 	private static final String	DB_FIELD_STATUS_TYPE			= "status";
 	
-	private static final String	DB_FIELD_HOUSE_TYPE				= "house_type";
+	private static final String	DB_FIELD_HOUSE_TYPE				= "house_types";
+	
+	private final BsonArray			houseTypes;
+	
+	private boolean							isRegisteredHouseTypes;
 	
 	/**
 	 * auth.User
@@ -85,6 +89,7 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	private Consumer( final String id ) {
 		setId( id );
 		this.meters = new LinkedList<>();
+		houseTypes = new BsonArray();
 	}
 	
 	// Тут тра переробити
@@ -166,18 +171,23 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	}
 	
 	public Set< HouseType > getHouseType() {
-		final BsonArray list = ( BsonArray )get( DB_FIELD_HOUSE_TYPE );
 		final Set< HouseType > hts = new LinkedHashSet<>();
-		for ( final BsonValue key : list.getValues() ) {
-			final HouseType ht = HouseType.valueOf( ( ( BsonString )key ).getValue() );
-			hts.add( ht );
-		}
+		if ( houseTypes != null && !houseTypes.isEmpty() )
+			for ( final BsonValue value : houseTypes.getValues() )
+				hts.add( HouseType.valueOf( value.asString().getValue() ) );
 		return hts;
 	}
 	
 	public boolean addHouseType( final HouseType houseType ) {
-		return update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq( "$addToSet", Filters.eq( "$each", houseType.name() ) ) )
-				.isModifiedCountAvailable();
+		final boolean bool = houseTypes.add( new BsonString( houseType.name() ) );
+		if ( !isRegisteredHouseTypes ) {
+			put( DB_FIELD_HOUSE_TYPE, houseTypes );
+			isRegisteredHouseTypes = true;
+		}
+		return bool;
+		// return update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq(
+		// "$addToSet", Filters.eq( "$each", houseType.name() ) )
+		// ).isModifiedCountAvailable();
 	}
 	
 	public List< Meter > getMeters() {
@@ -204,6 +214,7 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	}
 	
 	public void joinConsumerElectricity( final User user ) {
+		// Consumer already be stored in the database
 		setUserId( user.getId() );
 		setActive( true );
 		update( Filters.eq( DB_FIELD_ID, getId() ),

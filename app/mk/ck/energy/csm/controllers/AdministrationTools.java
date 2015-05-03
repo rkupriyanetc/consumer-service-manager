@@ -12,7 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -1041,7 +1040,7 @@ public class AdministrationTools extends Controller {
 						LOGGER.trace( "Count results is {}", pCount );
 						// А тут повертає пустоту, бо відсутні результати
 						final ResultSet result = statement.getResultSet();
-						final List< UndefinedConsumer > undefinedConsumers = new ArrayList< UndefinedConsumer >();
+						final List< UndefinedConsumer > undefinedConsumers = new LinkedList<>();
 						while ( result.next() ) {
 							// Account ID
 							String field = result.getString( 1 ).trim();
@@ -1050,8 +1049,11 @@ public class AdministrationTools extends Controller {
 							field = result.getString( 10 );
 							if ( field != null && !field.isEmpty() )
 								consumer.setFullName( field );
-							else
-								undefinedConsumers.add( new UndefinedConsumer( consumer, UndefinedConsumerType.CONSUMER_NAME_UNDEFINED ) );
+							else {
+								final UndefinedConsumer uCons = new UndefinedConsumer( consumer, UndefinedConsumerType.CONSUMER_NAME_UNDEFINED );
+								uCons.save();
+								undefinedConsumers.add( uCons );
+							}
 							// Is private house
 							final boolean isPriv = result.getBoolean( 12 );
 							consumer.addHouseType( isPriv ? HouseType.MANSION : HouseType.APARTMENT_HOUSE );
@@ -1078,16 +1080,16 @@ public class AdministrationTools extends Controller {
 									pasSeries = pasNumber;
 									pasNumber = passportTmp;
 								}
-							mk.ck.energy.csm.model.Documents document;
+							mk.ck.energy.csm.model.Documents documents;
 							if ( idCode != null && !idCode.isEmpty() && idCode.length() > 8 )
-								document = new mk.ck.energy.csm.model.Documents( idCode, pasSeries, pasNumber );
+								documents = new mk.ck.energy.csm.model.Documents( idCode, pasSeries, pasNumber );
 							else
 								if ( passBoll )
-									document = new mk.ck.energy.csm.model.Documents( null, pasSeries, pasNumber );
+									documents = new mk.ck.energy.csm.model.Documents( null, pasSeries, pasNumber );
 								else
-									document = null;
-							if ( document != null )
-								consumer.setDocuments( document );
+									documents = null;
+							if ( documents != null )
+								consumer.setDocuments( documents );
 							// Address
 							final Address address = Address.create();
 							field = result.getString( 4 );
@@ -1173,9 +1175,9 @@ public class AdministrationTools extends Controller {
 									for ( int k = 0; k < addrLocations.size() && !bool; k++ ) {
 										final String al = addrLocations.get( k ).getTopAddressId();
 										final boolean isAddrTop = keyReferences.equals( al );
-										bool = al.equals( lt.name() ) && isAddrTop;
+										bool = lt.name().equals( addrLocations.get( k ).getLocationType().name() ) && isAddrTop;
 										if ( bool ) {
-											address.setAddressLocationId( al );
+											address.setAddressLocation( addrLocations.get( k ) );
 											break;
 										}
 									}

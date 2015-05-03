@@ -81,7 +81,7 @@ public class Address {
 	
 	public void setAddressLocation( final AddressLocation address ) {
 		if ( address != null )
-			if ( !this.addressLocation.equals( address ) ) {
+			if ( !address.equals( this.addressLocation ) ) {
 				this.addressLocation = address;
 				// Тут тра переробити
 				this.addressLocationId = address.getId();
@@ -93,15 +93,16 @@ public class Address {
 	}
 	
 	public void setAddressLocationId( final String addressLocationId ) {
-		if ( !this.addressLocationId.equals( addressLocationId ) )
-			try {
-				this.addressLocation = AddressLocation.findById( addressLocationId );
-				this.addressLocationId = addressLocationId;
-			}
-			catch ( final AddressNotFoundException anfe ) {
-				this.addressLocationId = null;
-				LOGGER.warn( "Sorry. Cannot find address location by {}", addressLocationId );
-			}
+		if ( addressLocationId != null && !addressLocationId.isEmpty() )
+			if ( !addressLocationId.equals( this.addressLocationId ) )
+				try {
+					this.addressLocation = AddressLocation.findById( addressLocationId );
+					this.addressLocationId = addressLocationId;
+				}
+				catch ( final AddressNotFoundException anfe ) {
+					this.addressLocationId = null;
+					LOGGER.warn( "Sorry. Cannot find address location by {}", addressLocationId );
+				}
 	}
 	
 	public AddressPlace getAddressPlace() {
@@ -110,7 +111,7 @@ public class Address {
 	
 	public void setAddressPlace( final AddressPlace address ) {
 		if ( address != null )
-			if ( !this.addressPlace.equals( address ) ) {
+			if ( !address.equals( this.addressPlace ) ) {
 				this.addressPlace = address;
 				// Тут тра переробити
 				this.addressPlaceId = address.getId();
@@ -122,15 +123,16 @@ public class Address {
 	}
 	
 	public void setAddressPlaceId( final String addressPlaceId ) {
-		if ( !this.addressPlaceId.equals( addressPlaceId ) )
-			try {
-				this.addressPlace = AddressPlace.findById( addressPlaceId );
-				this.addressPlaceId = addressPlaceId;
-			}
-			catch ( final AddressNotFoundException anfe ) {
-				this.addressPlaceId = null;
-				LOGGER.warn( "Sorry. Cannot find address place by {}", addressPlaceId );
-			}
+		if ( addressPlaceId != null && !addressPlaceId.isEmpty() )
+			if ( !addressPlaceId.equals( this.addressPlaceId ) )
+				try {
+					this.addressPlace = AddressPlace.findById( addressPlaceId );
+					this.addressPlaceId = addressPlaceId;
+				}
+				catch ( final AddressNotFoundException anfe ) {
+					this.addressPlaceId = null;
+					LOGGER.warn( "Sorry. Cannot find address place by {}", addressPlaceId );
+				}
 	}
 	
 	public String getHouse() {
