@@ -73,9 +73,10 @@ public class Meter extends CSMAbstractDocument< Meter > {
 		return new Meter();
 	}
 	
-	public static Meter create( final MeterDevice meterDevice, final String number, final byte digits, final long dateInstall,
-			final short order, final String masterName, final LocationMeterType locationMeter ) {
+	public static Meter create( final String consumerId, final MeterDevice meterDevice, final String number, final byte digits,
+			final long dateInstall, final short order, final String masterName, final LocationMeterType locationMeter ) {
 		final Meter meter = new Meter();
+		meter.setConsumerId( consumerId );
 		meter.setMeterDevice( meterDevice );
 		meter.setNumber( number );
 		meter.setDigits( digits );

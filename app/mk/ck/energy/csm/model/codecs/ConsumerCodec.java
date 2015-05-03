@@ -47,9 +47,9 @@ public class ConsumerCodec implements CollectibleCodec< Consumer > {
 		final Document document = new Document( DB_FIELD_ID, value.getId() );
 		document.append( DB_FIELD_USER_ID, value.getString( DB_FIELD_USER_ID ) );
 		document.append( DB_FIELD_FULLNAME, value.getString( DB_FIELD_FULLNAME ) );
-		document.append( DB_FIELD_ADDRESS, value.getAddress() );
+		document.append( DB_FIELD_ADDRESS, value.get( DB_FIELD_ADDRESS ) );
 		document.append( DB_FIELD_ACTIVE, value.isActive() );
-		document.append( DB_FIELD_DOCUMENTS, value.getDocuments() );
+		document.append( DB_FIELD_DOCUMENTS, value.get( DB_FIELD_DOCUMENTS ) );
 		document.append( DB_FIELD_CONSUMER_TYPE, value.getString( DB_FIELD_CONSUMER_TYPE ) );
 		document.append( DB_FIELD_STATUS_TYPE, value.getString( DB_FIELD_STATUS_TYPE ) );
 		document.append( DB_FIELD_HOUSE_TYPE, value.getString( DB_FIELD_HOUSE_TYPE ) );

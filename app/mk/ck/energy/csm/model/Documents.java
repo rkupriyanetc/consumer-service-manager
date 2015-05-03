@@ -16,7 +16,9 @@ public class Documents {
 	
 	private String			idCode;
 	
-	public Documents( final String id, final String passportSeries, final String passportNumber ) {
+	private Documents() {}
+	
+	private Documents( final String id, final String passportSeries, final String passportNumber ) {
 		this.passportSeries = passportSeries;
 		this.passportNumber = passportNumber;
 		this.idCode = id;
@@ -55,5 +57,18 @@ public class Documents {
 		if ( passportNumber != null && !passportNumber.isEmpty() )
 			doc.put( DB_FIELD_PASSPORT_NUMBER, passportNumber );
 		return doc;
+	}
+	
+	public static Documents create() {
+		return new Documents();
+	}
+	
+	public static Documents create( final String id, final String passportSeries, final String passportNumber ) {
+		return new Documents( id, passportSeries, passportNumber );
+	}
+	
+	public static Documents create( final Document doc ) {
+		return new Documents( doc.getString( DB_FIELD_ID_CODE ), doc.getString( DB_FIELD_PASSPORT_SERIES ),
+				doc.getString( DB_FIELD_PASSPORT_NUMBER ) );
 	}
 }

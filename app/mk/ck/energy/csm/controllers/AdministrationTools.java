@@ -1082,10 +1082,10 @@ public class AdministrationTools extends Controller {
 								}
 							mk.ck.energy.csm.model.Documents documents;
 							if ( idCode != null && !idCode.isEmpty() && idCode.length() > 8 )
-								documents = new mk.ck.energy.csm.model.Documents( idCode, pasSeries, pasNumber );
+								documents = mk.ck.energy.csm.model.Documents.create( idCode, pasSeries, pasNumber );
 							else
 								if ( passBoll )
-									documents = new mk.ck.energy.csm.model.Documents( null, pasSeries, pasNumber );
+									documents = mk.ck.energy.csm.model.Documents.create( null, pasSeries, pasNumber );
 								else
 									documents = null;
 							if ( documents != null )
@@ -1239,7 +1239,8 @@ public class AdministrationTools extends Controller {
 							Date installDate = result.getDate( 18 );
 							// Meter Order
 							final short order = result.getShort( 19 );
-							final Meter meter = Meter.create( devices.get( 0 ), number, digits, installDate.getTime(), order, inspector, place );
+							final Meter meter = Meter.create( consumer.getId(), devices.get( 0 ), number, digits, installDate.getTime(), order,
+									inspector, place );
 							final byte amp = result.getByte( 20 );
 							if ( amp > 0 )
 								meter.setMightOutturn( amp );
@@ -1277,8 +1278,9 @@ public class AdministrationTools extends Controller {
 									meter.addPlumb( plumb2 );
 								}
 							}
+							meter.save();
 							consumer.addMeters( meter );
-							consumer.insertIntoDB();
+							consumer.save();
 							LOGGER.trace( "Consumer {} created. Writed by {} record!", consumer.getId(), ++consumerSize );
 						}
 						// Finish all Consumers

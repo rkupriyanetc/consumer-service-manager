@@ -147,11 +147,11 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	}
 	
 	public Documents getDocuments() {
-		return ( Documents )get( DB_FIELD_DOCUMENTS );
+		return Documents.create( ( Document )get( DB_FIELD_DOCUMENTS ) );
 	}
 	
 	public void setDocuments( final Documents documents ) {
-		put( DB_FIELD_DOCUMENTS, documents );
+		put( DB_FIELD_DOCUMENTS, documents.getDocument() );
 	}
 	
 	public ConsumerType getConsumerType() {
@@ -211,6 +211,17 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 			return doc;
 		} else
 			throw new IllegalArgumentException( "ID should not be empty in AddressTop.findById( id )" );
+	}
+	
+	public void save() throws ImpossibleCreatingException {
+		final Consumer consumer = getCollection().find( Filters.eq( DB_FIELD_ID, getId() ), Consumer.class ).first();
+		if ( consumer == null )
+			insertIntoDB();
+		else {
+			final String consumerId = getId();
+			LOGGER.warn( "Cannot save Consumer. Consumer already exists: {}", consumerId );
+			throw new ImpossibleCreatingException( "Consumer already exists " + consumerId );
+		}
 	}
 	
 	public void joinConsumerElectricity( final User user ) {
