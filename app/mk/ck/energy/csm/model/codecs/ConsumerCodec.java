@@ -45,11 +45,15 @@ public class ConsumerCodec implements CollectibleCodec< Consumer > {
 	@Override
 	public void encode( final BsonWriter writer, final Consumer value, final EncoderContext encoderContext ) {
 		final Document document = new Document( DB_FIELD_ID, value.getId() );
-		document.append( DB_FIELD_USER_ID, value.getString( DB_FIELD_USER_ID ) );
+		final String user = value.getString( DB_FIELD_USER_ID );
+		if ( user != null && !user.isEmpty() )
+			document.append( DB_FIELD_USER_ID, user );
 		document.append( DB_FIELD_FULLNAME, value.getString( DB_FIELD_FULLNAME ) );
 		document.append( DB_FIELD_ADDRESS, value.get( DB_FIELD_ADDRESS ) );
 		document.append( DB_FIELD_ACTIVE, value.isActive() );
-		document.append( DB_FIELD_DOCUMENTS, value.get( DB_FIELD_DOCUMENTS ) );
+		final Object doc = value.get( DB_FIELD_DOCUMENTS );
+		if ( doc != null )
+			document.append( DB_FIELD_DOCUMENTS, doc );
 		document.append( DB_FIELD_CONSUMER_TYPE, value.getString( DB_FIELD_CONSUMER_TYPE ) );
 		document.append( DB_FIELD_STATUS_TYPE, value.getString( DB_FIELD_STATUS_TYPE ) );
 		document.append( DB_FIELD_HOUSE_TYPE, value.getString( DB_FIELD_HOUSE_TYPE ) );
@@ -65,11 +69,15 @@ public class ConsumerCodec implements CollectibleCodec< Consumer > {
 	public Consumer decode( final BsonReader reader, final DecoderContext decoderContext ) {
 		final Document document = documentCodec.decode( reader, decoderContext );
 		final Consumer consumer = Consumer.create( document.getString( DB_FIELD_ID ) );
-		consumer.setUserId( DB_FIELD_USER_ID );
+		final String user = document.getString( DB_FIELD_USER_ID );
+		if ( user != null && !user.isEmpty() )
+			consumer.setUserId( user );
 		consumer.put( DB_FIELD_FULLNAME, document.getString( DB_FIELD_FULLNAME ) );
 		consumer.put( DB_FIELD_ADDRESS, document.get( DB_FIELD_ADDRESS ) );
 		consumer.setActive( document.getBoolean( DB_FIELD_ACTIVE ) );
-		consumer.put( DB_FIELD_DOCUMENTS, document.get( DB_FIELD_DOCUMENTS ) );
+		final Object doc = document.get( DB_FIELD_DOCUMENTS );
+		if ( doc != null )
+			consumer.put( DB_FIELD_DOCUMENTS, doc );
 		consumer.put( DB_FIELD_CONSUMER_TYPE, document.getString( DB_FIELD_CONSUMER_TYPE ) );
 		consumer.put( DB_FIELD_STATUS_TYPE, document.getString( DB_FIELD_STATUS_TYPE ) );
 		consumer.put( DB_FIELD_HOUSE_TYPE, document.getString( DB_FIELD_HOUSE_TYPE ) );

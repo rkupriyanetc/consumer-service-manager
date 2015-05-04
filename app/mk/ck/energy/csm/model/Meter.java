@@ -50,7 +50,7 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	static {
 		try {
 			MAXDATE = new SimpleDateFormat( "yyyy.mm.dd" ).parse( "9999.12.31" );
-			MAXDATE_PAKED = new SimpleDateFormat( "yyyy.mm.dd" ).parse( "2049.01.01" );
+			MAXDATE_PAKED = new SimpleDateFormat( "yyyy-mm-dd" ).parse( "2049-01-01" );
 		}
 		catch ( final Exception e ) {
 			MAXDATE = new Date( 9999 * 12 * 31 * 24 * 60 * 60 * 1000 );

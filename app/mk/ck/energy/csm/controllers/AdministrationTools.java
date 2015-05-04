@@ -1299,9 +1299,9 @@ public class AdministrationTools extends Controller {
 									meter.addPlumb( plumb2 );
 								}
 							}
-							meter.save();
 							consumer.addMeters( meter );
 							consumer.save();
+							meter.save();
 							LOGGER.trace( "Consumer {} created. Writed by {} record!", consumer.getId(), ++consumerSize );
 						}
 						// Finish all Consumers

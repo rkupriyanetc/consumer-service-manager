@@ -60,10 +60,12 @@ public class MeterCodec implements CollectibleCodec< Meter > {
 		final Long un = value.getLong( DB_FIELD_DATE_UNINSTALL );
 		if ( un != null )
 			document.append( DB_FIELD_DATE_UNINSTALL, un.longValue() );
-		document.append( DB_FIELD_DATE_TESTING, value.getLong( DB_FIELD_DATE_TESTING ) );
+		final Long tn = value.getLong( DB_FIELD_DATE_TESTING );
+		if ( tn != null )
+			document.append( DB_FIELD_DATE_TESTING, tn.longValue() );
 		document.append( DB_FIELD_MASTER_NAME, value.getString( DB_FIELD_MASTER_NAME ) );
-		document.append( DB_FIELD_MIGHT_OUTTURN, value.getMightOutturn() );
 		document.append( DB_FIELD_LOCATION_METER_TYPE, value.getString( DB_FIELD_LOCATION_METER_TYPE ) );
+		document.append( DB_FIELD_MIGHT_OUTTURN, value.getMightOutturn() );
 		documentCodec.encode( writer, document, encoderContext );
 	}
 	
@@ -86,10 +88,12 @@ public class MeterCodec implements CollectibleCodec< Meter > {
 		final Long un = document.getLong( DB_FIELD_DATE_UNINSTALL );
 		if ( un != null )
 			meter.put( DB_FIELD_DATE_UNINSTALL, un.longValue() );
-		meter.put( DB_FIELD_DATE_TESTING, document.getLong( DB_FIELD_DATE_TESTING ) );
+		final Long tn = document.getLong( DB_FIELD_DATE_TESTING );
+		if ( tn != null )
+			document.append( DB_FIELD_DATE_TESTING, tn.longValue() );
 		meter.put( DB_FIELD_MASTER_NAME, document.getString( DB_FIELD_MASTER_NAME ) );
-		meter.put( DB_FIELD_MIGHT_OUTTURN, document.get( DB_FIELD_MIGHT_OUTTURN ) );
 		meter.put( DB_FIELD_LOCATION_METER_TYPE, document.getString( DB_FIELD_LOCATION_METER_TYPE ) );
+		meter.put( DB_FIELD_MIGHT_OUTTURN, document.get( DB_FIELD_MIGHT_OUTTURN ) );
 		return meter;
 	}
 	
