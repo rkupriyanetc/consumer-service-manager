@@ -1,19 +1,14 @@
 package mk.ck.energy.csm.model;
 
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import mk.ck.energy.csm.model.auth.User;
 import mk.ck.energy.csm.model.auth.UserNotFoundException;
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
-import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWrapper;
-import org.bson.BsonString;
-import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 
@@ -49,11 +44,7 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	
 	private static final String	DB_FIELD_STATUS_TYPE			= "status";
 	
-	private static final String	DB_FIELD_HOUSE_TYPE				= "house_types";
-	
-	private final BsonArray			houseTypes;
-	
-	private boolean							isRegisteredHouseTypes;
+	private static final String	DB_FIELD_HOUSE_TYPE				= "house_type";
 	
 	/**
 	 * auth.User
@@ -65,34 +56,11 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	 */
 	private List< Meter >				meters;
 	
-	/**
-	 * private Consumer( final String id, final User user, final String fullName,
-	 * final Address address, final boolean active,
-	 * final ConsumerStatusType statusType, final ConsumerType consumerType ) {
-	 * if ( user != null ) {
-	 * this.user = user;
-	 * this.userId = user.getId();
-	 * }
-	 * this.id = id;
-	 * this.active = active;
-	 * this.consumerType = consumerType == null ? ConsumerType.INDIVIDUAL :
-	 * consumerType;
-	 * this.statusType = statusType == null ? ConsumerStatusType.TEMPORARILY :
-	 * statusType;
-	 * this.fullName = fullName;
-	 * this.address = address;
-	 * this.meters = new ArrayList< Meter >( 0 );
-	 * this.houseType = new HashSet< HouseType >( 0 );
-	 * }
-	 */
-	// Тут тра переробити
 	private Consumer( final String id ) {
 		setId( id );
 		this.meters = new LinkedList<>();
-		houseTypes = new BsonArray();
 	}
 	
-	// Тут тра переробити
 	public static Consumer create( final String id ) {
 		return new Consumer( id );
 	}
@@ -170,24 +138,12 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		put( DB_FIELD_STATUS_TYPE, statusType.name() );
 	}
 	
-	public Set< HouseType > getHouseType() {
-		final Set< HouseType > hts = new LinkedHashSet<>();
-		if ( houseTypes != null && !houseTypes.isEmpty() )
-			for ( final BsonValue value : houseTypes.getValues() )
-				hts.add( HouseType.valueOf( value.asString().getValue() ) );
-		return hts;
+	public HouseType getHouseType() {
+		return HouseType.valueOf( getString( DB_FIELD_HOUSE_TYPE ) );
 	}
 	
-	public boolean addHouseType( final HouseType houseType ) {
-		final boolean bool = houseTypes.add( new BsonString( houseType.name() ) );
-		if ( !isRegisteredHouseTypes ) {
-			put( DB_FIELD_HOUSE_TYPE, houseTypes );
-			isRegisteredHouseTypes = true;
-		}
-		return bool;
-		// return update( Filters.eq( DB_FIELD_ID, getId() ), Filters.eq(
-		// "$addToSet", Filters.eq( "$each", houseType.name() ) )
-		// ).isModifiedCountAvailable();
+	public void setHouseType( final HouseType houseType ) {
+		put( DB_FIELD_HOUSE_TYPE, houseType.name() );
 	}
 	
 	public List< Meter > getMeters() {

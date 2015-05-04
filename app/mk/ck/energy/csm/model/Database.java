@@ -13,6 +13,7 @@ import mk.ck.energy.csm.model.codecs.ConsumerCodec;
 import mk.ck.energy.csm.model.codecs.MeterCodec;
 import mk.ck.energy.csm.model.codecs.MeterDeviceCodec;
 import mk.ck.energy.csm.model.codecs.TokenActionCodec;
+import mk.ck.energy.csm.model.codecs.UndefinedConsumerCodec;
 import mk.ck.energy.csm.model.codecs.UserCodec;
 
 import org.bson.Document;
@@ -106,9 +107,10 @@ public class Database {
 						final MeterDeviceCodec meterDeviceCodec = new MeterDeviceCodec( defaultDocumentCodec );
 						final MeterCodec meterCodec = new MeterCodec( defaultDocumentCodec );
 						final ConsumerCodec consumerCodec = new ConsumerCodec( defaultDocumentCodec );
+						final UndefinedConsumerCodec undefinedConsumerCodec = new UndefinedConsumerCodec( defaultDocumentCodec );
 						final CodecRegistry codecRegistry = CodecRegistries.fromRegistries( MongoClient.getDefaultCodecRegistry(),
 								CodecRegistries.fromCodecs( userCodec, tokenActionCodec, addressTopCodec, addressLocationCodec,
-										addressPlaceCodec, meterDeviceCodec, meterCodec, consumerCodec ) );
+										addressPlaceCodec, meterDeviceCodec, meterCodec, consumerCodec, undefinedConsumerCodec ) );
 						final MongoClientOptions options = MongoClientOptions.builder().codecRegistry( codecRegistry ).build();
 						mongoClient = new MongoClient( new ServerAddress( config.getString( "host" ) ), Arrays.asList( credential ), options );
 					}

@@ -42,7 +42,9 @@ import mk.ck.energy.csm.model.AdministrativeCenterType;
 import mk.ck.energy.csm.model.Configuration;
 import mk.ck.energy.csm.model.Consumer;
 import mk.ck.energy.csm.model.ConsumerStatusType;
+import mk.ck.energy.csm.model.ConsumerType;
 import mk.ck.energy.csm.model.Database;
+import mk.ck.energy.csm.model.Documents;
 import mk.ck.energy.csm.model.HouseType;
 import mk.ck.energy.csm.model.ImpossibleCreatingException;
 import mk.ck.energy.csm.model.LocationMeterType;
@@ -1045,18 +1047,21 @@ public class AdministrationTools extends Controller {
 							// Account ID
 							String field = result.getString( 1 ).trim();
 							final Consumer consumer = Consumer.create( field );
+							// Population - standard created
+							consumer.setConsumerType( ConsumerType.INDIVIDUAL );
 							// Fullname
 							field = result.getString( 10 );
 							if ( field != null && !field.isEmpty() )
 								consumer.setFullName( field );
 							else {
-								final UndefinedConsumer uCons = new UndefinedConsumer( consumer, UndefinedConsumerType.CONSUMER_NAME_UNDEFINED );
+								final UndefinedConsumer uCons = UndefinedConsumer.create( consumer.getId(),
+										UndefinedConsumerType.CONSUMER_NAME_UNDEFINED );
 								uCons.save();
 								undefinedConsumers.add( uCons );
 							}
 							// Is private house
 							final boolean isPriv = result.getBoolean( 12 );
-							consumer.addHouseType( isPriv ? HouseType.MANSION : HouseType.APARTMENT_HOUSE );
+							consumer.setHouseType( isPriv ? HouseType.MANSION : HouseType.APARTMENT_HOUSE );
 							// Documents
 							final String idCode = result.getString( 7 );
 							final String passport = result.getString( 8 );
@@ -1080,12 +1085,12 @@ public class AdministrationTools extends Controller {
 									pasSeries = pasNumber;
 									pasNumber = passportTmp;
 								}
-							mk.ck.energy.csm.model.Documents documents;
+							Documents documents;
 							if ( idCode != null && !idCode.isEmpty() && idCode.length() > 8 )
-								documents = mk.ck.energy.csm.model.Documents.create( idCode, pasSeries, pasNumber );
+								documents = Documents.create( idCode, pasSeries, pasNumber );
 							else
 								if ( passBoll )
-									documents = mk.ck.energy.csm.model.Documents.create( null, pasSeries, pasNumber );
+									documents = Documents.create( null, pasSeries, pasNumber );
 								else
 									documents = null;
 							if ( documents != null )
@@ -1136,7 +1141,10 @@ public class AdministrationTools extends Controller {
 							}
 							catch ( final AddressNotFoundException anfe ) {
 								// It's Empty LocationType. But write to undefined list
-								undefinedConsumers.add( new UndefinedConsumer( consumer, UndefinedConsumerType.ADDRESSPLACE_UNDEFINED ) );
+								final UndefinedConsumer uc = UndefinedConsumer.create( consumer.getId(),
+										UndefinedConsumerType.ADDRESSPLACE_UNDEFINED );
+								uc.save();
+								undefinedConsumers.add( uc );
 							}
 							// Address City
 							field = result.getString( 2 );
@@ -1164,10 +1172,13 @@ public class AdministrationTools extends Controller {
 									lt = null;
 									break;
 							}
-							if ( lt == null )
+							if ( lt == null ) {
 								// It's Empty LocationType. But write to undefined list
-								undefinedConsumers.add( new UndefinedConsumer( consumer, UndefinedConsumerType.LOCATIONTYPE_UNDEFINED ) );
-							else {
+								final UndefinedConsumer uc = UndefinedConsumer.create( consumer.getId(),
+										UndefinedConsumerType.LOCATIONTYPE_UNDEFINED );
+								uc.save();
+								undefinedConsumers.add( uc );
+							} else {
 								List< AddressLocation > addrLocations = null;
 								try {
 									addrLocations = AddressLocation.findLikeLocationName( nameCity );
@@ -1181,11 +1192,18 @@ public class AdministrationTools extends Controller {
 											break;
 										}
 									}
-									if ( !bool )
-										undefinedConsumers.add( new UndefinedConsumer( consumer, UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED ) );
+									if ( !bool ) {
+										final UndefinedConsumer uc = UndefinedConsumer.create( consumer.getId(),
+												UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
+										uc.save();
+										undefinedConsumers.add( uc );
+									}
 								}
 								catch ( final AddressNotFoundException anfe ) {
-									undefinedConsumers.add( new UndefinedConsumer( consumer, UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED ) );
+									final UndefinedConsumer uc = UndefinedConsumer.create( consumer.getId(),
+											UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
+									uc.save();
+									undefinedConsumers.add( uc );
 								}
 								catch ( final NumberFormatException nfe ) {
 									LOGGER.trace( "This should not happen" );
@@ -1208,8 +1226,11 @@ public class AdministrationTools extends Controller {
 							final String meterName = result.getString( 13 );
 							// Must be only one, because the full name
 							final List< MeterDevice > devices = MeterDevice.findLikeName( meterName );
-							if ( devices.size() > 1 )
-								undefinedConsumers.add( new UndefinedConsumer( consumer, UndefinedConsumerType.METERS_MANY ) );
+							if ( devices.size() > 1 ) {
+								final UndefinedConsumer uc = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.METERS_MANY );
+								uc.save();
+								undefinedConsumers.add( uc );
+							}
 							// Meter place
 							final int meterPlaceId = result.getInt( 14 );
 							String str;

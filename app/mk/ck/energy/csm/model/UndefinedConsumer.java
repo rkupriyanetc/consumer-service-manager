@@ -15,34 +15,36 @@ import com.mongodb.client.model.Filters;
  */
 public class UndefinedConsumer extends CSMAbstractDocument< UndefinedConsumer > {
 	
-	private static final long						serialVersionUID										= 1L;
+	private static final long		serialVersionUID										= 1L;
 	
-	private static final String					COLLECTION_NAME_CONSUMERS_UNDEFINED	= "consumersUndefined";
+	private static final String	COLLECTION_NAME_CONSUMERS_UNDEFINED	= "consumersUndefined";
 	
-	private static final String					DB_FIELD_UNDEFINED_CONSUMER_TYPE		= "type";
+	private static final String	DB_FIELD_UNDEFINED_CONSUMER_TYPE		= "type";
 	
-	private final Consumer							consumer;
+	private UndefinedConsumer() {}
 	
-	private final UndefinedConsumerType	undefinedType;
-	
-	public UndefinedConsumer( final Consumer consumer, final UndefinedConsumerType undefinedType ) {
-		this.consumer = consumer;
-		put( DB_FIELD_ID, consumer.getId() );
-		this.undefinedType = undefinedType;
-		put( DB_FIELD_UNDEFINED_CONSUMER_TYPE, undefinedType );
+	public static UndefinedConsumer create() {
+		return new UndefinedConsumer();
 	}
 	
-	public Consumer getConsumer() {
-		return consumer;
+	public static UndefinedConsumer create( final String consumerId, final UndefinedConsumerType undefinedType ) {
+		final UndefinedConsumer uc = new UndefinedConsumer();
+		uc.setId( consumerId );
+		uc.setUndefinedType( undefinedType );
+		return uc;
 	}
 	
 	public UndefinedConsumerType getUndefinedType() {
-		return undefinedType;
+		return UndefinedConsumerType.valueOf( getString( DB_FIELD_UNDEFINED_CONSUMER_TYPE ) );
+	}
+	
+	public void setUndefinedType( final UndefinedConsumerType undefinedType ) {
+		put( DB_FIELD_UNDEFINED_CONSUMER_TYPE, undefinedType.name() );
 	}
 	
 	public void save() {
-		final UndefinedConsumer uConsumer = getCollection().find( Filters.eq( DB_FIELD_ID, consumer.getId() ),
-				UndefinedConsumer.class ).first();
+		final UndefinedConsumer uConsumer = getCollection().find( Filters.eq( DB_FIELD_ID, getId() ), UndefinedConsumer.class )
+				.first();
 		if ( uConsumer == null )
 			insertIntoDB();
 		else {
@@ -54,9 +56,9 @@ public class UndefinedConsumer extends CSMAbstractDocument< UndefinedConsumer > 
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer( "Ос. рахунок: " );
-		sb.append( consumer.getId() );
+		sb.append( getId() );
 		sb.append( " UT: " );
-		sb.append( undefinedType.name() );
+		sb.append( getString( DB_FIELD_UNDEFINED_CONSUMER_TYPE ) );
 		return sb.toString();
 	}
 	
