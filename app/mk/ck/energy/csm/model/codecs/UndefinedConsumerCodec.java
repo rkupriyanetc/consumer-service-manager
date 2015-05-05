@@ -1,7 +1,10 @@
 package mk.ck.energy.csm.model.codecs;
 
+import java.util.List;
+
 import mk.ck.energy.csm.model.UndefinedConsumer;
 
+import org.bson.BsonArray;
 import org.bson.BsonReader;
 import org.bson.BsonValue;
 import org.bson.BsonWriter;
@@ -11,12 +14,16 @@ import org.bson.codecs.CollectibleCodec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.DocumentCodec;
 import org.bson.codecs.EncoderContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UndefinedConsumerCodec implements CollectibleCodec< UndefinedConsumer > {
 	
+	protected static final Logger		LOGGER														= LoggerFactory.getLogger( UndefinedConsumerCodec.class );
+	
 	private static final String			DB_FIELD_ID												= "_id";
 	
-	private static final String			DB_FIELD_UNDEFINED_CONSUMER_TYPE	= "type";
+	private static final String			DB_FIELD_UNDEFINED_CONSUMER_TYPES	= "types";
 	
 	private final Codec< Document >	documentCodec;
 	
@@ -31,7 +38,9 @@ public class UndefinedConsumerCodec implements CollectibleCodec< UndefinedConsum
 	@Override
 	public void encode( final BsonWriter writer, final UndefinedConsumer value, final EncoderContext encoderContext ) {
 		final Document document = new Document( DB_FIELD_ID, value.getId() );
-		document.append( DB_FIELD_UNDEFINED_CONSUMER_TYPE, value.getString( DB_FIELD_UNDEFINED_CONSUMER_TYPE ) );
+		final Object o = value.get( DB_FIELD_UNDEFINED_CONSUMER_TYPES );
+		if ( o != null )
+			document.append( DB_FIELD_UNDEFINED_CONSUMER_TYPES, o );
 		documentCodec.encode( writer, document, encoderContext );
 	}
 	
@@ -45,7 +54,23 @@ public class UndefinedConsumerCodec implements CollectibleCodec< UndefinedConsum
 		final Document document = documentCodec.decode( reader, decoderContext );
 		final UndefinedConsumer consumer = UndefinedConsumer.create();
 		consumer.put( DB_FIELD_ID, document.getString( DB_FIELD_ID ) );
-		consumer.put( DB_FIELD_UNDEFINED_CONSUMER_TYPE, document.getString( DB_FIELD_UNDEFINED_CONSUMER_TYPE ) );
+		List< ? > list = null;
+		final Object o = document.get( DB_FIELD_UNDEFINED_CONSUMER_TYPES );
+		if ( o == null )
+			consumer.setUndefinedConsumerTypes( null );
+		else
+			try {
+				if ( List.class.isInstance( o ) ) {
+					list = List.class.cast( o );
+					list = consumer.listStringAsBsonArray( consumer.extractAsListStringValues( list ) );
+				} else
+					if ( BsonArray.class.isInstance( o ) )
+						list = BsonArray.class.cast( o );
+				consumer.setUndefinedConsumerTypes( list );
+			}
+			catch ( final ClassCastException cce ) {
+				LOGGER.warn( "Error casting array of UndefinedConsumerType {}", o );
+			}
 		return consumer;
 	}
 	

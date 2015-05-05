@@ -1043,9 +1043,18 @@ public class AdministrationTools extends Controller {
 						// А тут повертає пустоту, бо відсутні результати
 						final ResultSet result = statement.getResultSet();
 						final List< UndefinedConsumer > undefinedConsumers = new LinkedList<>();
+						boolean undefinedConsomerTry = false;
 						while ( result.next() ) {
+							UndefinedConsumer ndefinedConsomer;
+							// select lsid, nazvapos, nstreet, house, flat, indeks, uid,
+							// adoc, codestatus, surname, wdoc, priv, marka, codemesto,
+							// inspektor, nomer, rozr, ndate, cdoc, amp, number_pl, ndate_pl,
+							// kdate_pl, insp_pl, code_pl,
+							// number_pl2, ndate_pl2, kdate_pl2, insp_pl2, code_pl2,
+							// count_plumb
 							// Account ID
 							String field = result.getString( 1 ).trim();
+							// Create Consumer with consumerId
 							final Consumer consumer = Consumer.create( field );
 							// Population - standard created
 							consumer.setConsumerType( ConsumerType.INDIVIDUAL );
@@ -1054,10 +1063,10 @@ public class AdministrationTools extends Controller {
 							if ( field != null && !field.isEmpty() )
 								consumer.setFullName( field );
 							else {
-								final UndefinedConsumer uCons = UndefinedConsumer.create( consumer.getId(),
-										UndefinedConsumerType.CONSUMER_NAME_UNDEFINED );
-								uCons.save();
-								undefinedConsumers.add( uCons );
+								ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.CONSUMER_NAME_UNDEFINED );
+								ndefinedConsomer.save();
+								undefinedConsomerTry = true;
+								undefinedConsumers.add( ndefinedConsomer );
 							}
 							// Is private house
 							final boolean isPriv = result.getBoolean( 12 );

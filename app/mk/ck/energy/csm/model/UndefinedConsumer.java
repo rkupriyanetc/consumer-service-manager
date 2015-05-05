@@ -1,9 +1,15 @@
 package mk.ck.energy.csm.model;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
+import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWrapper;
+import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.bson.codecs.configuration.CodecRegistry;
 
 import com.mongodb.client.MongoCollection;
@@ -19,9 +25,15 @@ public class UndefinedConsumer extends CSMAbstractDocument< UndefinedConsumer > 
 	
 	private static final String	COLLECTION_NAME_CONSUMERS_UNDEFINED	= "consumersUndefined";
 	
-	private static final String	DB_FIELD_UNDEFINED_CONSUMER_TYPE		= "type";
+	private static final String	DB_FIELD_UNDEFINED_CONSUMER_TYPES		= "types";
 	
-	private UndefinedConsumer() {}
+	private final BsonArray			types;
+	
+	private boolean							isRegisteredTypes;
+	
+	private UndefinedConsumer() {
+		types = new BsonArray();
+	}
 	
 	public static UndefinedConsumer create() {
 		return new UndefinedConsumer();
@@ -30,16 +42,46 @@ public class UndefinedConsumer extends CSMAbstractDocument< UndefinedConsumer > 
 	public static UndefinedConsumer create( final String consumerId, final UndefinedConsumerType undefinedType ) {
 		final UndefinedConsumer uc = new UndefinedConsumer();
 		uc.setId( consumerId );
-		uc.setUndefinedType( undefinedType );
+		uc.addUndefinedConsumerType( undefinedType );
 		return uc;
 	}
 	
-	public UndefinedConsumerType getUndefinedType() {
-		return UndefinedConsumerType.valueOf( getString( DB_FIELD_UNDEFINED_CONSUMER_TYPE ) );
+	/**
+	 * Типи неірного створення особового рахунку
+	 */
+	public List< UndefinedConsumerType > getUndefinedConsumerTypes() {
+		final List< UndefinedConsumerType > typ = new LinkedList<>();
+		if ( types != null && !types.isEmpty() )
+			for ( final BsonValue value : types.getValues() )
+				typ.add( UndefinedConsumerType.valueOf( value.asString().getValue() ) );
+		return typ;
 	}
 	
-	public void setUndefinedType( final UndefinedConsumerType undefinedType ) {
-		put( DB_FIELD_UNDEFINED_CONSUMER_TYPE, undefinedType.name() );
+	public void setUndefinedConsumerTypes( final Object undefinedTypes ) {
+		if ( undefinedTypes != null ) {
+			types.addAll( ( BsonArray )undefinedTypes );
+			if ( !types.isEmpty() ) {
+				if ( !isRegisteredTypes ) {
+					put( DB_FIELD_UNDEFINED_CONSUMER_TYPES, types );
+					isRegisteredTypes = true;
+				}
+			} else {
+				remove( DB_FIELD_UNDEFINED_CONSUMER_TYPES );
+				isRegisteredTypes = false;
+			}
+		} else {
+			remove( DB_FIELD_UNDEFINED_CONSUMER_TYPES );
+			isRegisteredTypes = false;
+		}
+	}
+	
+	public boolean addUndefinedConsumerType( final UndefinedConsumerType value ) {
+		final boolean bool = types.add( new BsonString( value.name() ) );
+		if ( !isRegisteredTypes ) {
+			put( DB_FIELD_UNDEFINED_CONSUMER_TYPES, types );
+			isRegisteredTypes = true;
+		}
+		return bool;
 	}
 	
 	public void save() {
@@ -58,7 +100,7 @@ public class UndefinedConsumer extends CSMAbstractDocument< UndefinedConsumer > 
 		final StringBuffer sb = new StringBuffer( "Ос. рахунок: " );
 		sb.append( getId() );
 		sb.append( " UT: " );
-		sb.append( getString( DB_FIELD_UNDEFINED_CONSUMER_TYPE ) );
+		sb.append( get( DB_FIELD_UNDEFINED_CONSUMER_TYPES ) );
 		return sb.toString();
 	}
 	
