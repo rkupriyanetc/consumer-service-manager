@@ -528,53 +528,20 @@ public class AdministrationTools extends Controller {
 									}
 									break;
 							}
-							LocationType lt;
-							switch ( nameType ) {
-								case "с." :
-									lt = LocationType.VILLAGE;
-									break;
-								case "м." :
-									lt = LocationType.CITY;
-									break;
-								case "смт." :
-									lt = LocationType.TOWNSHIP;
-									break;
-								case "х." :
-									lt = LocationType.HAMLET;
-									break;
-								case "сад." :
-									lt = LocationType.BOWERY;
-									break;
-								default :
-									lt = LocationType.UNSPECIFIED;
-									break;
-							}
+							final LocationType lt = LocationType.abbreviationToLocationType( nameType );
 							Set< AdministrativeCenterType > at = new LinkedHashSet<>();
 							final StringTokenizer st = new StringTokenizer( admType, "," );
 							while ( st.hasMoreTokens() ) {
 								final String token = st.nextToken().trim();
-								switch ( token ) {
-									case "р-н" :
-										at.add( AdministrativeCenterType.DISTRICT );
-										break;
-									case "обл." :
-										at.add( AdministrativeCenterType.REGIONAL );
-										break;
-									case "столиця" :
-										at.add( AdministrativeCenterType.CAPITAL );
-										break;
-									default :
-										try {
-											final AdministrativeCenterType act = AdministrativeCenterType.valueOf( token );
-											at.add( act );
-										}
-										catch ( final IllegalArgumentException iae ) {
-											LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
-										}
-										catch ( final NullPointerException npe ) {
-											LOGGER.debug( "Parameter should not be empty in valueOf({})", token );
-										}
-										break;
+								try {
+									final AdministrativeCenterType act = AdministrativeCenterType.abbreviationToAdministrativeCenterType( token );
+									at.add( act );
+								}
+								catch ( final IllegalArgumentException iae ) {
+									LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
+								}
+								catch ( final NullPointerException npe ) {
+									LOGGER.debug( "Parameter should not be empty in valueOf({})", token );
 								}
 							}
 							AddressLocation al = null;
@@ -728,53 +695,20 @@ public class AdministrationTools extends Controller {
 									}
 									break;
 							}
-							LocationType lt;
-							switch ( nameType ) {
-								case "с." :
-									lt = LocationType.VILLAGE;
-									break;
-								case "м." :
-									lt = LocationType.CITY;
-									break;
-								case "смт." :
-									lt = LocationType.TOWNSHIP;
-									break;
-								case "х." :
-									lt = LocationType.HAMLET;
-									break;
-								case "сад." :
-									lt = LocationType.BOWERY;
-									break;
-								default :
-									lt = LocationType.UNSPECIFIED;
-									break;
-							}
+							final LocationType lt = LocationType.abbreviationToLocationType( nameType );
 							Set< AdministrativeCenterType > at = new LinkedHashSet<>();
 							final StringTokenizer st = new StringTokenizer( admType, "," );
 							while ( st.hasMoreTokens() ) {
 								final String token = st.nextToken().trim();
-								switch ( token ) {
-									case "р-н" :
-										at.add( AdministrativeCenterType.DISTRICT );
-										break;
-									case "обл." :
-										at.add( AdministrativeCenterType.REGIONAL );
-										break;
-									case "столиця" :
-										at.add( AdministrativeCenterType.CAPITAL );
-										break;
-									default :
-										try {
-											final AdministrativeCenterType act = AdministrativeCenterType.valueOf( token );
-											at.add( act );
-										}
-										catch ( final IllegalArgumentException iae ) {
-											LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
-										}
-										catch ( final NullPointerException npe ) {
-											LOGGER.debug( "Parameter should not be empty in valueOf({})", token );
-										}
-										break;
+								try {
+									final AdministrativeCenterType act = AdministrativeCenterType.abbreviationToAdministrativeCenterType( token );
+									at.add( act );
+								}
+								catch ( final IllegalArgumentException iae ) {
+									LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
+								}
+								catch ( final NullPointerException npe ) {
+									LOGGER.debug( "Parameter should not be empty in valueOf({})", token );
 								}
 							}
 							AddressLocation al = null;
@@ -817,33 +751,7 @@ public class AdministrationTools extends Controller {
 						final int pos = field.indexOf( "." ) + 1;
 						String typeStr = field.substring( 0, pos ).trim();
 						final String nameStr = field.substring( pos ).trim();
-						final StreetType st;
-						switch ( typeStr ) {
-							case "пл." :
-								st = StreetType.AREA;
-								break;
-							case "бул." :
-								st = StreetType.BOULEVARD;
-								break;
-							case "прсп." :
-								st = StreetType.AVENUE;
-								break;
-							case "вул." :
-								st = StreetType.STREET;
-								break;
-							case "прв." :
-								st = StreetType.LANE;
-								break;
-							case "туп." :
-								st = StreetType.CUL_DE_SAC;
-								break;
-							case "узв." :
-								st = StreetType.DESCENT;
-								break;
-							default :
-								st = StreetType.UNCERTAIN;
-								break;
-						}
+						final StreetType st = StreetType.abbreviationToStreetType( typeStr );
 						if ( st.equals( StreetType.UNCERTAIN ) ) {
 							final Element street = document.createElement( "street" );
 							root.appendChild( street );
@@ -928,33 +836,7 @@ public class AdministrationTools extends Controller {
 									}
 								}
 							}
-							final StreetType st;
-							switch ( nameType ) {
-								case "пл." :
-									st = StreetType.AREA;
-									break;
-								case "бул." :
-									st = StreetType.BOULEVARD;
-									break;
-								case "прсп." :
-									st = StreetType.AVENUE;
-									break;
-								case "вул." :
-									st = StreetType.STREET;
-									break;
-								case "прв." :
-									st = StreetType.LANE;
-									break;
-								case "туп." :
-									st = StreetType.CUL_DE_SAC;
-									break;
-								case "узв." :
-									st = StreetType.DESCENT;
-									break;
-								default :
-									st = StreetType.UNCERTAIN;
-									break;
-							}
+							final StreetType st = StreetType.abbreviationToStreetType( nameType );
 							try {
 								final AddressPlace al = AddressPlace.create( st, name );
 								al.save();

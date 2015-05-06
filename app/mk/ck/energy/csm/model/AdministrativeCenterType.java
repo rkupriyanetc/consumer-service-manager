@@ -44,6 +44,25 @@ public enum AdministrativeCenterType {
 		return vals;
 	}
 	
+	public static AdministrativeCenterType abbreviationToAdministrativeCenterType( final String abbreviation ) {
+		AdministrativeCenterType act;
+		switch ( abbreviation ) {
+			case "р-н" :
+				act = AdministrativeCenterType.DISTRICT;
+				break;
+			case "обл." :
+				act = AdministrativeCenterType.REGIONAL;
+				break;
+			case "столиця" :
+				act = AdministrativeCenterType.CAPITAL;
+				break;
+			default :
+				act = AdministrativeCenterType.valueOf( abbreviation );
+				break;
+		}
+		return act;
+	}
+	
 	public String toString( final String method ) {
 		return Messages.get( method + "." + name().toLowerCase() );
 	}

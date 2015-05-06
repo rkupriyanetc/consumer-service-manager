@@ -53,7 +53,18 @@ public enum StreetType {
 	 * Узвіз</a> — вулиця, що має крутий підйом. (наприклад, Андріївський узвіз у
 	 * Києві).
 	 */
-	DESCENT( 7 );
+	DESCENT( 7 ),
+	/**
+	 * Проїзд
+	 */
+	PASSAGE( 8 ),
+	/**
+	 * <a
+	 * href="http://uk.wikipedia.org/wiki/%D0%92%D1%83%D0%BB%D0%B8%D1%86%D1%8F">
+	 * Набережна</a> — вулиця вздовж річки чи великої водойми (озеро, море,
+	 * океан).
+	 */
+	QUAY( 9 ), ;
 	
 	private int	id;
 	
@@ -86,6 +97,52 @@ public enum StreetType {
 		for ( final StreetType lType : StreetType.values() )
 			vals.put( lType.name(), lType.name() );
 		return vals;
+	}
+	
+	public static StreetType abbreviationToStreetType( final String abbreviation ) {
+		StreetType st;
+		switch ( abbreviation ) {
+			case "пл." :
+				st = StreetType.AREA;
+				break;
+			case "бул." :
+				st = StreetType.BOULEVARD;
+				break;
+			case "прсп." :
+				st = StreetType.AVENUE;
+				break;
+			case "прс." :
+				st = StreetType.AVENUE;
+				break;
+			case "вул." :
+				st = StreetType.STREET;
+				break;
+			case "прв." :
+				st = StreetType.LANE;
+				break;
+			case "пров." :
+				st = StreetType.LANE;
+				break;
+			case "туп." :
+				st = StreetType.CUL_DE_SAC;
+				break;
+			case "узв." :
+				st = StreetType.DESCENT;
+				break;
+			case "прз." :
+				st = StreetType.PASSAGE;
+				break;
+			case "прзд." :
+				st = StreetType.PASSAGE;
+				break;
+			case "наб." :
+				st = StreetType.PASSAGE;
+				break;
+			default :
+				st = StreetType.UNCERTAIN;
+				break;
+		}
+		return st;
 	}
 	
 	public boolean equals( final StreetType o ) {

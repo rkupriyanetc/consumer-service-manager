@@ -52,6 +52,31 @@ public enum LocationType {
 		return vals;
 	}
 	
+	public static LocationType abbreviationToLocationType( final String abbreviation ) {
+		LocationType lt;
+		switch ( abbreviation ) {
+			case "с." :
+				lt = LocationType.VILLAGE;
+				break;
+			case "м." :
+				lt = LocationType.CITY;
+				break;
+			case "смт." :
+				lt = LocationType.TOWNSHIP;
+				break;
+			case "х." :
+				lt = LocationType.HAMLET;
+				break;
+			case "сад." :
+				lt = LocationType.BOWERY;
+				break;
+			default :
+				lt = LocationType.UNSPECIFIED;
+				break;
+		}
+		return lt;
+	}
+	
 	public boolean equals( final LocationType o ) {
 		if ( o == null )
 			return false;
