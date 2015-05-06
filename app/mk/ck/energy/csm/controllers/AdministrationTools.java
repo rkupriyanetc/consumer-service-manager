@@ -997,33 +997,7 @@ public class AdministrationTools extends Controller {
 							final int posS = field.indexOf( "." ) + 1;
 							final String typeStr = field.substring( 0, posS ).trim();
 							final String nameStr = field.substring( posS ).trim();
-							final StreetType st;
-							switch ( typeStr ) {
-								case "пл." :
-									st = StreetType.AREA;
-									break;
-								case "бул." :
-									st = StreetType.BOULEVARD;
-									break;
-								case "прсп." :
-									st = StreetType.AVENUE;
-									break;
-								case "вул." :
-									st = StreetType.STREET;
-									break;
-								case "прв." :
-									st = StreetType.LANE;
-									break;
-								case "туп." :
-									st = StreetType.CUL_DE_SAC;
-									break;
-								case "узв." :
-									st = StreetType.DESCENT;
-									break;
-								default :
-									st = StreetType.UNCERTAIN;
-									break;
-							}
+							final StreetType st = StreetType.abbreviationToStreetType( typeStr );
 							try {
 								final AddressPlace addr = AddressPlace.find( nameStr, st );
 								address.setAddressPlace( addr );
@@ -1041,28 +1015,8 @@ public class AdministrationTools extends Controller {
 							final int pos = field.indexOf( "." ) + 1;
 							final String typeCity = field.substring( 0, pos ).trim();
 							final String nameCity = field.substring( pos ).trim();
-							LocationType lt;
-							switch ( typeCity ) {
-								case "с." :
-									lt = LocationType.VILLAGE;
-									break;
-								case "м." :
-									lt = LocationType.CITY;
-									break;
-								case "смт." :
-									lt = LocationType.TOWNSHIP;
-									break;
-								case "х." :
-									lt = LocationType.HAMLET;
-									break;
-								case "сад." :
-									lt = LocationType.BOWERY;
-									break;
-								default :
-									lt = null;
-									break;
-							}
-							if ( lt == null ) {
+							final LocationType lt = LocationType.abbreviationToLocationType( typeCity );
+							if ( lt == null || lt != null && lt.equals( LocationType.UNSPECIFIED ) ) {
 								// It's Empty LocationType. But write to undefined list
 								if ( !undefinedConsomerTry ) {
 									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.LOCATIONTYPE_UNDEFINED );
@@ -1173,7 +1127,7 @@ public class AdministrationTools extends Controller {
 								final Plumb plumb = new Plumb( number, installDate.getTime(), inspector, type );
 								// Plumb UninstallDate
 								Date uninstallDate = result.getDate( 23 );
-								if ( uninstallDate != Meter.MAXDATE_PAKED )
+								if ( uninstallDate.getTime() != Meter.MAXDATE_PAKED.getTime() )
 									plumb.setUninstallDate( uninstallDate.getTime() );
 								meter.addPlumb( plumb );
 								number = result.getString( 26 );
@@ -1194,7 +1148,6 @@ public class AdministrationTools extends Controller {
 									meter.addPlumb( plumb2 );
 								}
 							}
-							consumer.addMeters( meter );
 							consumer.save();
 							meter.save();
 							if ( undefinedConsomerTry && ndefinedConsomer != null ) {

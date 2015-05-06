@@ -65,7 +65,9 @@ public class MeterCodec implements CollectibleCodec< Meter > {
 			document.append( DB_FIELD_DATE_TESTING, tn.longValue() );
 		document.append( DB_FIELD_MASTER_NAME, value.getString( DB_FIELD_MASTER_NAME ) );
 		document.append( DB_FIELD_LOCATION_METER_TYPE, value.getString( DB_FIELD_LOCATION_METER_TYPE ) );
-		document.append( DB_FIELD_MIGHT_OUTTURN, value.getMightOutturn() );
+		final byte by = value.getMightOutturn();
+		if ( by != 0 )
+			document.append( DB_FIELD_MIGHT_OUTTURN, by );
 		documentCodec.encode( writer, document, encoderContext );
 	}
 	
@@ -93,7 +95,9 @@ public class MeterCodec implements CollectibleCodec< Meter > {
 			document.append( DB_FIELD_DATE_TESTING, tn.longValue() );
 		meter.put( DB_FIELD_MASTER_NAME, document.getString( DB_FIELD_MASTER_NAME ) );
 		meter.put( DB_FIELD_LOCATION_METER_TYPE, document.getString( DB_FIELD_LOCATION_METER_TYPE ) );
-		meter.put( DB_FIELD_MIGHT_OUTTURN, document.get( DB_FIELD_MIGHT_OUTTURN ) );
+		final Long by = ( Long )document.get( DB_FIELD_MIGHT_OUTTURN );
+		if ( by != null && by.byteValue() != 0 )
+			meter.put( DB_FIELD_MIGHT_OUTTURN, by.byteValue() );
 		return meter;
 	}
 	
