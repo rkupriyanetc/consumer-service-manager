@@ -1045,7 +1045,7 @@ public class AdministrationTools extends Controller {
 						final List< UndefinedConsumer > undefinedConsumers = new LinkedList<>();
 						boolean undefinedConsomerTry = false;
 						while ( result.next() ) {
-							UndefinedConsumer ndefinedConsomer;
+							UndefinedConsumer ndefinedConsomer = null;
 							// select lsid, nazvapos, nstreet, house, flat, indeks, uid,
 							// adoc, codestatus, surname, wdoc, priv, marka, codemesto,
 							// inspektor, nomer, rozr, ndate, cdoc, amp, number_pl, ndate_pl,
@@ -1064,9 +1064,7 @@ public class AdministrationTools extends Controller {
 								consumer.setFullName( field );
 							else {
 								ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.CONSUMER_NAME_UNDEFINED );
-								ndefinedConsomer.save();
 								undefinedConsomerTry = true;
-								undefinedConsumers.add( ndefinedConsomer );
 							}
 							// Is private house
 							final boolean isPriv = result.getBoolean( 12 );
@@ -1150,10 +1148,11 @@ public class AdministrationTools extends Controller {
 							}
 							catch ( final AddressNotFoundException anfe ) {
 								// It's Empty LocationType. But write to undefined list
-								final UndefinedConsumer uc = UndefinedConsumer.create( consumer.getId(),
-										UndefinedConsumerType.ADDRESSPLACE_UNDEFINED );
-								uc.save();
-								undefinedConsumers.add( uc );
+								if ( !undefinedConsomerTry ) {
+									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.ADDRESSPLACE_UNDEFINED );
+									undefinedConsomerTry = true;
+								} else
+									ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.ADDRESSPLACE_UNDEFINED );
 							}
 							// Address City
 							field = result.getString( 2 );
@@ -1183,10 +1182,11 @@ public class AdministrationTools extends Controller {
 							}
 							if ( lt == null ) {
 								// It's Empty LocationType. But write to undefined list
-								final UndefinedConsumer uc = UndefinedConsumer.create( consumer.getId(),
-										UndefinedConsumerType.LOCATIONTYPE_UNDEFINED );
-								uc.save();
-								undefinedConsumers.add( uc );
+								if ( !undefinedConsomerTry ) {
+									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.LOCATIONTYPE_UNDEFINED );
+									undefinedConsomerTry = true;
+								} else
+									ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.LOCATIONTYPE_UNDEFINED );
 							} else {
 								List< AddressLocation > addrLocations = null;
 								try {
@@ -1201,18 +1201,21 @@ public class AdministrationTools extends Controller {
 											break;
 										}
 									}
-									if ( !bool ) {
-										final UndefinedConsumer uc = UndefinedConsumer.create( consumer.getId(),
-												UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
-										uc.save();
-										undefinedConsumers.add( uc );
-									}
+									if ( !bool )
+										if ( !undefinedConsomerTry ) {
+											ndefinedConsomer = UndefinedConsumer.create( consumer.getId(),
+													UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
+											undefinedConsomerTry = true;
+										} else
+											ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
 								}
 								catch ( final AddressNotFoundException anfe ) {
-									final UndefinedConsumer uc = UndefinedConsumer.create( consumer.getId(),
-											UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
-									uc.save();
-									undefinedConsumers.add( uc );
+									if ( !undefinedConsomerTry ) {
+										ndefinedConsomer = UndefinedConsumer.create( consumer.getId(),
+												UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
+										undefinedConsomerTry = true;
+									} else
+										ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
 								}
 								catch ( final NumberFormatException nfe ) {
 									LOGGER.trace( "This should not happen" );
@@ -1235,11 +1238,12 @@ public class AdministrationTools extends Controller {
 							final String meterName = result.getString( 13 );
 							// Must be only one, because the full name
 							final List< MeterDevice > devices = MeterDevice.findLikeName( meterName );
-							if ( devices.size() > 1 ) {
-								final UndefinedConsumer uc = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.METERS_MANY );
-								uc.save();
-								undefinedConsumers.add( uc );
-							}
+							if ( devices.size() > 1 )
+								if ( !undefinedConsomerTry ) {
+									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.METERS_MANY );
+									undefinedConsomerTry = true;
+								} else
+									ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.METERS_MANY );
 							// Meter place
 							final int meterPlaceId = result.getInt( 14 );
 							String str;
@@ -1311,6 +1315,12 @@ public class AdministrationTools extends Controller {
 							consumer.addMeters( meter );
 							consumer.save();
 							meter.save();
+							if ( undefinedConsomerTry && ndefinedConsomer != null ) {
+								ndefinedConsomer.save();
+								undefinedConsumers.add( ndefinedConsomer );
+								undefinedConsomerTry = false;
+								ndefinedConsomer = null;
+							}
 							LOGGER.trace( "Consumer {} created. Writed by {} record!", consumer.getId(), ++consumerSize );
 						}
 						// Finish all Consumers
