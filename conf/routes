@@ -62,6 +62,7 @@ POST    /account/addr/place                mk.ck.energy.csm.controllers.AccountT
 GET     /account/addr/location             mk.ck.energy.csm.controllers.AccountTools.testLocationAddress
 POST    /account/addr/location             mk.ck.energy.csm.controllers.AccountTools.doTestLocationAddress
 GET     /account/addr/locationRemove/:id   mk.ck.energy.csm.controllers.AccountTools.removeLocationAddress(id: String)
+GET     /account/addr/consumers            mk.ck.energy.csm.controllers.AccountTools.viewConsumers
 
 GET     /admin/tools                       mk.ck.energy.csm.controllers.AdministrationTools.index(indexTab: Integer ?= 1)
 GET     /admin/tools/userAdd               mk.ck.energy.csm.controllers.AdministrationTools.addUser(userRole: String)

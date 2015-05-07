@@ -13,6 +13,7 @@ page.home.bind=Зв''язати
 page.home.rates=Тарифи
 page.home.admin=Засоби адміністрування
 page.home.testAddr=Тестування додавання адреси
+page.home.consumers=Перегляд споживачів
 
 main.menu.home.title=Домашня
 main.menu.about.title=Про сайт
@@ -174,6 +175,8 @@ button.addrTop.save=Зберегти файл
 button.staff.about.export=Експорт в Excel
 
 text.feedback.contact=Пишіть, щоб встановити зв''язок
+text.yes=Так
+text.no=Ні
 
 text.about.rvk=Це мій перший сайт. Я радий, що у мене щось почало виходити. Дякую за підтримку!
 text.about.komora=Велике дякую цьому чоловікові за сильну підтримку, терпіння та витривалість до мого навчання.

@@ -25,6 +25,8 @@ public class UndefinedConsumerCodec implements CollectibleCodec< UndefinedConsum
 	
 	private static final String			DB_FIELD_UNDEFINED_CONSUMER_TYPES	= "types";
 	
+	private static final String			DB_FIELD_UNDEFINED_STRING					= "error";
+	
 	private final Codec< Document >	documentCodec;
 	
 	public UndefinedConsumerCodec() {
@@ -38,9 +40,12 @@ public class UndefinedConsumerCodec implements CollectibleCodec< UndefinedConsum
 	@Override
 	public void encode( final BsonWriter writer, final UndefinedConsumer value, final EncoderContext encoderContext ) {
 		final Document document = new Document( DB_FIELD_ID, value.getId() );
-		final Object o = value.get( DB_FIELD_UNDEFINED_CONSUMER_TYPES );
+		Object o = value.get( DB_FIELD_UNDEFINED_CONSUMER_TYPES );
 		if ( o != null )
 			document.append( DB_FIELD_UNDEFINED_CONSUMER_TYPES, o );
+		o = value.get( DB_FIELD_UNDEFINED_STRING );
+		if ( o != null )
+			document.append( DB_FIELD_UNDEFINED_STRING, o );
 		documentCodec.encode( writer, document, encoderContext );
 	}
 	
@@ -53,9 +58,9 @@ public class UndefinedConsumerCodec implements CollectibleCodec< UndefinedConsum
 	public UndefinedConsumer decode( final BsonReader reader, final DecoderContext decoderContext ) {
 		final Document document = documentCodec.decode( reader, decoderContext );
 		final UndefinedConsumer consumer = UndefinedConsumer.create();
-		consumer.put( DB_FIELD_ID, document.getString( DB_FIELD_ID ) );
+		consumer.setId( document.getString( DB_FIELD_ID ) );
 		List< ? > list = null;
-		final Object o = document.get( DB_FIELD_UNDEFINED_CONSUMER_TYPES );
+		Object o = document.get( DB_FIELD_UNDEFINED_CONSUMER_TYPES );
 		if ( o == null )
 			consumer.setUndefinedConsumerTypes( null );
 		else
@@ -71,6 +76,9 @@ public class UndefinedConsumerCodec implements CollectibleCodec< UndefinedConsum
 			catch ( final ClassCastException cce ) {
 				LOGGER.warn( "Error casting array of UndefinedConsumerType {}", o );
 			}
+		o = document.get( DB_FIELD_UNDEFINED_STRING );
+		if ( o != null )
+			consumer.put( DB_FIELD_UNDEFINED_STRING, o );
 		return consumer;
 	}
 	

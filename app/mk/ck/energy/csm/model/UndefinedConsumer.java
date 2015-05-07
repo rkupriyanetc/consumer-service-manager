@@ -27,6 +27,8 @@ public class UndefinedConsumer extends CSMAbstractDocument< UndefinedConsumer > 
 	
 	private static final String	DB_FIELD_UNDEFINED_CONSUMER_TYPES		= "types";
 	
+	private static final String	DB_FIELD_UNDEFINED_STRING						= "error";
+	
 	private final BsonArray			types;
 	
 	private boolean							isRegisteredTypes;
@@ -39,11 +41,21 @@ public class UndefinedConsumer extends CSMAbstractDocument< UndefinedConsumer > 
 		return new UndefinedConsumer();
 	}
 	
-	public static UndefinedConsumer create( final String consumerId, final UndefinedConsumerType undefinedType ) {
+	public static UndefinedConsumer create( final String consumerId, final UndefinedConsumerType undefinedType, final String error ) {
 		final UndefinedConsumer uc = new UndefinedConsumer();
 		uc.setId( consumerId );
 		uc.addUndefinedConsumerType( undefinedType );
+		uc.setError( error );
 		return uc;
+	}
+	
+	public String getError() {
+		return getString( DB_FIELD_UNDEFINED_STRING );
+	}
+	
+	public void setError( final String error ) {
+		if ( error != null && !error.isEmpty() )
+			put( DB_FIELD_UNDEFINED_STRING, error );
 	}
 	
 	/**

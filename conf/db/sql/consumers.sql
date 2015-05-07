@@ -56,11 +56,11 @@ left join _sl_respos t on t.code_pos = a.code_pos
 left join _sl_streets s on s.code_street = a.code_street
 left join _owner w on w.code_ab = a.code_ab
 left join _status_ab sa on sa.code_ab = a.code_ab
-where sa.code_status not in ( 2, 80 ) and a.code_abon in ( '250648' ) and
+where sa.code_status not in ( 2, 80 ) and t.code_pos = 1 and --a.code_abon in ( '250648', '250660', '01-003706', '35-002463' ) and
   sa.n_date = ( select max( n_date ) from _status_ab where code_ab = a.code_ab ) and
     w.n_date = ( select max( n_date ) from _owner where code_ab = a.code_ab )
 order by t.nazva_pos, a.code_abon;
---, '250660', '01-003706', '35-002463'
+
 declare consumers cursor for
 select id from #_RVK_tmp_InfoConsumers;
 

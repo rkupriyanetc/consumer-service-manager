@@ -53,20 +53,39 @@ public class MeterCodec implements CollectibleCodec< Meter > {
 		final Document document = new Document( DB_FIELD_ID, value.getId() );
 		document.append( DB_FIELD_CONSUMER_ID, value.getString( DB_FIELD_CONSUMER_ID ) );
 		document.append( DB_FIELD_METER_DEVICE_ID, value.getString( DB_FIELD_METER_DEVICE_ID ) );
-		document.append( DB_FIELD_NUMBER, value.getString( DB_FIELD_NUMBER ) );
-		document.append( DB_FIELD_DIGITS, value.getDigits() );
-		document.append( DB_FIELD_ORDER, value.getOrder() );
-		document.append( DB_FIELD_DATE_INSTALL, value.getLong( DB_FIELD_DATE_INSTALL ) );
-		final Long un = value.getLong( DB_FIELD_DATE_UNINSTALL );
-		if ( un != null )
-			document.append( DB_FIELD_DATE_UNINSTALL, un.longValue() );
-		final Long tn = value.getLong( DB_FIELD_DATE_TESTING );
-		if ( tn != null )
-			document.append( DB_FIELD_DATE_TESTING, tn.longValue() );
-		document.append( DB_FIELD_MASTER_NAME, value.getString( DB_FIELD_MASTER_NAME ) );
-		document.append( DB_FIELD_LOCATION_METER_TYPE, value.getString( DB_FIELD_LOCATION_METER_TYPE ) );
-		final byte by = value.getMightOutturn();
-		if ( by != 0 )
+		Object o = value.get( DB_FIELD_NUMBER );
+		if ( o != null )
+			document.append( DB_FIELD_NUMBER, o );
+		byte by = value.getDigits();
+		if ( by > 0 )
+			document.append( DB_FIELD_DIGITS, by );
+		final short or = value.getOrder();
+		if ( or > 0 )
+			document.append( DB_FIELD_ORDER, or );
+		o = value.get( DB_FIELD_DATE_INSTALL );
+		long lon;
+		if ( o != null ) {
+			lon = ( ( Long )o ).longValue();
+			document.append( DB_FIELD_DATE_INSTALL, lon );
+		}
+		o = value.get( DB_FIELD_DATE_UNINSTALL );
+		if ( o != null ) {
+			lon = ( ( Long )o ).longValue();
+			document.append( DB_FIELD_DATE_UNINSTALL, lon );
+		}
+		o = value.get( DB_FIELD_DATE_TESTING );
+		if ( o != null ) {
+			lon = ( ( Long )o ).longValue();
+			document.append( DB_FIELD_DATE_TESTING, lon );
+		}
+		o = value.get( DB_FIELD_MASTER_NAME );
+		if ( o != null )
+			document.append( DB_FIELD_MASTER_NAME, o );
+		o = value.get( DB_FIELD_LOCATION_METER_TYPE );
+		if ( o != null )
+			document.append( DB_FIELD_LOCATION_METER_TYPE, o );
+		by = value.getMightOutturn();
+		if ( by > 0 )
 			document.append( DB_FIELD_MIGHT_OUTTURN, by );
 		documentCodec.encode( writer, document, encoderContext );
 	}
@@ -83,21 +102,51 @@ public class MeterCodec implements CollectibleCodec< Meter > {
 		meter.setId( document.getString( DB_FIELD_ID ) );
 		meter.setConsumerId( document.getString( DB_FIELD_CONSUMER_ID ) );
 		meter.setMeterDeviceId( document.getString( DB_FIELD_METER_DEVICE_ID ) );
-		meter.put( DB_FIELD_NUMBER, document.getString( DB_FIELD_NUMBER ) );
-		meter.put( DB_FIELD_DIGITS, document.get( DB_FIELD_DIGITS ) );
-		meter.put( DB_FIELD_ORDER, document.get( DB_FIELD_ORDER ) );
-		meter.put( DB_FIELD_DATE_INSTALL, document.getLong( DB_FIELD_DATE_INSTALL ) );
-		final Long un = document.getLong( DB_FIELD_DATE_UNINSTALL );
-		if ( un != null )
-			meter.put( DB_FIELD_DATE_UNINSTALL, un.longValue() );
-		final Long tn = document.getLong( DB_FIELD_DATE_TESTING );
-		if ( tn != null )
-			document.append( DB_FIELD_DATE_TESTING, tn.longValue() );
-		meter.put( DB_FIELD_MASTER_NAME, document.getString( DB_FIELD_MASTER_NAME ) );
-		meter.put( DB_FIELD_LOCATION_METER_TYPE, document.getString( DB_FIELD_LOCATION_METER_TYPE ) );
-		final Long by = ( Long )document.get( DB_FIELD_MIGHT_OUTTURN );
-		if ( by != null && by.byteValue() != 0 )
-			meter.put( DB_FIELD_MIGHT_OUTTURN, by.byteValue() );
+		Object o = document.get( DB_FIELD_NUMBER );
+		if ( o != null )
+			meter.put( DB_FIELD_NUMBER, o );
+		o = document.get( DB_FIELD_DIGITS );
+		byte by;
+		if ( o != null ) {
+			by = ( ( Integer )o ).byteValue();
+			if ( by > 0 )
+				meter.put( DB_FIELD_DIGITS, by );
+		}
+		o = document.get( DB_FIELD_ORDER );
+		short or;
+		if ( o != null ) {
+			or = ( ( Integer )o ).shortValue();
+			if ( or > 0 )
+				meter.put( DB_FIELD_ORDER, or );
+		}
+		o = document.get( DB_FIELD_DATE_INSTALL );
+		long un;
+		if ( o != null ) {
+			un = ( ( Long )o ).longValue();
+			meter.put( DB_FIELD_DATE_INSTALL, un );
+		}
+		o = document.get( DB_FIELD_DATE_UNINSTALL );
+		if ( o != null ) {
+			un = ( ( Long )o ).longValue();
+			meter.put( DB_FIELD_DATE_UNINSTALL, un );
+		}
+		o = document.get( DB_FIELD_DATE_TESTING );
+		if ( o != null ) {
+			un = ( ( Long )o ).longValue();
+			meter.put( DB_FIELD_DATE_TESTING, un );
+		}
+		o = document.get( DB_FIELD_MASTER_NAME );
+		if ( o != null )
+			meter.put( DB_FIELD_MASTER_NAME, o );
+		o = document.get( DB_FIELD_LOCATION_METER_TYPE );
+		if ( o != null )
+			meter.put( DB_FIELD_LOCATION_METER_TYPE, o );
+		o = document.get( DB_FIELD_MIGHT_OUTTURN );
+		if ( o != null ) {
+			by = ( ( Integer )o ).byteValue();
+			if ( by > 0 )
+				meter.put( DB_FIELD_MIGHT_OUTTURN, by );
+		}
 		return meter;
 	}
 	

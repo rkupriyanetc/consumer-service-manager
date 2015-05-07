@@ -1,0 +1,62 @@
+@(itemConsumers: scala.collection.Iterator[mk.ck.energy.csm.model.Consumer], itemUndefinedConsumer: scala.collection.Iterator[mk.ck.energy.csm.model.UndefinedConsumer])
+
+@import helper._
+
+@main(Messages("page.home.consumers")) {
+
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">@Messages("page.home.consumers")</h3>
+    </div>
+    <div class="panel-body">
+      
+        @if(itemUndefinedConsumer != null ) {
+          @itemUndefinedConsumer.zipWithIndex.map { case (item2, kp) =>
+            <div class="row">
+              <div class="col-md-1 col-xs-1">
+                N : @(kp+1)
+              </div>
+              <div class="col-md-2 col-xs-2">
+                _id : @item2.getId()
+              </div>
+              <div class="col-md-5 col-xs-5">
+                types : @item2.getUndefinedConsumerTypes()
+              </div>
+              <div class="col-md-3 col-xs-3">
+                types : @item2.getError()
+              </div>
+            </div>
+          }
+        }
+        <br/>
+        
+        @if(itemConsumers != null ) {
+          @itemConsumers.zipWithIndex.map { case (item1, kn) =>
+            <div class="row">
+              <div class="col-md-1 col-xs-1">
+                N : @(kn+1)
+              </div>
+              <div class="col-md-2 col-xs-2">
+                _id : @item1.getId()
+              </div>
+              <div class="col-md-3 col-xs-3">
+                name : @item1.getFullName()
+              </div>
+              <div class="col-md-5 col-xs-5">
+                addr : @item1.getAddress()
+              </div>
+              <div class="col-md-1 col-xs-1">
+                join : 
+                  @if(item1.isActive()) {
+                    @Messages("text.yes")
+                  } else {
+                    @Messages("text.no")
+                  }
+              </div>
+            </div>
+          }
+        }
+    </div>
+   
+  </div>
+}

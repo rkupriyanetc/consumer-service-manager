@@ -161,6 +161,15 @@ public class MeterDevice extends CSMAbstractDocument< MeterDevice > {
 		return devices;
 	}
 	
+	public static MeterDevice findByName( final String meterName ) throws MeterDeviceNotFoundException {
+		if ( meterName == null || meterName.isEmpty() )
+			throw new IllegalArgumentException( "The parameter should not be empty" );
+		final MeterDevice meter = getMongoCollection().find( Filters.eq( DB_FIELD_NAME, meterName ), MeterDevice.class ).first();
+		if ( meter == null )
+			throw new MeterDeviceNotFoundException( "MeterDevice by " + meterName + " not found" );
+		return meter;
+	}
+	
 	public void save() throws ImpossibleCreatingException {
 		final Bson value = Filters.and( Filters.eq( DB_FIELD_NAME, getName() ), Filters.eq( DB_FIELD_PHASING, getPhasing() ) );
 		final MeterDevice meter = getCollection().find( value, MeterDevice.class ).first();

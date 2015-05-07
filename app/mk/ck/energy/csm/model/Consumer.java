@@ -99,11 +99,19 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	}
 	
 	public Address getAddress() {
-		return Address.create( ( Document )get( DB_FIELD_ADDRESS ) );
+		final Object o = get( DB_FIELD_ADDRESS );
+		if ( o != null )
+			return Address.create( ( Document )o );
+		else
+			return null;
 	}
 	
 	public void setAddress( final Address address ) {
-		put( DB_FIELD_ADDRESS, address.getDocument() );
+		if ( address != null ) {
+			final Document doc = address.getDocument();
+			if ( doc != null && !doc.isEmpty() )
+				put( DB_FIELD_ADDRESS, doc );
+		}
 	}
 	
 	public boolean isActive() {
@@ -115,11 +123,19 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	}
 	
 	public Documents getDocuments() {
-		return Documents.create( ( Document )get( DB_FIELD_DOCUMENTS ) );
+		final Object o = get( DB_FIELD_DOCUMENTS );
+		if ( o != null )
+			return Documents.create( ( Document )o );
+		else
+			return null;
 	}
 	
 	public void setDocuments( final Documents documents ) {
-		put( DB_FIELD_DOCUMENTS, documents.getDocument() );
+		if ( documents != null ) {
+			final Document doc = documents.getDocument();
+			if ( doc != null && !doc.isEmpty() )
+				put( DB_FIELD_DOCUMENTS, doc );
+		}
 	}
 	
 	public ConsumerType getConsumerType() {
@@ -176,7 +192,6 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		else {
 			final String consumerId = getId();
 			LOGGER.warn( "Cannot save Consumer. Consumer already exists: {}", consumerId );
-			throw new ImpossibleCreatingException( "Consumer already exists " + consumerId );
 		}
 	}
 	

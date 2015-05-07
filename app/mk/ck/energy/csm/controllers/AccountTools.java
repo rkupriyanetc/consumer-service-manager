@@ -13,9 +13,11 @@ import mk.ck.energy.csm.model.AddressNotFoundException;
 import mk.ck.energy.csm.model.AddressPlace;
 import mk.ck.energy.csm.model.AddressTop;
 import mk.ck.energy.csm.model.AdministrativeCenterType;
+import mk.ck.energy.csm.model.Consumer;
 import mk.ck.energy.csm.model.ImpossibleCreatingException;
 import mk.ck.energy.csm.model.LocationType;
 import mk.ck.energy.csm.model.StreetType;
+import mk.ck.energy.csm.model.UndefinedConsumer;
 import mk.ck.energy.csm.model.auth.UserRole;
 
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import play.mvc.Result;
 import views.html.addressLocation;
 import views.html.addressPlace;
 import views.html.addressTop;
+import views.html.viewConsumers;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 
@@ -410,5 +413,15 @@ public class AccountTools extends Controller {
 									Filters.and( Filters.eq( "top_address_id", 1 ), Filters.eq( "administrative_type", -1 ),
 											Filters.eq( "location_type", 1 ), Filters.eq( "location", 1 ) ) ).iterator() ) ) );
 		}
+	}
+	
+	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
+	public static Result viewConsumers() {
+		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
+		return ok( viewConsumers.render(
+				scala.collection.JavaConversions.asScalaIterator( Consumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
+						.iterator() ),
+				scala.collection.JavaConversions.asScalaIterator( UndefinedConsumer.getMongoCollection().find()
+						.sort( Filters.eq( "_id", 1 ) ).iterator() ) ) );
 	}
 }

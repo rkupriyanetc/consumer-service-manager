@@ -529,29 +529,32 @@ public class AdministrationTools extends Controller {
 									break;
 							}
 							final LocationType lt = LocationType.abbreviationToLocationType( nameType );
-							Set< AdministrativeCenterType > at = new LinkedHashSet<>();
-							final StringTokenizer st = new StringTokenizer( admType, "," );
-							while ( st.hasMoreTokens() ) {
-								final String token = st.nextToken().trim();
+							if ( !lt.equals( LocationType.UNSPECIFIED ) ) {
+								Set< AdministrativeCenterType > at = new LinkedHashSet<>();
+								final StringTokenizer st = new StringTokenizer( admType, "," );
+								while ( st.hasMoreTokens() ) {
+									final String token = st.nextToken().trim();
+									try {
+										final AdministrativeCenterType act = AdministrativeCenterType.abbreviationToAdministrativeCenterType( token );
+										at.add( act );
+									}
+									catch ( final IllegalArgumentException iae ) {
+										LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
+									}
+									catch ( final NullPointerException npe ) {
+										LOGGER.debug( "Parameter should not be empty in valueOf({})", token );
+									}
+								}
+								AddressLocation al = null;
+								if ( at.isEmpty() )
+									at = null;
 								try {
-									final AdministrativeCenterType act = AdministrativeCenterType.abbreviationToAdministrativeCenterType( token );
-									at.add( act );
+									al = AddressLocation.create( addr.get( 0 ), name, lt, at );
+									al.save();
 								}
-								catch ( final IllegalArgumentException iae ) {
-									LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
-								}
-								catch ( final NullPointerException npe ) {
-									LOGGER.debug( "Parameter should not be empty in valueOf({})", token );
-								}
-							}
-							AddressLocation al = null;
-							if ( at.isEmpty() )
-								at = null;
-							try {
-								al = AddressLocation.create( addr.get( 0 ), name, lt, at );
-								al.save();
-							}
-							catch ( final ImpossibleCreatingException ice ) {}
+								catch ( final ImpossibleCreatingException ice ) {}
+							} else
+								LOGGER.warn( "Specifig LocationType {} is not save. Undefined...", nameType );
 						}
 					}
 				}
@@ -696,29 +699,32 @@ public class AdministrationTools extends Controller {
 									break;
 							}
 							final LocationType lt = LocationType.abbreviationToLocationType( nameType );
-							Set< AdministrativeCenterType > at = new LinkedHashSet<>();
-							final StringTokenizer st = new StringTokenizer( admType, "," );
-							while ( st.hasMoreTokens() ) {
-								final String token = st.nextToken().trim();
+							if ( !lt.equals( LocationType.UNSPECIFIED ) ) {
+								Set< AdministrativeCenterType > at = new LinkedHashSet<>();
+								final StringTokenizer st = new StringTokenizer( admType, "," );
+								while ( st.hasMoreTokens() ) {
+									final String token = st.nextToken().trim();
+									try {
+										final AdministrativeCenterType act = AdministrativeCenterType.abbreviationToAdministrativeCenterType( token );
+										at.add( act );
+									}
+									catch ( final IllegalArgumentException iae ) {
+										LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
+									}
+									catch ( final NullPointerException npe ) {
+										LOGGER.debug( "Parameter should not be empty in valueOf({})", token );
+									}
+								}
+								AddressLocation al = null;
+								if ( at.isEmpty() )
+									at = null;
 								try {
-									final AdministrativeCenterType act = AdministrativeCenterType.abbreviationToAdministrativeCenterType( token );
-									at.add( act );
+									al = AddressLocation.create( addr.get( 0 ), name, lt, at );
+									al.save();
 								}
-								catch ( final IllegalArgumentException iae ) {
-									LOGGER.debug( "This token {} is no AdministrativeCenterType", token );
-								}
-								catch ( final NullPointerException npe ) {
-									LOGGER.debug( "Parameter should not be empty in valueOf({})", token );
-								}
-							}
-							AddressLocation al = null;
-							if ( at.isEmpty() )
-								at = null;
-							try {
-								al = AddressLocation.create( addr.get( 0 ), name, lt, at );
-								al.save();
-							}
-							catch ( final ImpossibleCreatingException ice ) {}
+								catch ( final ImpossibleCreatingException ice ) {}
+							} else
+								LOGGER.warn( "Specifig LocationType {} is not save. Undefined...", nameType );
 						}
 					}
 				}
@@ -765,11 +771,12 @@ public class AdministrationTools extends Controller {
 							type.appendChild( document.createTextNode( typeStr ) );
 							street.appendChild( type );
 						} else
-							try {
-								final AddressPlace al = AddressPlace.create( st, nameStr );
-								al.save();
-							}
-							catch ( final ImpossibleCreatingException ice ) {}
+							if ( !st.equals( StreetType.UNSPECIFIED ) )
+								try {
+									final AddressPlace al = AddressPlace.create( st, nameStr );
+									al.save();
+								}
+								catch ( final ImpossibleCreatingException ice ) {}
 					}
 					final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 					transformerFactory.setAttribute( "indent-number", 2 );
@@ -837,11 +844,12 @@ public class AdministrationTools extends Controller {
 								}
 							}
 							final StreetType st = StreetType.abbreviationToStreetType( nameType );
-							try {
-								final AddressPlace al = AddressPlace.create( st, name );
-								al.save();
-							}
-							catch ( final ImpossibleCreatingException ice ) {}
+							if ( !st.equals( StreetType.UNSPECIFIED ) )
+								try {
+									final AddressPlace al = AddressPlace.create( st, name );
+									al.save();
+								}
+								catch ( final ImpossibleCreatingException ice ) {}
 						}
 					}
 				}
@@ -945,7 +953,8 @@ public class AdministrationTools extends Controller {
 							if ( field != null && !field.isEmpty() )
 								consumer.setFullName( field );
 							else {
-								ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.CONSUMER_NAME_UNDEFINED );
+								ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.CONSUMER_NAME_UNDEFINED,
+										field );
 								undefinedConsomerTry = true;
 							}
 							// Is private house
@@ -1004,11 +1013,19 @@ public class AdministrationTools extends Controller {
 							}
 							catch ( final AddressNotFoundException anfe ) {
 								// It's Empty LocationType. But write to undefined list
+								final StringBuilder sb = new StringBuilder( nameStr );
+								sb.append( " *** " );
+								sb.append( st.name() );
 								if ( !undefinedConsomerTry ) {
-									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.ADDRESSPLACE_UNDEFINED );
+									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.ADDRESSPLACE_UNDEFINED,
+											sb.toString() );
 									undefinedConsomerTry = true;
-								} else
+								} else {
+									sb.append( " *** " );
+									sb.append( ndefinedConsomer.getError() );
+									ndefinedConsomer.setError( sb.toString() );
 									ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.ADDRESSPLACE_UNDEFINED );
+								}
 							}
 							// Address City
 							field = result.getString( 2 );
@@ -1017,17 +1034,28 @@ public class AdministrationTools extends Controller {
 							final String nameCity = field.substring( pos ).trim();
 							final LocationType lt = LocationType.abbreviationToLocationType( typeCity );
 							if ( lt == null || lt != null && lt.equals( LocationType.UNSPECIFIED ) ) {
+								final StringBuilder sb = new StringBuilder();
+								if ( lt == null )
+									sb.append( "LocationType is null" );
+								else
+									sb.append( lt.name() );
 								// It's Empty LocationType. But write to undefined list
 								if ( !undefinedConsomerTry ) {
-									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.LOCATIONTYPE_UNDEFINED );
+									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.LOCATIONTYPE_UNDEFINED,
+											sb.toString() );
 									undefinedConsomerTry = true;
-								} else
+								} else {
+									sb.append( " *** " );
+									sb.append( ndefinedConsomer.getError() );
 									ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.LOCATIONTYPE_UNDEFINED );
+									ndefinedConsomer.setError( sb.toString() );
+								}
 							} else {
 								List< AddressLocation > addrLocations = null;
 								try {
 									addrLocations = AddressLocation.findLikeLocationName( nameCity );
 									boolean bool = false;
+									int indexK = 0;
 									for ( int k = 0; k < addrLocations.size() && !bool; k++ ) {
 										final String al = addrLocations.get( k ).getTopAddressId();
 										final boolean isAddrTop = keyReferences.equals( al );
@@ -1035,23 +1063,37 @@ public class AdministrationTools extends Controller {
 										if ( bool ) {
 											address.setAddressLocation( addrLocations.get( k ) );
 											break;
-										}
+										} else
+											indexK = k;
 									}
-									if ( !bool )
+									if ( !bool ) {
+										final StringBuilder sb = new StringBuilder( lt.name() );
+										sb.append( " *** " );
+										sb.append( addrLocations.get( indexK ).getLocationType().name() );
 										if ( !undefinedConsomerTry ) {
 											ndefinedConsomer = UndefinedConsumer.create( consumer.getId(),
-													UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
+													UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED, sb.toString() );
 											undefinedConsomerTry = true;
-										} else
+										} else {
+											sb.append( " *** " );
+											sb.append( ndefinedConsomer.getError() );
+											ndefinedConsomer.setError( sb.toString() );
 											ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
+										}
+									}
 								}
 								catch ( final AddressNotFoundException anfe ) {
+									final StringBuilder sb = new StringBuilder( nameCity );
 									if ( !undefinedConsomerTry ) {
 										ndefinedConsomer = UndefinedConsumer.create( consumer.getId(),
-												UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
+												UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED, sb.toString() );
 										undefinedConsomerTry = true;
-									} else
+									} else {
+										sb.append( " *** " );
+										sb.append( ndefinedConsomer.getError() );
+										ndefinedConsomer.setError( sb.toString() );
 										ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
+									}
 								}
 								catch ( final NumberFormatException nfe ) {
 									LOGGER.trace( "This should not happen" );
@@ -1073,13 +1115,9 @@ public class AdministrationTools extends Controller {
 							// Meter ID
 							final String meterName = result.getString( 13 );
 							// Must be only one, because the full name
-							final List< MeterDevice > devices = MeterDevice.findLikeName( meterName );
-							if ( devices.size() > 1 )
-								if ( !undefinedConsomerTry ) {
-									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.METERS_MANY );
-									undefinedConsomerTry = true;
-								} else
-									ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.METERS_MANY );
+							if ( meterName.equals( "ЦЭ6803В(ВМ)" ) )
+								LOGGER.trace( meterName + "   TcE6803B(BM)" );
+							final MeterDevice device = MeterDevice.findByName( meterName );
 							// Meter place
 							final int meterPlaceId = result.getInt( 14 );
 							String str;
@@ -1108,48 +1146,73 @@ public class AdministrationTools extends Controller {
 							// Meter InstallDate
 							Date installDate = result.getDate( 18 );
 							// Meter Order
-							final short order = result.getShort( 19 );
-							final Meter meter = Meter.create( consumer.getId(), devices.get( 0 ), number, digits, installDate.getTime(), order,
-									inspector, place );
-							final byte amp = result.getByte( 20 );
-							if ( amp > 0 )
-								meter.setMightOutturn( amp );
-							number = result.getString( 21 );
-							if ( number != null && !number.isEmpty() && number.length() > 3 ) {
-								number.trim();
-								// Plumb InstallDate
-								installDate = result.getDate( 22 );
-								// Plumb Inspector
-								inspector = result.getString( 24 );
-								// Plumb type
-								p = result.getInt( 25 );
-								PlumbType type = p == 3 ? PlumbType.STICKER : p == 2 ? PlumbType.IMS : PlumbType.SECURITY;
-								final Plumb plumb = new Plumb( number, installDate.getTime(), inspector, type );
-								// Plumb UninstallDate
-								Date uninstallDate = result.getDate( 23 );
-								if ( uninstallDate.getTime() != Meter.MAXDATE_PAKED.getTime() )
-									plumb.setUninstallDate( uninstallDate.getTime() );
-								meter.addPlumb( plumb );
-								number = result.getString( 26 );
+							field = result.getString( 19 );
+							short order;
+							try {
+								order = Short.parseShort( field );
+							}
+							catch ( final NumberFormatException nfe ) {
+								order = 0;
+							}
+							Meter meter;
+							if ( device != null ) {
+								meter = Meter.create( consumer.getId(), device, number, digits, installDate.getTime(), order, inspector, place );
+								final byte amp = result.getByte( 20 );
+								if ( amp > 0 )
+									meter.setMightOutturn( amp );
+								number = result.getString( 21 );
 								if ( number != null && !number.isEmpty() && number.length() > 3 ) {
 									number.trim();
 									// Plumb InstallDate
-									installDate = result.getDate( 27 );
+									installDate = result.getDate( 22 );
 									// Plumb Inspector
-									inspector = result.getString( 29 );
+									inspector = result.getString( 24 );
 									// Plumb type
-									p = result.getInt( 30 );
-									type = p == 3 ? PlumbType.STICKER : p == 2 ? PlumbType.IMS : PlumbType.SECURITY;
-									final Plumb plumb2 = new Plumb( number, installDate.getTime(), inspector, type );
+									p = result.getInt( 25 );
+									PlumbType type = p == 3 ? PlumbType.STICKER : p == 2 ? PlumbType.IMS : PlumbType.SECURITY;
+									final Plumb plumb = new Plumb( number, installDate.getTime(), inspector, type );
 									// Plumb UninstallDate
-									uninstallDate = result.getDate( 28 );
-									if ( uninstallDate != Meter.MAXDATE_PAKED )
+									Date uninstallDate = result.getDate( 23 );
+									if ( uninstallDate.getTime() != Meter.MAXDATE_PAKED.getTime() )
 										plumb.setUninstallDate( uninstallDate.getTime() );
-									meter.addPlumb( plumb2 );
+									meter.addPlumb( plumb );
+									number = result.getString( 26 );
+									if ( number != null && !number.isEmpty() && number.length() > 3 ) {
+										number.trim();
+										// Plumb InstallDate
+										installDate = result.getDate( 27 );
+										// Plumb Inspector
+										inspector = result.getString( 29 );
+										// Plumb type
+										p = result.getInt( 30 );
+										type = p == 3 ? PlumbType.STICKER : p == 2 ? PlumbType.IMS : PlumbType.SECURITY;
+										final Plumb plumb2 = new Plumb( number, installDate.getTime(), inspector, type );
+										// Plumb UninstallDate
+										uninstallDate = result.getDate( 28 );
+										if ( uninstallDate != Meter.MAXDATE_PAKED )
+											plumb.setUninstallDate( uninstallDate.getTime() );
+										meter.addPlumb( plumb2 );
+									}
+								}
+							} else {
+								meter = null;
+								final StringBuilder sb = new StringBuilder( meterName );
+								if ( !undefinedConsomerTry ) {
+									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.METER_NOT_FOUND,
+											sb.toString() );
+									undefinedConsomerTry = true;
+								} else {
+									sb.append( " *** " );
+									sb.append( ndefinedConsomer.getError() );
+									ndefinedConsomer.setError( sb.toString() );
+									ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.METER_NOT_FOUND );
 								}
 							}
 							consumer.save();
-							meter.save();
+							if ( meter != null )
+								meter.save();
+							else
+								LOGGER.warn( "Device meter name not fount : {}", meterName );
 							if ( undefinedConsomerTry && ndefinedConsomer != null ) {
 								ndefinedConsomer.save();
 								undefinedConsumers.add( ndefinedConsomer );
@@ -1170,7 +1233,7 @@ public class AdministrationTools extends Controller {
 						LOGGER.trace( "Exception : {}", e );
 					}
 				if ( isReadSQLFile )
-					LOGGER.trace( "Import the consumers from MSSQL server" );
+					LOGGER.trace( "Import the consumers from MSSQL server successful!" );
 				else
 					LOGGER.trace( "Import the consumers from MSSQL server unsuccessful!" );
 			}

@@ -147,7 +147,7 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	public byte getDigits() {
 		final Object digits = get( DB_FIELD_DIGITS );
 		if ( digits != null )
-			return ( byte )digits;
+			return ( ( Byte )digits ).byteValue();
 		else
 			return 0;
 	}
@@ -184,7 +184,7 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	public short getOrder() {
 		final Object order = get( DB_FIELD_ORDER );
 		if ( order != null )
-			return ( short )order;
+			return ( ( Short )order ).shortValue();
 		else
 			return 0;
 	}
@@ -232,7 +232,7 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	public byte getMightOutturn() {
 		final Object might = get( DB_FIELD_MIGHT_OUTTURN );
 		if ( might != null )
-			return ( byte )might;
+			return ( ( Byte )might ).byteValue();
 		else
 			return 0;
 	}
@@ -267,7 +267,6 @@ public class Meter extends CSMAbstractDocument< Meter > {
 		else {
 			final String meterName = this.toString();
 			LOGGER.warn( "Cannot save Meter. Meter already exists: {}", meterName );
-			throw new ImpossibleCreatingException( "Meter already exists " + meterName );
 		}
 	}
 	

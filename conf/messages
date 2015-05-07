@@ -13,6 +13,7 @@ page.home.bind=Link
 page.home.rates=Rates
 page.home.admin=Administration Tools
 page.home.testAddr=Test adding Address
+page.home.consumers=View Consumers
 
 main.menu.home.title=Home
 main.menu.about.title=About
@@ -93,6 +94,8 @@ text.about.bootstrap=Cras sit amet nibh libero, in gravida nulla. Nulla vel metu
 text.about.play_authenticate=Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis.
 
 text.feedback.contact=Write to establish a link
+text.yes=Yes
+text.no=No
 
 
 street.type.full.uncertain=

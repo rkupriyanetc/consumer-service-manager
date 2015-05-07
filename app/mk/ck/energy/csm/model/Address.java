@@ -160,15 +160,19 @@ public class Address {
 	}
 	
 	Document getDocument() {
-		final Document doc = new Document( DB_FIELD_ADDRESS_LOCATION_ID, addressLocation.getId() );
-		doc.put( DB_FIELD_ADDRESS_PLACE_ID, addressPlace.getId() );
-		if ( house != null && !house.isEmpty() )
-			doc.put( DB_FIELD_ADDRESS_HOUSE, house );
-		if ( apartment != null && !apartment.isEmpty() )
-			doc.put( DB_FIELD_ADDRESS_APARTMENT, apartment );
-		if ( postalCode != null && !postalCode.isEmpty() )
-			doc.put( DB_FIELD_ADDRESS_POSTAL_CODE, postalCode );
-		return doc;
+		if ( addressLocationId != null && !addressLocationId.isEmpty() && addressPlaceId != null && !addressPlaceId.isEmpty() ) {
+			final Document doc = new Document();
+			doc.put( DB_FIELD_ADDRESS_LOCATION_ID, addressLocationId );
+			doc.put( DB_FIELD_ADDRESS_PLACE_ID, addressPlaceId );
+			if ( house != null && !house.isEmpty() )
+				doc.put( DB_FIELD_ADDRESS_HOUSE, house );
+			if ( apartment != null && !apartment.isEmpty() )
+				doc.put( DB_FIELD_ADDRESS_APARTMENT, apartment );
+			if ( postalCode != null && !postalCode.isEmpty() )
+				doc.put( DB_FIELD_ADDRESS_POSTAL_CODE, postalCode );
+			return doc;
+		} else
+			return null;
 	}
 	
 	@Override
@@ -185,6 +189,7 @@ public class Address {
 			sb.append( ", " );
 		}
 		if ( apartment != null && !apartment.isEmpty() ) {
+			sb.append( " кв. " );
 			sb.append( apartment );
 			sb.append( ", " );
 		}
