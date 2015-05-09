@@ -34,11 +34,17 @@ import views.html.viewConsumers;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 
 public class AccountTools extends Controller {
 	
 	private static final Logger	LOGGER	= LoggerFactory.getLogger( AccountTools.class );
+	
+	private static int					numberOnThePage;
+	
+	private static int					skipOnThePage;
 	
 	public static class AddrTop {
 		
@@ -186,7 +192,7 @@ public class AccountTools extends Controller {
 		private int	countRows;
 		
 		public CountRows() {
-			countRows = 15;
+			countRows = 20;
 		}
 		
 		public int getCountRows() {
@@ -418,10 +424,49 @@ public class AccountTools extends Controller {
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
 	public static Result viewConsumers() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
-		return ok( viewConsumers.render(
-				scala.collection.JavaConversions.asScalaIterator( Consumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
-						.iterator() ),
-				scala.collection.JavaConversions.asScalaIterator( UndefinedConsumer.getMongoCollection().find()
-						.sort( Filters.eq( "_id", 1 ) ).iterator() ) ) );
+		numberOnThePage = 20;
+		skipOnThePage = 0;
+		final FindIterable< UndefinedConsumer > iterableUndefinedConsumer = UndefinedConsumer.getMongoCollection().find()
+				.sort( Filters.eq( "_id", 1 ) );
+		MongoCursor< UndefinedConsumer > cursorUndefinedConsumer;
+		MongoCursor< Consumer > cursorConsumer;
+		final long nextNumber = UndefinedConsumer.getMongoCollection().count();
+		if ( nextNumber >= numberOnThePage ) {
+			cursorUndefinedConsumer = iterableUndefinedConsumer.limit( numberOnThePage ).iterator();
+			cursorConsumer = null;
+		} else {
+			cursorConsumer = Consumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
+					.limit( numberOnThePage - ( int )nextNumber ).iterator();
+			cursorUndefinedConsumer = iterableUndefinedConsumer.limit( ( int )nextNumber ).iterator();
+		}
+		return ok( viewConsumers.render( COUNTROWS_FORM.fill( new CountRows() ),
+				scala.collection.JavaConversions.asScalaIterator( cursorConsumer ),
+				scala.collection.JavaConversions.asScalaIterator( cursorUndefinedConsumer ) ) );
+	}
+	
+	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
+	public static Result doViewConsumers() {
+		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
+		final Form< CountRows > filledForm = COUNTROWS_FORM.bindFromRequest();
+		if ( filledForm.hasErrors() )
+			return badRequest( viewConsumers.render( filledForm, null, null ) );
+		else {
+			final CountRows cr = filledForm.get();
+			final int nextNumber = cr.getCountRows();
+			final FindIterable< UndefinedConsumer > iterableUndefinedConsumer = UndefinedConsumer.getMongoCollection().find()
+					.sort( Filters.eq( "_id", 1 ) );
+			MongoCursor< UndefinedConsumer > cursorUndefinedConsumer;
+			MongoCursor< Consumer > cursorConsumer;
+			if ( nextNumber >= numberOnThePage ) {
+				cursorUndefinedConsumer = iterableUndefinedConsumer.limit( numberOnThePage ).iterator();
+				cursorConsumer = null;
+			} else {
+				cursorConsumer = Consumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) ).limit( numberOnThePage - nextNumber )
+						.iterator();
+				cursorUndefinedConsumer = iterableUndefinedConsumer.limit( nextNumber ).iterator();
+			}
+			return ok( viewConsumers.render( COUNTROWS_FORM, scala.collection.JavaConversions.asScalaIterator( cursorConsumer ),
+					scala.collection.JavaConversions.asScalaIterator( cursorUndefinedConsumer ) ) );
+		}
 	}
 }
