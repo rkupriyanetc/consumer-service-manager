@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import mk.ck.energy.csm.model.Consumer;
+import mk.ck.energy.csm.model.ConsumerException;
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 import mk.ck.energy.csm.providers.MyStupidBasicAuthProvider;
 
@@ -532,6 +534,16 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		} else
 			LOGGER.debug( "User {} was removed.", id );
 		return doc;
+	}
+	
+	public Consumer getConsumer() {
+		try {
+			return Consumer.findById( "35-002463" );
+		}
+		catch ( final ConsumerException e ) {
+			LOGGER.warn( "Could not find Consumer by id {}", "35-002463" );
+		}
+		return null;
 	}
 	
 	public boolean isAdmin() {

@@ -179,10 +179,10 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		if ( id != null && !id.isEmpty() ) {
 			final Consumer doc = getMongoCollection().find( Filters.eq( DB_FIELD_ID, id ) ).first();
 			if ( doc == null )
-				throw new ConsumerException( "The Consumer was found by " + id );
+				throw new ConsumerException( "The Consumer was not found by " + id );
 			return doc;
 		} else
-			throw new IllegalArgumentException( "ID should not be empty in AddressTop.findById( id )" );
+			throw new IllegalArgumentException( "ID should not be empty in Consumer.findById( id )" );
 	}
 	
 	public void save() throws ImpossibleCreatingException {

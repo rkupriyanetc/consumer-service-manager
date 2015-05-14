@@ -116,12 +116,12 @@ public class Account extends Controller {
 		
 		public AppendConsumer() {}
 		
-		public String getUserId() {
-			return userId;
-		}
-		
 		public void setUserId( final String userId ) {
 			this.userId = userId;
+		}
+		
+		public String getUserId() {
+			return userId;
 		}
 		
 		public String getId() {
@@ -310,7 +310,6 @@ public class Account extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< AppendConsumer > filledForm = APPEND_CONSUMER_FORM.bindFromRequest();
 		final AppendConsumer ac = new AppendConsumer();
-		// Тут тра переробити
 		ac.setUserId( User.getLocalUser( session() ).getId() );
 		Map< String, String > loc;
 		if ( idAddrTop != null && !idAddrTop.isEmpty() )
@@ -342,9 +341,13 @@ public class Account extends Controller {
 			}
 			catch ( final ConsumerException ce ) {
 				LOGGER.error( "Sorry. Consumer {} not found", u.getId() );
+				filledForm.reject( ce.getMessage() );
+				return badRequest( joinConsumer.render( filledForm, new HashMap< String, String >( 0 ) ) );
 			}
 			catch ( final UserNotFoundException unfe ) {
 				LOGGER.error( "Sorry. User not found by Id {}", u.getUserId() );
+				filledForm.reject( unfe.getMessage() );
+				return badRequest( joinConsumer.render( filledForm, new HashMap< String, String >( 0 ) ) );
 			}
 			return Application.profile();
 		}

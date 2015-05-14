@@ -266,8 +266,8 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 				.iterator();
 		while ( o.hasNext() ) {
 			final AddressLocation addr = o.next();
-			final String name = addr.getString( DB_FIELD_LOCATION_TYPE ) + " " + addr.getString( DB_FIELD_LOCATION );
-			final String _id = addr.getString( DB_FIELD_ID );
+			final String name = addr.getLocationType().toString( Address.LOCATION_TYPE_SHORTNAME ) + " " + addr.getLocation();
+			final String _id = addr.getId();
 			references.put( _id, name );
 		}
 		if ( isAddrTop != 0 ) {

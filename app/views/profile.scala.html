@@ -11,6 +11,21 @@
     </div>
     <div class="panel-body">
       
+      @if(localUser.getConsumer().isActive()) {
+      <div class="row">
+        <div class="col-md-5 col-xs-5">
+          @Messages("playauthenticate.profile.consumer")
+        </div>
+        <div class="col-md-2 col-xs-2">
+          @localUser.getConsumer().getId()
+        </div>        
+        <div class="col-md-5 col-xs-5">
+          @localUser.getConsumer().getFullName()
+        </div>
+      </div>
+      
+      <hr/>
+      }
       <div class="row">
         <div class="col-md-2 col-xs-2">
           @Messages("playauthenticate.profile.mail", "")
@@ -99,6 +114,7 @@
         }
       </div>
       
+      @if(!localUser.getConsumer().isActive()) {
       <hr/>
       
       <div class="row">
@@ -112,6 +128,7 @@
           
         </div>
       </div>
+      }
       
     </div>
   </div>
