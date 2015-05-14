@@ -110,10 +110,8 @@ public class Account extends Controller {
 		@Required
 		private List< String >	placeAddress;
 		
-		@Required
 		private String					house;
 		
-		@Required
 		private String					apartment;
 		
 		public AppendConsumer() {}
@@ -313,7 +311,7 @@ public class Account extends Controller {
 		final Form< AppendConsumer > filledForm = APPEND_CONSUMER_FORM.bindFromRequest();
 		final AppendConsumer ac = new AppendConsumer();
 		// Тут тра переробити
-		ac.setUserId( User.getLocalUser( session() ).getIdentifier() );
+		ac.setUserId( User.getLocalUser( session() ).getId() );
 		Map< String, String > loc;
 		if ( idAddrTop != null && !idAddrTop.isEmpty() )
 			loc = AddressLocation.getMap( idAddrTop, 1 );
