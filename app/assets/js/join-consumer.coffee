@@ -21,3 +21,9 @@ $('#topAddress').change -> topAddrChanged this
 
 $("#topAddress").select2
   templateResult: formatState
+
+$("#locationAddress").select2
+  templateResult: formatState
+
+$("#placeAddress").select2
+  templateResult: formatState

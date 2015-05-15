@@ -3,6 +3,7 @@ package mk.ck.energy.csm.model;
 import java.util.LinkedList;
 import java.util.List;
 
+import mk.ck.energy.csm.controllers.Account.AppendConsumer;
 import mk.ck.energy.csm.model.auth.User;
 import mk.ck.energy.csm.model.auth.UserNotFoundException;
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
@@ -14,6 +15,7 @@ import org.bson.codecs.configuration.CodecRegistry;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * @author RVK
@@ -71,6 +73,14 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	
 	public String getUserId() {
 		return getString( DB_FIELD_USER_ID );
+	}
+	
+	public void setUser( final User user ) {
+		if ( user != null )
+			if ( !user.getId().equals( getUserId() ) ) {
+				this.user = user;
+				put( DB_FIELD_USER_ID, user.getId() );
+			}
 	}
 	
 	public void setUserId( final String userId ) {
@@ -185,6 +195,17 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 			throw new IllegalArgumentException( "ID should not be empty in Consumer.findById( id )" );
 	}
 	
+	public static Consumer findByUser( final User user ) throws ConsumerException {
+		if ( user != null ) {
+			final Consumer doc = getMongoCollection().find(
+					Filters.and( Filters.eq( DB_FIELD_USER_ID, user.getId() ), Filters.eq( DB_FIELD_ACTIVE, true ) ) ).first();
+			if ( doc == null )
+				throw new ConsumerException( "The Consumer was not found by " + user.getEmail() );
+			return doc;
+		} else
+			throw new IllegalArgumentException( "User should not be empty in Consumer.findByUser( User )" );
+	}
+	
 	public void save() throws ImpossibleCreatingException {
 		final Consumer consumer = getCollection().find( Filters.eq( DB_FIELD_ID, getId() ), Consumer.class ).first();
 		if ( consumer == null )
@@ -195,12 +216,45 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		}
 	}
 	
-	public void joinConsumerElectricity( final User user ) {
+	@Override
+	public boolean equals( final Object o ) {
+		if ( o == null )
+			return false;
+		if ( o instanceof Consumer ) {
+			final Consumer consumer = Consumer.class.cast( o );
+			if ( consumer.getId().equals( getId() ) && consumer.getFullName().equals( getFullName() )
+					&& consumer.getAddress().equals( getAddress() ) )
+				return true;
+			else
+				return false;
+		} else
+			if ( o instanceof AppendConsumer ) {
+				final AppendConsumer consumer = AppendConsumer.class.cast( o );
+				if ( consumer.getId().equals( getId() )
+						&& consumer.getFullName().equals( getFullName() )
+						&& ( consumer.getApartment() != null && consumer.getApartment().equals( getAddress().getApartment() ) || ( consumer
+								.getApartment() == null || consumer.getApartment().isEmpty() )
+								&& ( getAddress().getApartment() == null || getAddress().getApartment().isEmpty() ) )
+						&& ( consumer.getHouse() != null && consumer.getHouse().equals( getAddress().getHouse() ) || ( consumer.getHouse() == null || consumer
+								.getHouse().isEmpty() ) && ( getAddress().getHouse() == null || getAddress().getHouse().isEmpty() ) ) )
+					return true;
+				else
+					return false;
+			}
+		return false;
+	}
+	
+	public boolean joinConsumerElectricity( final User user ) {
 		// Consumer already be stored in the database
-		setUserId( user.getId() );
+		if ( isActive() )
+			return false;
+		setUser( user );
 		setActive( true );
-		update( Filters.eq( DB_FIELD_ID, getId() ),
+		final UpdateResult ur = update( Filters.eq( DB_FIELD_ID, getId() ),
 				Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ), Filters.eq( DB_FIELD_USER_ID, user.getId() ) ) );
+		final long n = ur.getModifiedCount();
+		LOGGER.trace( "Consumer {} join a user {}. Modified {} document(s) in consumers.", getId(), user.getEmail(), n );
+		return n > 0;
 	}
 	
 	@Override

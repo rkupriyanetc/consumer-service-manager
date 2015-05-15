@@ -176,6 +176,25 @@ public class Address {
 	}
 	
 	@Override
+	public boolean equals( final Object o ) {
+		if ( o == null )
+			return false;
+		if ( o instanceof Address ) {
+			final Address address = Address.class.cast( o );
+			if ( address.getAddressLocationId().equals( getAddressLocationId() )
+					&& address.getAddressPlaceId().equals( getAddressPlaceId() )
+					&& ( address.getApartment() != null && address.getApartment().equals( getApartment() ) || address.getApartment() == null
+							&& getApartment() == null )
+					&& ( address.getHouse() != null && address.getHouse().equals( getHouse() ) || address.getHouse() == null
+							&& getHouse() == null ) )
+				return true;
+			else
+				return false;
+		} else
+			return false;
+	}
+	
+	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
 		if ( postalCode != null && postalCode.isEmpty() ) {

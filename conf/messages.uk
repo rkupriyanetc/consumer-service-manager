@@ -149,6 +149,7 @@ page.rates.title_place_city=В місті
 page.profile.user.id=ID користувача
 page.profile.consumer.description=Всі дані потрібно ввести точно такі, як в квитанції.
 page.profile.consumer.join=Приєднати
+page.profile.consumer.join.error=Такий користувач вже приєднаний
 page.profile.consumer.id=Ос. рахунок
 page.profile.consumer.fullname=Прізвище, ім'я та по батькові
 page.profile.consumer.addressTop=Основна адреса

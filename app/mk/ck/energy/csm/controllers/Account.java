@@ -328,16 +328,13 @@ public class Account extends Controller {
 			return badRequest( joinConsumer.render( filledForm, new HashMap< String, String >( 0 ) ) );
 		else {
 			final AppendConsumer u = filledForm.get();
-			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.id" ), u.getId() );
-			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.fullname" ), u.getFullName() );
-			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressTop" ), u.getTopAddress() );
-			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressLocation" ), u.getLocationAddress() );
-			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressPlace" ), u.getPlaceAddress() );
-			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressHouse" ), u.getHouse() );
-			LOGGER.debug( "{} is {}", Messages.get( "page.profile.consumer.addressApartment" ), u.getApartment() );
 			try {
 				final Consumer consumer = Consumer.findById( u.getId() );
-				consumer.joinConsumerElectricity( User.findById( u.getUserId() ) );
+				if ( consumer.equals( u ) )
+					if ( !consumer.joinConsumerElectricity( User.findById( u.getUserId() ) ) ) {
+						filledForm.reject( Messages.get( "page.profile.consumer.join.error" ) );
+						return badRequest( joinConsumer.render( filledForm, new HashMap< String, String >( 0 ) ) );
+					}
 			}
 			catch ( final ConsumerException ce ) {
 				LOGGER.error( "Sorry. Consumer {} not found", u.getId() );

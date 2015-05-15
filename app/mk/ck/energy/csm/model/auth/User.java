@@ -538,10 +538,10 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 	
 	public Consumer getConsumer() {
 		try {
-			return Consumer.findById( "35-002463" );
+			return Consumer.findByUser( this );
 		}
 		catch ( final ConsumerException e ) {
-			LOGGER.warn( "Could not find Consumer by id {}", "35-002463" );
+			LOGGER.warn( "Could not find Consumer by User {}", getEmail() );
 		}
 		return null;
 	}

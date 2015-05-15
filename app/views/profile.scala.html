@@ -11,21 +11,22 @@
     </div>
     <div class="panel-body">
       
-      @if(localUser.getConsumer().isActive()) {
-      <div class="row">
-        <div class="col-md-5 col-xs-5">
-          @Messages("playauthenticate.profile.consumer")
-        </div>
-        <div class="col-md-2 col-xs-2">
-          @localUser.getConsumer().getId()
-        </div>        
-        <div class="col-md-5 col-xs-5">
-          @localUser.getConsumer().getFullName()
-        </div>
-      </div>
+      @defining(localUser.getConsumer()) { consumer =>
+        @if(consumer != null ) {
+          <div class="row">
+            <div class="col-md-5 col-xs-5">
+              @Messages("playauthenticate.profile.consumer")
+            </div>
+            <div class="col-md-2 col-xs-2">
+              @localUser.getConsumer().getId()
+            </div>
+            <div class="col-md-5 col-xs-5">
+              @localUser.getConsumer().getFullName()
+            </div>
+          </div>
+          <hr/>
+        }
       
-      <hr/>
-      }
       <div class="row">
         <div class="col-md-2 col-xs-2">
           @Messages("playauthenticate.profile.mail", "")
@@ -114,22 +115,21 @@
         }
       </div>
       
-      @if(!localUser.getConsumer().isActive()) {
-      <hr/>
+      @if(consumer == null) {
+        <hr/>
       
-      <div class="row">
-        <div class="col-md-4 col-xs-4">
-          <a href="@routes.Account.changePassword()" class="list-group-item-danger">@Messages("playauthenticate.profile.password_change")</a>
+        <div class="row">
+          <div class="col-md-4 col-xs-4">
+            <a href="@routes.Account.changePassword()" class="list-group-item-danger">@Messages("playauthenticate.profile.password_change")</a>
+          </div>
+          <div class="col-md-5 col-xs-5">
+            <a href='@mk.ck.energy.csm.controllers.routes.Account.joinConsumerElectricity("0")' class="list-group-item-success">@Messages("playauthenticate.profile.join_consumer.electricity")</a>
+          </div>
+          <div class="col-md-3 col-xs-3">
+          </div>
         </div>
-        <div class="col-md-5 col-xs-5">
-          <a href='@mk.ck.energy.csm.controllers.routes.Account.joinConsumerElectricity("0")' class="list-group-item-success">@Messages("playauthenticate.profile.join_consumer.electricity")</a>
-        </div>
-        <div class="col-md-3 col-xs-3">
-          
-        </div>
-      </div>
       }
-      
+      }
     </div>
   </div>
 }
