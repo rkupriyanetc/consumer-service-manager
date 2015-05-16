@@ -352,7 +352,9 @@ public class Account extends Controller {
 	
 	public static Result onChangeAddressTopSelect( final String addrId ) {
 		final Map< String, String > vals = AddressLocation.getMap( addrId, 1 );
-		final StringBuilder buf = new StringBuilder();
+		final StringBuilder buf = new StringBuilder( "<option value='0' selected>" );
+		buf.append( Messages.get( "page.profile.consumer.addressLocation.select" ) );
+		buf.append( "</option>" );
 		for ( final Map.Entry< String, String > entry : vals.entrySet() )
 			if ( entry.getValue().equals( "0" ) )
 				buf.append( "<option " ).append( "disabled>" ).append( "--------------------" ).append( "</option>" );

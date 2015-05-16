@@ -12,6 +12,7 @@ import org.bson.BsonDocument;
 import org.bson.BsonDocumentWrapper;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.conversions.Bson;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -204,6 +205,57 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 			return doc;
 		} else
 			throw new IllegalArgumentException( "User should not be empty in Consumer.findByUser( User )" );
+	}
+	
+	public static Bson makeFilterToId( final String value ) {
+		return Filters.eq( DB_FIELD_ID, value );
+	}
+	
+	public static Bson makeFilterToFullName( final String value ) {
+		return Filters.eq( DB_FIELD_FULLNAME, value );
+	}
+	
+	public static Bson makeFilterToAddress( final Address value ) {
+		if ( value != null )
+			return Filters.eq( DB_FIELD_ADDRESS, value.getDocument() );
+		else
+			return null;
+	}
+	
+	public static Bson makeFilterToDocuments( final Documents value ) {
+		if ( value != null )
+			return Filters.eq( DB_FIELD_DOCUMENTS, value.getDocument() );
+		else
+			return null;
+	}
+	
+	public static Bson makeFilterToConsumerType( final ConsumerType value ) {
+		if ( value != null )
+			return Filters.eq( DB_FIELD_CONSUMER_TYPE, value.name() );
+		else
+			return null;
+	}
+	
+	public static Bson makeFilterToHouseType( final HouseType value ) {
+		if ( value != null )
+			return Filters.eq( DB_FIELD_HOUSE_TYPE, value.name() );
+		else
+			return null;
+	}
+	
+	public static Bson makeFilterToStatusType( final ConsumerStatusType value ) {
+		if ( value != null )
+			return Filters.eq( DB_FIELD_STATUS_TYPE, value.name() );
+		else
+			return null;
+	}
+	
+	public static Bson makeFilterToActive( final String value ) {
+		return Filters.eq( DB_FIELD_ACTIVE, value );
+	}
+	
+	public static Bson makeFilterToUserId( final String value ) {
+		return Filters.eq( DB_FIELD_USER_ID, value );
 	}
 	
 	public void save() throws ImpossibleCreatingException {

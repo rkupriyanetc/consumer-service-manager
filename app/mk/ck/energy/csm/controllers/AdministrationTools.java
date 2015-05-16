@@ -41,6 +41,7 @@ import mk.ck.energy.csm.model.AddressTop;
 import mk.ck.energy.csm.model.AdministrativeCenterType;
 import mk.ck.energy.csm.model.Configuration;
 import mk.ck.energy.csm.model.Consumer;
+import mk.ck.energy.csm.model.ConsumerException;
 import mk.ck.energy.csm.model.ConsumerStatusType;
 import mk.ck.energy.csm.model.ConsumerType;
 import mk.ck.energy.csm.model.Database;
@@ -62,6 +63,7 @@ import mk.ck.energy.csm.model.auth.UserNotFoundException;
 import mk.ck.energy.csm.model.auth.UserRole;
 import mk.ck.energy.csm.providers.MyFirstLastNameUserPasswordAuthUser;
 
+import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -81,6 +83,8 @@ import views.html.admin.userAdd;
 import views.html.admin.viewXML;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
+
+import com.mongodb.client.model.Filters;
 
 public class AdministrationTools extends Controller {
 	
@@ -1208,7 +1212,43 @@ public class AdministrationTools extends Controller {
 									ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.METER_NOT_FOUND );
 								}
 							}
-							consumer.save();
+							try {
+								final Consumer c = Consumer.findById( consumer.getId() );
+								final Bson cQuery = Consumer.makeFilterToId( c.getId() );
+								Bson cUpdate = null;
+								if ( consumer.getFullName() != null && !consumer.getFullName().equals( c.getFullName() ) )
+									cUpdate = Consumer.makeFilterToFullName( consumer.getFullName() );
+								if ( !consumer.getAddress().equals( c.getAddress() ) )
+									if ( cUpdate == null )
+										cUpdate = Consumer.makeFilterToAddress( consumer.getAddress() );
+									else
+										cUpdate = Filters.and( cUpdate, Consumer.makeFilterToAddress( consumer.getAddress() ) );
+								if ( !consumer.getDocuments().equals( c.getDocuments() ) )
+									if ( cUpdate == null )
+										cUpdate = Consumer.makeFilterToDocuments( consumer.getDocuments() );
+									else
+										cUpdate = Filters.and( cUpdate, Consumer.makeFilterToDocuments( consumer.getDocuments() ) );
+								if ( !consumer.getConsumerType().equals( c.getConsumerType() ) )
+									if ( cUpdate == null )
+										cUpdate = Consumer.makeFilterToConsumerType( consumer.getConsumerType() );
+									else
+										cUpdate = Filters.and( cUpdate, Consumer.makeFilterToConsumerType( consumer.getConsumerType() ) );
+								if ( !consumer.getHouseType().equals( c.getHouseType() ) )
+									if ( cUpdate == null )
+										cUpdate = Consumer.makeFilterToHouseType( consumer.getHouseType() );
+									else
+										cUpdate = Filters.and( cUpdate, Consumer.makeFilterToHouseType( consumer.getHouseType() ) );
+								if ( !consumer.getStatusType().equals( c.getStatusType() ) )
+									if ( cUpdate == null )
+										cUpdate = Consumer.makeFilterToStatusType( consumer.getStatusType() );
+									else
+										cUpdate = Filters.and( cUpdate, Consumer.makeFilterToStatusType( consumer.getStatusType() ) );
+								if ( cUpdate != null )
+									consumer.update( cQuery, cUpdate );
+							}
+							catch ( final ConsumerException ce ) {
+								consumer.save();
+							}
 							if ( meter != null )
 								meter.save();
 							else
