@@ -181,15 +181,14 @@ public class Address {
 			return false;
 		if ( o instanceof Address ) {
 			final Address address = Address.class.cast( o );
-			if ( address.getAddressLocationId().equals( getAddressLocationId() )
-					&& address.getAddressPlaceId().equals( getAddressPlaceId() )
+			return address.getAddressLocation().equals( getAddressLocation() )
+					&& address.getAddressPlace().equals( getAddressPlace() )
 					&& ( address.getApartment() != null && address.getApartment().equals( getApartment() ) || address.getApartment() == null
 							&& getApartment() == null )
 					&& ( address.getHouse() != null && address.getHouse().equals( getHouse() ) || address.getHouse() == null
-							&& getHouse() == null ) )
-				return true;
-			else
-				return false;
+							&& getHouse() == null )
+					&& ( address.getPostalCode() != null && address.getPostalCode().equals( getPostalCode() ) || address.getPostalCode() == null
+							&& getPostalCode() == null );
 		} else
 			return false;
 	}

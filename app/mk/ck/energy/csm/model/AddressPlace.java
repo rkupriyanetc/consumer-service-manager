@@ -96,7 +96,7 @@ public class AddressPlace extends CSMAbstractDocument< AddressPlace > {
 	
 	public static Map< String, String > getMap() {
 		final Map< String, String > references = new LinkedHashMap< String, String >( 0 );
-		final Bson sort = Filters.and( Filters.eq( DB_FIELD_STREET_TYPE, 1 ), Filters.eq( DB_FIELD_STREET_NAME, 1 ) );
+		final Bson sort = Filters.eq( DB_FIELD_STREET_NAME, 1 );
 		final MongoCursor< AddressPlace > cursor = getMongoCollection().find().sort( sort ).iterator();
 		while ( cursor.hasNext() ) {
 			final AddressPlace place = cursor.next();

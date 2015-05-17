@@ -59,6 +59,22 @@ public class Documents {
 		return doc;
 	}
 	
+	@Override
+	public boolean equals( final Object o ) {
+		if ( o == null )
+			return false;
+		if ( o instanceof Documents ) {
+			final Documents documents = Documents.class.cast( o );
+			return ( documents.getIdentificationCode() != null && documents.getIdentificationCode().equals( getIdentificationCode() ) || documents
+					.getIdentificationCode() == null && getIdentificationCode() == null )
+					&& ( documents.getPassportNumber() != null && documents.getPassportNumber().equals( getPassportNumber() ) || documents
+							.getPassportNumber() == null && getPassportNumber() == null )
+					&& ( documents.getPassportSeries() != null && documents.getPassportNumber().equals( getPassportNumber() ) || documents
+							.getPassportNumber() == null && getPassportNumber() == null );
+		} else
+			return false;
+	}
+	
 	public static Documents create() {
 		return new Documents();
 	}

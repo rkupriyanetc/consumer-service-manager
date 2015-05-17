@@ -210,6 +210,16 @@ public class AddressTop extends CSMAbstractDocument< AddressTop > {
 	}
 	
 	@Override
+	public boolean equals( final Object o ) {
+		if ( o == null )
+			return false;
+		final AddressTop at = ( AddressTop )o;
+		return getName().equals( at.getName() )
+				&& ( getTopAddressId() != null && getTopAddressId().equals( at.getTopAddressId() ) || getTopAddressId() == null
+						&& at.getTopAddressId() == null );
+	}
+	
+	@Override
 	public < TDocument >BsonDocument toBsonDocument( final Class< TDocument > documentClass, final CodecRegistry codecRegistry ) {
 		return new BsonDocumentWrapper< AddressTop >( this, codecRegistry.get( AddressTop.class ) );
 	}

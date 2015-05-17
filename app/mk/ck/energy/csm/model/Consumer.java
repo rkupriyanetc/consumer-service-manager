@@ -274,24 +274,18 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 			return false;
 		if ( o instanceof Consumer ) {
 			final Consumer consumer = Consumer.class.cast( o );
-			if ( consumer.getId().equals( getId() ) && consumer.getFullName().equals( getFullName() )
-					&& consumer.getAddress().equals( getAddress() ) )
-				return true;
-			else
-				return false;
+			return consumer.getId().equals( getId() ) && consumer.getFullName().equals( getFullName() )
+					&& consumer.getAddress().equals( getAddress() );
 		} else
 			if ( o instanceof AppendConsumer ) {
 				final AppendConsumer consumer = AppendConsumer.class.cast( o );
-				if ( consumer.getId().equals( getId() )
+				return consumer.getId().equals( getId() )
 						&& consumer.getFullName().equals( getFullName() )
 						&& ( consumer.getApartment() != null && consumer.getApartment().equals( getAddress().getApartment() ) || ( consumer
 								.getApartment() == null || consumer.getApartment().isEmpty() )
 								&& ( getAddress().getApartment() == null || getAddress().getApartment().isEmpty() ) )
 						&& ( consumer.getHouse() != null && consumer.getHouse().equals( getAddress().getHouse() ) || ( consumer.getHouse() == null || consumer
-								.getHouse().isEmpty() ) && ( getAddress().getHouse() == null || getAddress().getHouse().isEmpty() ) ) )
-					return true;
-				else
-					return false;
+								.getHouse().isEmpty() ) && ( getAddress().getHouse() == null || getAddress().getHouse().isEmpty() ) );
 			}
 		return false;
 	}
@@ -299,7 +293,7 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	public boolean joinConsumerElectricity( final User user ) {
 		// Consumer already be stored in the database
 		if ( isActive() )
-			return false;
+			return false; // Consumer are joined
 		setUser( user );
 		setActive( true );
 		final UpdateResult ur = update( Filters.eq( DB_FIELD_ID, getId() ),

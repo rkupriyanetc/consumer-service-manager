@@ -295,7 +295,8 @@ public class AddressLocation extends CSMAbstractDocument< AddressLocation > {
 		if ( o == null )
 			return false;
 		final AddressLocation al = ( AddressLocation )o;
-		return getLocation().equals( al.getLocation() ) && getLocationType().equals( al.getLocationType() );
+		return getTopAddress().equals( al.getTopAddress() ) && getLocation().equals( al.getLocation() )
+				&& getLocationType().equals( al.getLocationType() );
 	}
 	
 	@Override

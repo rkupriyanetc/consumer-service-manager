@@ -1215,36 +1215,23 @@ public class AdministrationTools extends Controller {
 							try {
 								final Consumer c = Consumer.findById( consumer.getId() );
 								final Bson cQuery = Consumer.makeFilterToId( c.getId() );
-								Bson cUpdate = null;
+								final List< Bson > cUpdates = new LinkedList< Bson >();
 								if ( consumer.getFullName() != null && !consumer.getFullName().equals( c.getFullName() ) )
-									cUpdate = Consumer.makeFilterToFullName( consumer.getFullName() );
+									cUpdates.add( Consumer.makeFilterToFullName( consumer.getFullName() ) );
 								if ( !consumer.getAddress().equals( c.getAddress() ) )
-									if ( cUpdate == null )
-										cUpdate = Consumer.makeFilterToAddress( consumer.getAddress() );
-									else
-										cUpdate = Filters.and( cUpdate, Consumer.makeFilterToAddress( consumer.getAddress() ) );
+									cUpdates.add( Consumer.makeFilterToAddress( consumer.getAddress() ) );
 								if ( !consumer.getDocuments().equals( c.getDocuments() ) )
-									if ( cUpdate == null )
-										cUpdate = Consumer.makeFilterToDocuments( consumer.getDocuments() );
-									else
-										cUpdate = Filters.and( cUpdate, Consumer.makeFilterToDocuments( consumer.getDocuments() ) );
+									cUpdates.add( Consumer.makeFilterToDocuments( consumer.getDocuments() ) );
 								if ( !consumer.getConsumerType().equals( c.getConsumerType() ) )
-									if ( cUpdate == null )
-										cUpdate = Consumer.makeFilterToConsumerType( consumer.getConsumerType() );
-									else
-										cUpdate = Filters.and( cUpdate, Consumer.makeFilterToConsumerType( consumer.getConsumerType() ) );
+									cUpdates.add( Consumer.makeFilterToConsumerType( consumer.getConsumerType() ) );
 								if ( !consumer.getHouseType().equals( c.getHouseType() ) )
-									if ( cUpdate == null )
-										cUpdate = Consumer.makeFilterToHouseType( consumer.getHouseType() );
-									else
-										cUpdate = Filters.and( cUpdate, Consumer.makeFilterToHouseType( consumer.getHouseType() ) );
+									cUpdates.add( Consumer.makeFilterToHouseType( consumer.getHouseType() ) );
 								if ( !consumer.getStatusType().equals( c.getStatusType() ) )
-									if ( cUpdate == null )
-										cUpdate = Consumer.makeFilterToStatusType( consumer.getStatusType() );
-									else
-										cUpdate = Filters.and( cUpdate, Consumer.makeFilterToStatusType( consumer.getStatusType() ) );
-								if ( cUpdate != null )
+									cUpdates.add( Consumer.makeFilterToStatusType( consumer.getStatusType() ) );
+								if ( !cUpdates.isEmpty() ) {
+									final Bson cUpdate = Filters.and( cUpdates );
 									consumer.update( cQuery, cUpdate );
+								}
 							}
 							catch ( final ConsumerException ce ) {
 								consumer.save();
