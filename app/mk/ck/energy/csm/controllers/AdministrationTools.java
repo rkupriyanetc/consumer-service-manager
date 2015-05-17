@@ -139,6 +139,8 @@ public class AdministrationTools extends Controller {
 		
 		private boolean					updateConsumers;
 		
+		private boolean					updateMeters;
+		
 		private List< String >	references;
 		
 		public static StepByStep newInstance() {
@@ -209,6 +211,14 @@ public class AdministrationTools extends Controller {
 		
 		public void setUpdateConsumers( final boolean updateConsumers ) {
 			this.updateConsumers = updateConsumers;
+		}
+		
+		public boolean isUpdateMeters() {
+			return updateMeters;
+		}
+		
+		public void setUpdateMeters( final boolean updateMeters ) {
+			this.updateMeters = updateMeters;
 		}
 		
 		public List< String > getReferences() {
@@ -933,7 +943,7 @@ public class AdministrationTools extends Controller {
 						if ( !statement.execute() )
 							while ( !statement.getMoreResults() )
 								pCount++ ;
-						LOGGER.trace( "Count results is {}", pCount );
+						LOGGER.trace( "Count results is {} in select consumers", pCount );
 						// А тут повертає пустоту, бо відсутні результати
 						final ResultSet result = statement.getResultSet();
 						final List< UndefinedConsumer > undefinedConsumers = new LinkedList<>();
@@ -1116,6 +1126,72 @@ public class AdministrationTools extends Controller {
 								field = null;
 							if ( field != null )
 								consumer.setStatusType( ConsumerStatusType.valueOf( field ) );
+							try {
+								final Consumer c = Consumer.findById( consumer.getId() );
+								final Bson cQuery = Consumer.makeFilterToId( c.getId() );
+								final List< Bson > cUpdates = new LinkedList< Bson >();
+								if ( consumer.getFullName() != null && !consumer.getFullName().equals( c.getFullName() ) )
+									cUpdates.add( Consumer.makeFilterToFullName( consumer.getFullName() ) );
+								if ( !consumer.getAddress().equals( c.getAddress() ) )
+									cUpdates.add( Consumer.makeFilterToAddress( consumer.getAddress() ) );
+								if ( !consumer.getDocuments().equals( c.getDocuments() ) )
+									cUpdates.add( Consumer.makeFilterToDocuments( consumer.getDocuments() ) );
+								if ( !consumer.getConsumerType().equals( c.getConsumerType() ) )
+									cUpdates.add( Consumer.makeFilterToConsumerType( consumer.getConsumerType() ) );
+								if ( !consumer.getHouseType().equals( c.getHouseType() ) )
+									cUpdates.add( Consumer.makeFilterToHouseType( consumer.getHouseType() ) );
+								if ( !consumer.getStatusType().equals( c.getStatusType() ) )
+									cUpdates.add( Consumer.makeFilterToStatusType( consumer.getStatusType() ) );
+								if ( !cUpdates.isEmpty() ) {
+									final Bson cUpdate = Filters.and( cUpdates );
+									consumer.update( cQuery, cUpdate );
+								}
+							}
+							catch ( final ConsumerException ce ) {
+								consumer.save();
+							}
+							if ( undefinedConsomerTry && ndefinedConsomer != null ) {
+								ndefinedConsomer.save();
+								undefinedConsumers.add( ndefinedConsomer );
+								undefinedConsomerTry = false;
+								ndefinedConsomer = null;
+							}
+							LOGGER.trace( "Consumer {} created. Writed by {} record!", consumer.getId(), ++consumerSize );
+						}
+						// Finish all Consumers
+						result.close();
+					}
+					catch ( final SQLException sqle ) {
+						isReadSQLFile = false;
+						LOGGER.trace( "SQLException for PrepareStatement.execute(). {}", sqle );
+					}
+					catch ( final Exception e ) {
+						isReadSQLFile = false;
+						LOGGER.trace( "Exception : {}", e );
+					}
+				if ( isReadSQLFile )
+					LOGGER.trace( "Import the consumers from MSSQL server successful!" );
+				else
+					LOGGER.trace( "Import the consumers from MSSQL server unsuccessful!" );
+			}
+			// Processing UpdateMeters
+			if ( step.isUpdateMeters() ) {
+				int metersSize = 0;
+				final String sqlText = readSQLFile( "meters" );
+				boolean isReadSQLFile = sqlText != "";
+				if ( isReadSQLFile )
+					try {
+						final PreparedStatement statement = CONFIGURATION.getMSSQLConnection().prepareStatement( sqlText );
+						int pCount = 0;
+						if ( !statement.execute() )
+							while ( !statement.getMoreResults() )
+								pCount++ ;
+						LOGGER.trace( "Count results is {} in select meters", pCount );
+						final ResultSet result = statement.getResultSet();
+						while ( result.next() ) {
+							// Consumer
+							String field = result.getString( 1 );
+							final Consumer consumer = Consumer.findById( field );
 							// Meter ID
 							final String meterName = result.getString( 13 );
 							// Must be only one, because the full name
@@ -1158,7 +1234,7 @@ public class AdministrationTools extends Controller {
 							catch ( final NumberFormatException nfe ) {
 								order = 0;
 							}
-							Meter meter;
+							Meter meter = null;
 							if ( device != null ) {
 								meter = Meter.create( consumer.getId(), device, number, digits, installDate.getTime(), order, inspector, place );
 								final byte amp = result.getByte( 20 );
@@ -1198,55 +1274,12 @@ public class AdministrationTools extends Controller {
 										meter.addPlumb( plumb2 );
 									}
 								}
-							} else {
-								meter = null;
-								final StringBuilder sb = new StringBuilder( meterName );
-								if ( !undefinedConsomerTry ) {
-									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.METER_NOT_FOUND,
-											sb.toString() );
-									undefinedConsomerTry = true;
-								} else {
-									sb.append( " *** " );
-									sb.append( ndefinedConsomer.getError() );
-									ndefinedConsomer.setError( sb.toString() );
-									ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.METER_NOT_FOUND );
-								}
-							}
-							try {
-								final Consumer c = Consumer.findById( consumer.getId() );
-								final Bson cQuery = Consumer.makeFilterToId( c.getId() );
-								final List< Bson > cUpdates = new LinkedList< Bson >();
-								if ( consumer.getFullName() != null && !consumer.getFullName().equals( c.getFullName() ) )
-									cUpdates.add( Consumer.makeFilterToFullName( consumer.getFullName() ) );
-								if ( !consumer.getAddress().equals( c.getAddress() ) )
-									cUpdates.add( Consumer.makeFilterToAddress( consumer.getAddress() ) );
-								if ( !consumer.getDocuments().equals( c.getDocuments() ) )
-									cUpdates.add( Consumer.makeFilterToDocuments( consumer.getDocuments() ) );
-								if ( !consumer.getConsumerType().equals( c.getConsumerType() ) )
-									cUpdates.add( Consumer.makeFilterToConsumerType( consumer.getConsumerType() ) );
-								if ( !consumer.getHouseType().equals( c.getHouseType() ) )
-									cUpdates.add( Consumer.makeFilterToHouseType( consumer.getHouseType() ) );
-								if ( !consumer.getStatusType().equals( c.getStatusType() ) )
-									cUpdates.add( Consumer.makeFilterToStatusType( consumer.getStatusType() ) );
-								if ( !cUpdates.isEmpty() ) {
-									final Bson cUpdate = Filters.and( cUpdates );
-									consumer.update( cQuery, cUpdate );
-								}
-							}
-							catch ( final ConsumerException ce ) {
-								consumer.save();
 							}
 							if ( meter != null )
 								meter.save();
 							else
 								LOGGER.warn( "Device meter name not fount : {}", meterName );
-							if ( undefinedConsomerTry && ndefinedConsomer != null ) {
-								ndefinedConsomer.save();
-								undefinedConsumers.add( ndefinedConsomer );
-								undefinedConsomerTry = false;
-								ndefinedConsomer = null;
-							}
-							LOGGER.trace( "Consumer {} created. Writed by {} record!", consumer.getId(), ++consumerSize );
+							LOGGER.trace( "Meter {} created. Writed by {} record!", meter, ++metersSize );
 						}
 						// Finish all Consumers
 						result.close();
