@@ -28,5 +28,11 @@ public enum LocationMeterType {
 	/**
 	 * Інше
 	 */
-	OTHER,
+	OTHER, ;
+	
+	public boolean equals( final LocationMeterType o ) {
+		if ( o == null )
+			return false;
+		return name().equals( o.name() );
+	}
 }
