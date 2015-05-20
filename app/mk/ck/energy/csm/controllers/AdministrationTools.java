@@ -52,8 +52,6 @@ import mk.ck.energy.csm.model.LocationMeterType;
 import mk.ck.energy.csm.model.LocationType;
 import mk.ck.energy.csm.model.Meter;
 import mk.ck.energy.csm.model.MeterDevice;
-import mk.ck.energy.csm.model.Plumb;
-import mk.ck.energy.csm.model.PlumbType;
 import mk.ck.energy.csm.model.StreetType;
 import mk.ck.energy.csm.model.UndefinedConsumer;
 import mk.ck.energy.csm.model.UndefinedConsumerType;
@@ -84,6 +82,7 @@ import views.html.admin.viewXML;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 
 public class AdministrationTools extends Controller {
@@ -938,152 +937,164 @@ public class AdministrationTools extends Controller {
 				if ( isReadSQLFile )
 					try {
 						final PreparedStatement statement = CONFIGURATION.getMSSQLConnection().prepareStatement( sqlText );
-						// Помилка тут, бо повертає false
 						int pCount = 0;
 						if ( !statement.execute() )
 							while ( !statement.getMoreResults() )
 								pCount++ ;
 						LOGGER.trace( "Count results is {} in select consumers", pCount );
-						// А тут повертає пустоту, бо відсутні результати
 						final ResultSet result = statement.getResultSet();
 						final List< UndefinedConsumer > undefinedConsumers = new LinkedList<>();
 						boolean undefinedConsomerTry = false;
+						pCount = 0;
 						while ( result.next() ) {
 							UndefinedConsumer ndefinedConsomer = null;
-							// select lsid, nazvapos, nstreet, house, flat, indeks, uid,
-							// adoc, codestatus, surname, wdoc, priv, marka, codemesto,
-							// inspektor, nomer, rozr, ndate, cdoc, amp, number_pl, ndate_pl,
-							// kdate_pl, insp_pl, code_pl,
-							// number_pl2, ndate_pl2, kdate_pl2, insp_pl2, code_pl2,
-							// count_plumb
+							// a.code_abon, w.surname, t.nazva_pos, s.nazva_street, a.house,
+							// a.flat, a.indeks, a.privat, sa.code_status, a.unicod, a.doc,
+							// w.doc
 							// Account ID
 							String field = result.getString( 1 ).trim();
 							// Create Consumer with consumerId
-							final Consumer consumer = Consumer.create( field );
-							// Population - standard created
-							consumer.setConsumerType( ConsumerType.INDIVIDUAL );
-							// Fullname
-							field = result.getString( 10 );
+							Consumer consumer;
 							if ( field != null && !field.isEmpty() )
-								consumer.setFullName( field );
-							else {
-								ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.CONSUMER_NAME_UNDEFINED,
-										field );
-								undefinedConsomerTry = true;
-							}
-							// Is private house
-							final boolean isPriv = result.getBoolean( 12 );
-							consumer.setHouseType( isPriv ? HouseType.MANSION : HouseType.APARTMENT_HOUSE );
-							// Documents
-							final String idCode = result.getString( 7 );
-							final String passport = result.getString( 8 );
-							String passportTmp = result.getString( 11 );
-							String pasSeries = null;
-							String pasNumber = null;
-							if ( passport != null && passport.contains( " " ) && passport.length() > 7 ) {
-								final int pPas = passport.indexOf( " " );
-								pasSeries = passport.substring( 0, pPas );
-								pasNumber = passport.substring( pPas + 1 );
-							} else
-								if ( passportTmp != null && passportTmp.contains( " " ) && passportTmp.length() > 7 ) {
-									final int pPasp = passportTmp.indexOf( " " );
-									pasSeries = passportTmp.substring( 0, pPasp );
-									pasNumber = passportTmp.substring( pPasp + 1 );
-								}
-							final boolean passBoll = pasSeries != null && !pasSeries.isEmpty() && pasNumber != null && !pasNumber.isEmpty();
-							if ( passBoll )
-								if ( pasNumber.length() == 2 ) {
-									passportTmp = pasSeries;
-									pasSeries = pasNumber;
-									pasNumber = passportTmp;
-								}
-							Documents documents;
-							if ( idCode != null && !idCode.isEmpty() && idCode.length() > 8 )
-								documents = Documents.create( idCode, pasSeries, pasNumber );
+								consumer = Consumer.create( field );
 							else
+								consumer = null;
+							if ( consumer != null ) {
+								// Population - standard created
+								consumer.setConsumerType( ConsumerType.INDIVIDUAL );
+								// Fullname
+								field = result.getString( 2 );
+								if ( field != null && !field.isEmpty() )
+									consumer.setFullName( field );
+								else {
+									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.CONSUMER_NAME_UNDEFINED,
+											field );
+									undefinedConsomerTry = true;
+								}
+								// Is private house
+								final boolean isPriv = result.getBoolean( 8 );
+								consumer.setHouseType( isPriv ? HouseType.MANSION : HouseType.APARTMENT_HOUSE );
+								// Documents
+								final String idCode = result.getString( 10 );
+								final String passport = result.getString( 11 );
+								String passportTmp = result.getString( 12 );
+								String pasSeries = null;
+								String pasNumber = null;
+								if ( passport != null && passport.contains( " " ) && passport.length() > 7 ) {
+									final int pPas = passport.indexOf( " " );
+									pasSeries = passport.substring( 0, pPas );
+									pasNumber = passport.substring( pPas + 1 );
+								} else
+									if ( passportTmp != null && passportTmp.contains( " " ) && passportTmp.length() > 7 ) {
+										final int pPasp = passportTmp.indexOf( " " );
+										pasSeries = passportTmp.substring( 0, pPasp );
+										pasNumber = passportTmp.substring( pPasp + 1 );
+									}
+								final boolean passBoll = pasSeries != null && !pasSeries.isEmpty() && pasNumber != null && !pasNumber.isEmpty();
 								if ( passBoll )
-									documents = Documents.create( null, pasSeries, pasNumber );
+									if ( pasNumber.length() == 2 ) {
+										passportTmp = pasSeries;
+										pasSeries = pasNumber;
+										pasNumber = passportTmp;
+									}
+								Documents documents;
+								if ( idCode != null && !idCode.isEmpty() && idCode.length() > 8 || passBoll )
+									documents = Documents.create( idCode, pasSeries, pasNumber );
 								else
 									documents = null;
-							if ( documents != null )
-								consumer.setDocuments( documents );
-							// Address
-							final Address address = Address.create();
-							field = result.getString( 4 );
-							if ( field != null && !field.isEmpty() )
-								address.setHouse( field.trim() );
-							field = result.getString( 5 );
-							if ( field != null && !field.isEmpty() )
-								address.setApartment( field.trim() );
-							// Address Street
-							field = result.getString( 3 );
-							final int posS = field.indexOf( "." ) + 1;
-							final String typeStr = field.substring( 0, posS ).trim();
-							final String nameStr = field.substring( posS ).trim();
-							final StreetType st = StreetType.abbreviationToStreetType( typeStr );
-							try {
-								final AddressPlace addr = AddressPlace.find( nameStr, st );
-								address.setAddressPlace( addr );
-							}
-							catch ( final AddressNotFoundException anfe ) {
-								// It's Empty LocationType. But write to undefined list
-								final StringBuilder sb = new StringBuilder( nameStr );
-								sb.append( " *** " );
-								sb.append( st.name() );
-								if ( !undefinedConsomerTry ) {
-									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.ADDRESSPLACE_UNDEFINED,
-											sb.toString() );
-									undefinedConsomerTry = true;
-								} else {
-									sb.append( " *** " );
-									sb.append( ndefinedConsomer.getError() );
-									ndefinedConsomer.setError( sb.toString() );
-									ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.ADDRESSPLACE_UNDEFINED );
-								}
-							}
-							// Address City
-							field = result.getString( 2 );
-							final int pos = field.indexOf( "." ) + 1;
-							final String typeCity = field.substring( 0, pos ).trim();
-							final String nameCity = field.substring( pos ).trim();
-							final LocationType lt = LocationType.abbreviationToLocationType( typeCity );
-							if ( lt == null || lt != null && lt.equals( LocationType.UNSPECIFIED ) ) {
-								final StringBuilder sb = new StringBuilder();
-								if ( lt == null )
-									sb.append( "LocationType is null" );
-								else
-									sb.append( lt.name() );
-								// It's Empty LocationType. But write to undefined list
-								if ( !undefinedConsomerTry ) {
-									ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.LOCATIONTYPE_UNDEFINED,
-											sb.toString() );
-									undefinedConsomerTry = true;
-								} else {
-									sb.append( " *** " );
-									sb.append( ndefinedConsomer.getError() );
-									ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.LOCATIONTYPE_UNDEFINED );
-									ndefinedConsomer.setError( sb.toString() );
-								}
-							} else {
-								List< AddressLocation > addrLocations = null;
+								if ( documents != null )
+									consumer.setDocuments( documents );
+								// Address
+								final Address address = Address.create();
+								field = result.getString( 5 );
+								if ( field != null && !field.isEmpty() )
+									address.setHouse( field.trim() );
+								field = result.getString( 6 );
+								if ( field != null && !field.isEmpty() )
+									address.setApartment( field.trim() );
+								// Address Street
+								field = result.getString( 4 );
+								final int posS = field.indexOf( "." ) + 1;
+								final String typeStr = field.substring( 0, posS ).trim();
+								final String nameStr = field.substring( posS ).trim();
+								final StreetType st = StreetType.abbreviationToStreetType( typeStr );
 								try {
-									addrLocations = AddressLocation.findLikeLocationName( nameCity );
-									boolean bool = false;
-									int indexK = 0;
-									for ( int k = 0; k < addrLocations.size() && !bool; k++ ) {
-										final String al = addrLocations.get( k ).getTopAddressId();
-										final boolean isAddrTop = keyReferences.equals( al );
-										bool = lt.name().equals( addrLocations.get( k ).getLocationType().name() ) && isAddrTop;
-										if ( bool ) {
-											address.setAddressLocation( addrLocations.get( k ) );
-											break;
-										} else
-											indexK = k;
-									}
-									if ( !bool ) {
-										final StringBuilder sb = new StringBuilder( lt.name() );
+									final AddressPlace addr = AddressPlace.find( nameStr, st );
+									address.setAddressPlace( addr );
+								}
+								catch ( final AddressNotFoundException anfe ) {
+									// It's Empty LocationType. But write to undefined list
+									final StringBuilder sb = new StringBuilder( nameStr );
+									sb.append( " *** " );
+									sb.append( st.name() );
+									if ( !undefinedConsomerTry ) {
+										ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.ADDRESSPLACE_UNDEFINED,
+												sb.toString() );
+										undefinedConsomerTry = true;
+									} else {
 										sb.append( " *** " );
-										sb.append( addrLocations.get( indexK ).getLocationType().name() );
+										sb.append( ndefinedConsomer.getError() );
+										ndefinedConsomer.setError( sb.toString() );
+										ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.ADDRESSPLACE_UNDEFINED );
+									}
+								}
+								// Address City
+								field = result.getString( 3 );
+								final int pos = field.indexOf( "." ) + 1;
+								final String typeCity = field.substring( 0, pos ).trim();
+								final String nameCity = field.substring( pos ).trim();
+								final LocationType lt = LocationType.abbreviationToLocationType( typeCity );
+								if ( lt == null || lt != null && lt.equals( LocationType.UNSPECIFIED ) ) {
+									final StringBuilder sb = new StringBuilder();
+									if ( lt == null )
+										sb.append( "LocationType is null" );
+									else
+										sb.append( lt.name() );
+									// It's Empty LocationType. But write to undefined list
+									if ( !undefinedConsomerTry ) {
+										ndefinedConsomer = UndefinedConsumer.create( consumer.getId(), UndefinedConsumerType.LOCATIONTYPE_UNDEFINED,
+												sb.toString() );
+										undefinedConsomerTry = true;
+									} else {
+										sb.append( " *** " );
+										sb.append( ndefinedConsomer.getError() );
+										ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.LOCATIONTYPE_UNDEFINED );
+										ndefinedConsomer.setError( sb.toString() );
+									}
+								} else {
+									List< AddressLocation > addrLocations = null;
+									try {
+										addrLocations = AddressLocation.findLikeLocationName( nameCity );
+										boolean bool = false;
+										int indexK = 0;
+										for ( int k = 0; k < addrLocations.size() && !bool; k++ ) {
+											final String al = addrLocations.get( k ).getTopAddressId();
+											final boolean isAddrTop = keyReferences.equals( al );
+											bool = lt.name().equals( addrLocations.get( k ).getLocationType().name() ) && isAddrTop;
+											if ( bool ) {
+												address.setAddressLocation( addrLocations.get( k ) );
+												break;
+											} else
+												indexK = k;
+										}
+										if ( !bool ) {
+											final StringBuilder sb = new StringBuilder( lt.name() );
+											sb.append( " *** " );
+											sb.append( addrLocations.get( indexK ).getLocationType().name() );
+											if ( !undefinedConsomerTry ) {
+												ndefinedConsomer = UndefinedConsumer.create( consumer.getId(),
+														UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED, sb.toString() );
+												undefinedConsomerTry = true;
+											} else {
+												sb.append( " *** " );
+												sb.append( ndefinedConsomer.getError() );
+												ndefinedConsomer.setError( sb.toString() );
+												ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
+											}
+										}
+									}
+									catch ( final AddressNotFoundException anfe ) {
+										final StringBuilder sb = new StringBuilder( nameCity );
 										if ( !undefinedConsomerTry ) {
 											ndefinedConsomer = UndefinedConsumer.create( consumer.getId(),
 													UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED, sb.toString() );
@@ -1095,68 +1106,58 @@ public class AdministrationTools extends Controller {
 											ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
 										}
 									}
-								}
-								catch ( final AddressNotFoundException anfe ) {
-									final StringBuilder sb = new StringBuilder( nameCity );
-									if ( !undefinedConsomerTry ) {
-										ndefinedConsomer = UndefinedConsumer.create( consumer.getId(),
-												UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED, sb.toString() );
-										undefinedConsomerTry = true;
-									} else {
-										sb.append( " *** " );
-										sb.append( ndefinedConsomer.getError() );
-										ndefinedConsomer.setError( sb.toString() );
-										ndefinedConsomer.addUndefinedConsumerType( UndefinedConsumerType.ADDRESSLOCATION_UNDEFINED );
+									catch ( final NumberFormatException nfe ) {
+										LOGGER.trace( "This should not happen" );
 									}
 								}
-								catch ( final NumberFormatException nfe ) {
-									LOGGER.trace( "This should not happen" );
+								// Address postal code
+								field = result.getString( 7 );
+								if ( field != null && !field.isEmpty() && field.length() > 3 )
+									address.setPostalCode( field.trim() );
+								consumer.setAddress( address );
+								// Consumer code status
+								final int status = result.getInt( 9 );
+								if ( status > 0 && status < 10 )
+									field = Messages.get( CONSUMER_CODE_STATUS_NAME + "." + String.valueOf( status ) );
+								else
+									field = null;
+								if ( field != null )
+									consumer.setStatusType( ConsumerStatusType.valueOf( field ) );
+								try {
+									final Consumer c = Consumer.findById( consumer.getId() );
+									final Bson cQuery = Consumer.makeFilterToId( c.getId() );
+									final List< Bson > cUpdates = new LinkedList< Bson >();
+									if ( consumer.getFullName() != null && !consumer.getFullName().equals( c.getFullName() ) )
+										cUpdates.add( Consumer.makeFilterToFullName( consumer.getFullName() ) );
+									if ( !consumer.getAddress().equals( c.getAddress() ) )
+										cUpdates.add( Consumer.makeFilterToAddress( consumer.getAddress() ) );
+									if ( consumer.getDocuments() != null && !consumer.getDocuments().equals( c.getDocuments() )
+											|| consumer.getDocuments() == null && c.getDocuments() != null )
+										cUpdates.add( Consumer.makeFilterToDocuments( consumer.getDocuments() ) );
+									if ( !consumer.getConsumerType().equals( c.getConsumerType() ) )
+										cUpdates.add( Consumer.makeFilterToConsumerType( consumer.getConsumerType() ) );
+									if ( !consumer.getHouseType().equals( c.getHouseType() ) )
+										cUpdates.add( Consumer.makeFilterToHouseType( consumer.getHouseType() ) );
+									if ( !consumer.getStatusType().equals( c.getStatusType() ) )
+										cUpdates.add( Consumer.makeFilterToStatusType( consumer.getStatusType() ) );
+									if ( !cUpdates.isEmpty() ) {
+										final Bson cUpdate = Filters.and( cUpdates );
+										consumer.update( cQuery, cUpdate );
+										LOGGER.trace( "Consumer {} modified. Modified {} record!", consumer.getId(), ++pCount );
+									}
 								}
-							}
-							// Address postal code
-							field = result.getString( 6 );
-							if ( field != null && !field.isEmpty() && field.length() > 3 )
-								address.setPostalCode( field.trim() );
-							consumer.setAddress( address );
-							// Consumer code status
-							final int status = result.getInt( 9 );
-							if ( status > 0 && status < 10 )
-								field = Messages.get( CONSUMER_CODE_STATUS_NAME + "." + String.valueOf( status ) );
-							else
-								field = null;
-							if ( field != null )
-								consumer.setStatusType( ConsumerStatusType.valueOf( field ) );
-							try {
-								final Consumer c = Consumer.findById( consumer.getId() );
-								final Bson cQuery = Consumer.makeFilterToId( c.getId() );
-								final List< Bson > cUpdates = new LinkedList< Bson >();
-								if ( consumer.getFullName() != null && !consumer.getFullName().equals( c.getFullName() ) )
-									cUpdates.add( Consumer.makeFilterToFullName( consumer.getFullName() ) );
-								if ( !consumer.getAddress().equals( c.getAddress() ) )
-									cUpdates.add( Consumer.makeFilterToAddress( consumer.getAddress() ) );
-								if ( !consumer.getDocuments().equals( c.getDocuments() ) )
-									cUpdates.add( Consumer.makeFilterToDocuments( consumer.getDocuments() ) );
-								if ( !consumer.getConsumerType().equals( c.getConsumerType() ) )
-									cUpdates.add( Consumer.makeFilterToConsumerType( consumer.getConsumerType() ) );
-								if ( !consumer.getHouseType().equals( c.getHouseType() ) )
-									cUpdates.add( Consumer.makeFilterToHouseType( consumer.getHouseType() ) );
-								if ( !consumer.getStatusType().equals( c.getStatusType() ) )
-									cUpdates.add( Consumer.makeFilterToStatusType( consumer.getStatusType() ) );
-								if ( !cUpdates.isEmpty() ) {
-									final Bson cUpdate = Filters.and( cUpdates );
-									consumer.update( cQuery, cUpdate );
+								catch ( final ConsumerException ce ) {
+									consumer.save();
+									LOGGER.trace( "Consumer {} created. Writed {} record!", consumer.getId(), ++consumerSize );
 								}
-							}
-							catch ( final ConsumerException ce ) {
-								consumer.save();
-							}
-							if ( undefinedConsomerTry && ndefinedConsomer != null ) {
-								ndefinedConsomer.save();
-								undefinedConsumers.add( ndefinedConsomer );
-								undefinedConsomerTry = false;
-								ndefinedConsomer = null;
-							}
-							LOGGER.trace( "Consumer {} created. Writed by {} record!", consumer.getId(), ++consumerSize );
+								if ( undefinedConsomerTry && ndefinedConsomer != null ) {
+									ndefinedConsomer.save();
+									undefinedConsumers.add( ndefinedConsomer );
+									undefinedConsomerTry = false;
+									ndefinedConsomer = null;
+								}
+							} else
+								LOGGER.trace( "Consumer ID should not be empty! Sorry..." );
 						}
 						// Finish all Consumers
 						result.close();
@@ -1183,106 +1184,75 @@ public class AdministrationTools extends Controller {
 					try {
 						final PreparedStatement statement = CONFIGURATION.getMSSQLConnection().prepareStatement( sqlText );
 						int pCount = 0;
-						if ( !statement.execute() )
-							while ( !statement.getMoreResults() )
-								pCount++ ;
-						LOGGER.trace( "Count results is {} in select meters", pCount );
-						final ResultSet result = statement.getResultSet();
-						while ( result.next() ) {
-							// Consumer
-							String field = result.getString( 1 );
-							final Consumer consumer = Consumer.findById( field );
-							// Meter ID
-							final String meterName = result.getString( 13 );
-							// Must be only one, because the full name
-							if ( meterName.equals( "ЦЭ6803В(ВМ)" ) )
-								LOGGER.trace( meterName + "   TcE6803B(BM)" );
-							final MeterDevice device = MeterDevice.findByName( meterName );
-							// Meter place
-							final int meterPlaceId = result.getInt( 14 );
-							String str;
-							if ( meterPlaceId > 0 && meterPlaceId < 7 )
-								str = Messages.get( METER_CODE_PLACE_NAME + "." + String.valueOf( meterPlaceId ) );
-							else
-								str = null;
-							LocationMeterType place;
-							if ( str == null )
-								place = LocationMeterType.OTHER;
-							else
-								place = LocationMeterType.valueOf( str );
-							// Meter Inspector
-							String inspector = result.getString( 15 );
-							// Meter Number
-							String number = result.getString( 16 );
-							int p = number.indexOf( "[" );
-							if ( p < 0 )
-								p = number.indexOf( "{" );
-							if ( p < 0 )
-								p = number.indexOf( "(" );
-							if ( p >= 0 )
-								number = number.substring( 0, p - 1 );
-							// Meter Digits
-							final byte digits = result.getByte( 17 );
-							// Meter InstallDate
-							Date installDate = result.getDate( 18 );
-							// Meter Order
-							field = result.getString( 19 );
-							short order;
-							try {
-								order = Short.parseShort( field );
-							}
-							catch ( final NumberFormatException nfe ) {
-								order = 0;
-							}
-							Meter meter = null;
-							if ( device != null ) {
-								meter = Meter.create( consumer.getId(), device, number, digits, installDate.getTime(), order, inspector, place );
-								final byte amp = result.getByte( 20 );
-								if ( amp > 0 )
-									meter.setMightOutturn( amp );
-								number = result.getString( 21 );
-								if ( number != null && !number.isEmpty() && number.length() > 3 ) {
-									number.trim();
-									// Plumb InstallDate
-									installDate = result.getDate( 22 );
-									// Plumb Inspector
-									inspector = result.getString( 24 );
-									// Plumb type
-									p = result.getInt( 25 );
-									PlumbType type = p == 3 ? PlumbType.STICKER : p == 2 ? PlumbType.IMS : PlumbType.SECURITY;
-									final Plumb plumb = new Plumb( number, installDate.getTime(), inspector, type );
-									// Plumb UninstallDate
-									Date uninstallDate = result.getDate( 23 );
-									if ( uninstallDate.getTime() != Meter.MAXDATE_PAKED.getTime() )
-										plumb.setUninstallDate( uninstallDate.getTime() );
-									meter.addPlumb( plumb );
-									number = result.getString( 26 );
-									if ( number != null && !number.isEmpty() && number.length() > 3 ) {
-										number.trim();
-										// Plumb InstallDate
-										installDate = result.getDate( 27 );
-										// Plumb Inspector
-										inspector = result.getString( 29 );
-										// Plumb type
-										p = result.getInt( 30 );
-										type = p == 3 ? PlumbType.STICKER : p == 2 ? PlumbType.IMS : PlumbType.SECURITY;
-										final Plumb plumb2 = new Plumb( number, installDate.getTime(), inspector, type );
-										// Plumb UninstallDate
-										uninstallDate = result.getDate( 28 );
-										if ( uninstallDate != Meter.MAXDATE_PAKED )
-											plumb.setUninstallDate( uninstallDate.getTime() );
-										meter.addPlumb( plumb2 );
-									}
+						final MongoCursor< Consumer > cursor = Consumer.getMongoCollection().find().iterator();
+						while ( cursor.hasNext() ) {
+							final Consumer consumer = cursor.next();
+							statement.setString( 1, consumer.getId() );
+							if ( !statement.execute() )
+								while ( !statement.getMoreResults() )
+									pCount++ ;
+							LOGGER.trace( "Count results is {} in select meters", pCount );
+							final ResultSet result = statement.getResultSet();
+							while ( result.next() ) {
+								// m.nazva_marka, n.nomer, n.razr, n.n_date, n.k_date,
+								// i.inspektor, n.doc, n.amp, ma.code_mestoacc
+								// Meter ID
+								final String meterName = result.getString( 1 );
+								final MeterDevice device = MeterDevice.findByName( meterName );
+								// Meter place
+								final int meterPlaceId = result.getInt( 9 );
+								String field;
+								if ( meterPlaceId > 0 && meterPlaceId < 7 )
+									field = Messages.get( METER_CODE_PLACE_NAME + "." + String.valueOf( meterPlaceId ) );
+								else
+									field = null;
+								LocationMeterType place;
+								if ( field == null )
+									place = LocationMeterType.OTHER;
+								else
+									place = LocationMeterType.valueOf( field );
+								// Meter Inspector
+								final String inspector = result.getString( 6 );
+								// Meter Number
+								String number = result.getString( 2 );
+								int p = number.indexOf( "[" );
+								if ( p < 0 )
+									p = number.indexOf( "{" );
+								if ( p < 0 )
+									p = number.indexOf( "(" );
+								if ( p >= 0 )
+									number = number.substring( 0, p - 1 );
+								// Meter Digits
+								final byte digits = result.getByte( 3 );
+								// Meter InstallDate
+								final Date installDate = result.getDate( 4 );
+								final Date uninstallDate = result.getDate( 5 );
+								// Meter Order
+								field = result.getString( 7 );
+								short order;
+								try {
+									order = Short.parseShort( field );
 								}
+								catch ( final NumberFormatException nfe ) {
+									order = 0;
+								}
+								Meter meter = null;
+								if ( device != null ) {
+									meter = Meter.create( consumer.getId(), device, number, digits, installDate.getTime(), order, inspector, place );
+									final byte amp = result.getByte( 8 );
+									if ( amp > 0 )
+										meter.setMightOutturn( amp );
+									meter.setDateUninstall( uninstallDate.getTime() );
+								}
+								if ( meter != null )
+									meter.save();
+								else
+									LOGGER.warn( "Device meter name not fount : {}", meterName );
+								LOGGER.trace( "Meter {} created. Writed by {} record!", meter, ++metersSize );
 							}
-							if ( meter != null )
-								meter.save();
-							else
-								LOGGER.warn( "Device meter name not fount : {}", meterName );
-							LOGGER.trace( "Meter {} created. Writed by {} record!", meter, ++metersSize );
+							// Finish all Consumers
+							result.close();
 						}
-						// Finish all Consumers
-						result.close();
 					}
 					catch ( final SQLException sqle ) {
 						isReadSQLFile = false;

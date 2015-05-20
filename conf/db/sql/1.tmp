@@ -1,0 +1,35 @@
+
+                number = result.getString( 21 );
+                if ( number != null && !number.isEmpty() && number.length() > 3 ) {
+                  number.trim();
+                  // Plumb InstallDate
+                  installDate = result.getDate( 22 );
+                  // Plumb Inspector
+                  inspector = result.getString( 24 );
+                  // Plumb type
+                  p = result.getInt( 25 );
+                  PlumbType type = p == 3 ? PlumbType.STICKER : p == 2 ? PlumbType.IMS : PlumbType.SECURITY;
+                  final Plumb plumb = new Plumb( number, installDate.getTime(), inspector, type );
+                  // Plumb UninstallDate
+                  Date uninstallDate = result.getDate( 23 );
+                  if ( uninstallDate.getTime() != Meter.MAXDATE_PAKED.getTime() )
+                    plumb.setUninstallDate( uninstallDate.getTime() );
+                  meter.addPlumb( plumb );
+                  number = result.getString( 26 );
+                  if ( number != null && !number.isEmpty() && number.length() > 3 ) {
+                    number.trim();
+                    // Plumb InstallDate
+                    installDate = result.getDate( 27 );
+                    // Plumb Inspector
+                    inspector = result.getString( 29 );
+                    // Plumb type
+                    p = result.getInt( 30 );
+                    type = p == 3 ? PlumbType.STICKER : p == 2 ? PlumbType.IMS : PlumbType.SECURITY;
+                    final Plumb plumb2 = new Plumb( number, installDate.getTime(), inspector, type );
+                    // Plumb UninstallDate
+                    uninstallDate = result.getDate( 28 );
+                    if ( uninstallDate != Meter.MAXDATE_PAKED )
+                      plumb.setUninstallDate( uninstallDate.getTime() );
+                    meter.addPlumb( plumb2 );
+                  }
+                }
