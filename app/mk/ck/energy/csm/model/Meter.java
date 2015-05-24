@@ -254,8 +254,11 @@ public class Meter extends CSMAbstractDocument< Meter > {
 		if ( o == null || !( o instanceof Meter ) )
 			return false;
 		final Meter meter = ( Meter )o;
-		return meter.getMeterDevice().equals( getMeterDevice() ) && meter.getNumber().equals( getNumber() )
-				&& meter.getDateInstall() == getDateInstall() && meter.getConsumerId().equals( getConsumerId() );
+		return meter.getConsumerId().equals( getConsumerId() ) && meter.getMeterDevice().equals( getMeterDevice() )
+				&& meter.getNumber().equals( getNumber() ) && meter.getDateInstall() == getDateInstall()
+				&& meter.getDateUninstall() == getDateUninstall() && meter.getOrder() == getOrder()
+				&& meter.getDateTesting() == getDateTesting() && meter.getDigits() == getDigits()
+				&& meter.getMightOutturn() == getMightOutturn() && meter.getLocationMeter().equals( getLocationMeter() );
 	}
 	
 	public void save() throws ImpossibleCreatingException {
@@ -284,6 +287,54 @@ public class Meter extends CSMAbstractDocument< Meter > {
 			return userMeters;
 		} else
 			throw new IllegalArgumentException( "UserId should not be empty in Meter.findByUserId( userId )" );
+	}
+	
+	public static Bson makeFilterToId( final String value ) {
+		return Filters.eq( DB_FIELD_ID, value );
+	}
+	
+	public static Bson makeFilterToConsumerId( final String value ) {
+		return Filters.eq( DB_FIELD_CONSUMER_ID, value );
+	}
+	
+	public static Bson makeFilterToMeterDeviceId( final String value ) {
+		return Filters.eq( DB_FIELD_METER_DEVICE_ID, value );
+	}
+	
+	public static Bson makeFilterToDateInstall( final String value ) {
+		return Filters.eq( DB_FIELD_DATE_INSTALL, value );
+	}
+	
+	public static Bson makeFilterToDateUninstall( final String value ) {
+		return Filters.eq( DB_FIELD_DATE_UNINSTALL, value );
+	}
+	
+	public static Bson makeFilterToDateTesting( final String value ) {
+		return Filters.eq( DB_FIELD_DATE_TESTING, value );
+	}
+	
+	public static Bson makeFilterToNumber( final String value ) {
+		return Filters.eq( DB_FIELD_NUMBER, value );
+	}
+	
+	public static Bson makeFilterToOrder( final String value ) {
+		return Filters.eq( DB_FIELD_ORDER, value );
+	}
+	
+	public static Bson makeFilterToDigits( final String value ) {
+		return Filters.eq( DB_FIELD_DIGITS, value );
+	}
+	
+	public static Bson makeFilterToMasterName( final String value ) {
+		return Filters.eq( DB_FIELD_MASTER_NAME, value );
+	}
+	
+	public static Bson makeFilterToLocationType( final String value ) {
+		return Filters.eq( DB_FIELD_LOCATION_METER_TYPE, value );
+	}
+	
+	public static Bson makeFilterToMightOutturn( final String value ) {
+		return Filters.eq( DB_FIELD_MIGHT_OUTTURN, value );
 	}
 	
 	@Override

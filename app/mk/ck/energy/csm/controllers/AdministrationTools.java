@@ -1193,6 +1193,7 @@ public class AdministrationTools extends Controller {
 									pCount++ ;
 							LOGGER.trace( "Count results is {} in select meters", pCount );
 							final ResultSet result = statement.getResultSet();
+							final List< Meter > metersConsumer = Meter.findByConsumerId( consumer.getId() );
 							while ( result.next() ) {
 								// m.nazva_marka, n.nomer, n.razr, n.n_date, n.k_date,
 								// i.inspektor, n.doc, n.amp, ma.code_mestoacc
@@ -1245,12 +1246,33 @@ public class AdministrationTools extends Controller {
 									meter.setDateUninstall( uninstallDate.getTime() );
 								}
 								if ( meter != null ) {
-									final List< Meter > meters = Meter.findByConsumerId( consumer.getId() );
-									for ( final Meter m : meters )
+									for ( final Meter m : metersConsumer )
 										if ( m.equals( meter ) )
-											LOGGER.trace( "This is not the same meter" );
-										else
-											meter.save();
+											LOGGER.trace( "This is the same meter : {}", meter );
+										else {
+											final Consumer c = Consumer.findById( consumer.getId() );
+											final Bson cQuery = Consumer.makeFilterToId( c.getId() );
+											final List< Bson > cUpdates = new LinkedList< Bson >();
+											if ( consumer.getFullName() != null && !consumer.getFullName().equals( c.getFullName() ) )
+												cUpdates.add( Consumer.makeFilterToFullName( consumer.getFullName() ) );
+											if ( !consumer.getAddress().equals( c.getAddress() ) )
+												cUpdates.add( Consumer.makeFilterToAddress( consumer.getAddress() ) );
+											if ( consumer.getDocuments() != null && !consumer.getDocuments().equals( c.getDocuments() )
+													|| consumer.getDocuments() == null && c.getDocuments() != null )
+												cUpdates.add( Consumer.makeFilterToDocuments( consumer.getDocuments() ) );
+											if ( !consumer.getConsumerType().equals( c.getConsumerType() ) )
+												cUpdates.add( Consumer.makeFilterToConsumerType( consumer.getConsumerType() ) );
+											if ( !consumer.getHouseType().equals( c.getHouseType() ) )
+												cUpdates.add( Consumer.makeFilterToHouseType( consumer.getHouseType() ) );
+											if ( !consumer.getStatusType().equals( c.getStatusType() ) )
+												cUpdates.add( Consumer.makeFilterToStatusType( consumer.getStatusType() ) );
+											if ( !cUpdates.isEmpty() ) {
+												final Bson cUpdate = Filters.and( cUpdates );
+												consumer.update( cQuery, cUpdate );
+												LOGGER.trace( "Consumer {} modified. Modified {} record!", consumer.getId(), ++pCount );
+												meter.save();
+											}
+										}
 								} else
 									LOGGER.warn( "Device meter name not fount : {}", meterName );
 								LOGGER.trace( "Meter {} created. Writed by {} record!", meter, ++metersSize );
