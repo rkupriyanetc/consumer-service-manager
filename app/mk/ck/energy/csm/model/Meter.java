@@ -255,7 +255,7 @@ public class Meter extends CSMAbstractDocument< Meter > {
 			return false;
 		final Meter meter = ( Meter )o;
 		return meter.getMeterDevice().equals( getMeterDevice() ) && meter.getNumber().equals( getNumber() )
-				&& meter.getDateInstall() == getDateInstall();
+				&& meter.getDateInstall() == getDateInstall() && meter.getConsumerId().equals( getConsumerId() );
 	}
 	
 	public void save() throws ImpossibleCreatingException {

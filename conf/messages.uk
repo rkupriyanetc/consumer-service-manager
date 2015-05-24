@@ -54,6 +54,7 @@ page.admin.adminTab.tabDBSynchronization.selecting_streets=Вибір даних
 page.admin.adminTab.tabDBSynchronization.streets.edit=Редагування addressStreet.xml
 page.admin.adminTab.tabDBSynchronization.fillingMeterDevices=Заповнення колекції лічильників з таблиці {0}
 page.admin.adminTab.tabDBSynchronization.consumerUpdate=Завантажити чи обновити всіх фізичних споживачів до своєї БД
+page.admin.adminTab.tabDBSynchronization.updateMeters=Завантажити чи обновити всі встановлені лічильники споживачів
 
 page.admin.adminTab.hostChange.success=Хост змінено успішно. Щоб працювати далі, потрібно увійти знову.
 

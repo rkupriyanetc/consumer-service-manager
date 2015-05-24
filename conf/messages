@@ -48,6 +48,7 @@ page.admin.adminTab.tabDBSynchronization.selecting_streets=Selecting data from a
 page.admin.adminTab.tabDBSynchronization.streets.edit=Edit addressStreet.xml
 page.admin.adminTab.tabDBSynchronization.fillingMeterDevices=Filling the collection meters from table {0}
 page.admin.adminTab.tabDBSynchronization.consumerUpdate=Download or upgrade of all physical consumers in their database
+page.admin.adminTab.tabDBSynchronization.updateMeters=Download or update all installed customer meters
 
 page.admin.adminTab.hostChange.success=Host change success. You must sign in again to work
 

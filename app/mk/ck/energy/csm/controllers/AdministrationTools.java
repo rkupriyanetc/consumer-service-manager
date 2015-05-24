@@ -1184,7 +1184,7 @@ public class AdministrationTools extends Controller {
 					try {
 						final PreparedStatement statement = CONFIGURATION.getMSSQLConnection().prepareStatement( sqlText );
 						int pCount = 0;
-						final MongoCursor< Consumer > cursor = Consumer.getMongoCollection().find().iterator();
+						final MongoCursor< Consumer > cursor = Consumer.getMongoCollection().find().limit( 20 ).iterator();
 						while ( cursor.hasNext() ) {
 							final Consumer consumer = cursor.next();
 							statement.setString( 1, consumer.getId() );
@@ -1244,9 +1244,14 @@ public class AdministrationTools extends Controller {
 										meter.setMightOutturn( amp );
 									meter.setDateUninstall( uninstallDate.getTime() );
 								}
-								if ( meter != null )
-									meter.save();
-								else
+								if ( meter != null ) {
+									final List< Meter > meters = Meter.findByConsumerId( consumer.getId() );
+									for ( final Meter m : meters )
+										if ( m.equals( meter ) )
+											LOGGER.trace( "This is not the same meter" );
+										else
+											meter.save();
+								} else
 									LOGGER.warn( "Device meter name not fount : {}", meterName );
 								LOGGER.trace( "Meter {} created. Writed by {} record!", meter, ++metersSize );
 							}
