@@ -44,15 +44,19 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	
 	private static final String	DB_FIELD_LOCATION_METER_TYPE	= "location_meter";
 	
+	public static Date					MINDATE;
+	
 	public static Date					MAXDATE;
 	
 	public static Date					MAXDATE_PAKED;
 	static {
 		try {
+			MINDATE = new SimpleDateFormat( "yyyy.mm.dd" ).parse( "1950.01.01" );
 			MAXDATE = new SimpleDateFormat( "yyyy.mm.dd" ).parse( "9999.12.31" );
-			MAXDATE_PAKED = new SimpleDateFormat( "yyyy-mm-dd" ).parse( "2049-01-01" );
+			MAXDATE_PAKED = new SimpleDateFormat( "yyyy.mm.dd" ).parse( "2049.01.01" );
 		}
 		catch ( final Exception e ) {
+			MINDATE = new Date( 1950 * 24 * 60 * 60 * 1000 );
 			MAXDATE = new Date( 9999 * 12 * 31 * 24 * 60 * 60 * 1000 );
 			MAXDATE_PAKED = new Date( 2049 * 24 * 60 * 60 * 1000 );
 		}
@@ -286,7 +290,18 @@ public class Meter extends CSMAbstractDocument< Meter > {
 			}
 			return userMeters;
 		} else
-			throw new IllegalArgumentException( "UserId should not be empty in Meter.findByUserId( userId )" );
+			throw new IllegalArgumentException( "ConsumerId should not be empty in Meter.findByConsumerId( consumerId )" );
+	}
+	
+	public static Meter findByConsumerIdAndDateInstall( final String consumerId, final long date ) throws MeterNotFoundException {
+		if ( consumerId != null && !consumerId.isEmpty() ) {
+			final Meter meter = getMongoCollection().find(
+					Filters.and( Filters.eq( DB_FIELD_CONSUMER_ID, consumerId ), Filters.eq( DB_FIELD_DATE_INSTALL, date ) ) ).first();
+			if ( meter == null )
+				throw new MeterNotFoundException( "The Consumer was found by " + consumerId + " and date install " + new Date( date ) );
+			return meter;
+		} else
+			throw new IllegalArgumentException( "ConsumerId should not be empty in Meter.findByConsumerId( consumerId, date )" );
 	}
 	
 	public static Bson makeFilterToId( final String value ) {
