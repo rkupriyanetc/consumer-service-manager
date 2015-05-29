@@ -1246,11 +1246,10 @@ public class AdministrationTools extends Controller {
 									meter.setDateUninstall( uninstallDate.getTime() );
 								}
 								if ( meter != null ) {
-									if ( meterConsumer.equals( meter ) )
+									if ( meter.equals( meterConsumer ) )
 										LOGGER.trace( "This is the same meter : {}", meter );
 									else {
-										final Consumer c = Consumer.findById( consumer.getId() );
-										final Bson cQuery = Consumer.makeFilterToId( c.getId() );
+										final Bson cQuery = Meter.makeFilterToId( meter.getId() );
 										final List< Bson > cUpdates = new LinkedList< Bson >();
 										if ( consumer.getFullName() != null && !consumer.getFullName().equals( c.getFullName() ) )
 											cUpdates.add( Consumer.makeFilterToFullName( consumer.getFullName() ) );
