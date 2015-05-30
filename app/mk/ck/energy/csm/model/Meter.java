@@ -316,15 +316,15 @@ public class Meter extends CSMAbstractDocument< Meter > {
 		return Filters.eq( DB_FIELD_METER_DEVICE_ID, value );
 	}
 	
-	public static Bson makeFilterToDateInstall( final String value ) {
+	public static Bson makeFilterToDateInstall( final long value ) {
 		return Filters.eq( DB_FIELD_DATE_INSTALL, value );
 	}
 	
-	public static Bson makeFilterToDateUninstall( final String value ) {
+	public static Bson makeFilterToDateUninstall( final long value ) {
 		return Filters.eq( DB_FIELD_DATE_UNINSTALL, value );
 	}
 	
-	public static Bson makeFilterToDateTesting( final String value ) {
+	public static Bson makeFilterToDateTesting( final long value ) {
 		return Filters.eq( DB_FIELD_DATE_TESTING, value );
 	}
 	
@@ -332,11 +332,11 @@ public class Meter extends CSMAbstractDocument< Meter > {
 		return Filters.eq( DB_FIELD_NUMBER, value );
 	}
 	
-	public static Bson makeFilterToOrder( final String value ) {
+	public static Bson makeFilterToOrder( final short value ) {
 		return Filters.eq( DB_FIELD_ORDER, value );
 	}
 	
-	public static Bson makeFilterToDigits( final String value ) {
+	public static Bson makeFilterToDigits( final byte value ) {
 		return Filters.eq( DB_FIELD_DIGITS, value );
 	}
 	
@@ -344,11 +344,11 @@ public class Meter extends CSMAbstractDocument< Meter > {
 		return Filters.eq( DB_FIELD_MASTER_NAME, value );
 	}
 	
-	public static Bson makeFilterToLocationType( final String value ) {
-		return Filters.eq( DB_FIELD_LOCATION_METER_TYPE, value );
+	public static Bson makeFilterToLocationType( final LocationMeterType value ) {
+		return Filters.eq( DB_FIELD_LOCATION_METER_TYPE, value.name() );
 	}
 	
-	public static Bson makeFilterToMightOutturn( final String value ) {
+	public static Bson makeFilterToMightOutturn( final byte value ) {
 		return Filters.eq( DB_FIELD_MIGHT_OUTTURN, value );
 	}
 	

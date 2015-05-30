@@ -1177,7 +1177,7 @@ public class AdministrationTools extends Controller {
 			}
 			// Processing UpdateMeters
 			if ( step.isUpdateMeters() ) {
-				int metersSize = 0;
+				int metersCount = 0;
 				final String sqlText = readSQLFile( "meters" );
 				boolean isReadSQLFile = sqlText != "";
 				if ( isReadSQLFile )
@@ -1215,7 +1215,9 @@ public class AdministrationTools extends Controller {
 								else
 									place = LocationMeterType.valueOf( field );
 								// Meter Inspector
-								final String inspector = result.getString( 6 );
+								String inspector = result.getString( 6 );
+								if ( inspector.equals( "_невідомий" ) )
+									inspector = null;
 								// Meter Number
 								String number = result.getString( 2 );
 								int p = number.indexOf( "[" );
@@ -1245,38 +1247,49 @@ public class AdministrationTools extends Controller {
 										meter.setMightOutturn( amp );
 									meter.setDateUninstall( uninstallDate.getTime() );
 								}
-								if ( meter != null ) {
-									if ( meter.equals( meterConsumer ) )
+								if ( meterConsumer != null ) {
+									if ( meterConsumer.equals( meter ) )
 										LOGGER.trace( "This is the same meter : {}", meter );
 									else {
-										final Bson cQuery = Meter.makeFilterToId( meter.getId() );
+										final Bson cQuery = Meter.makeFilterToId( meterConsumer.getId() );
 										final List< Bson > cUpdates = new LinkedList< Bson >();
-										if ( consumer.getFullName() != null && !consumer.getFullName().equals( c.getFullName() ) )
-											cUpdates.add( Consumer.makeFilterToFullName( consumer.getFullName() ) );
-										if ( !consumer.getAddress().equals( c.getAddress() ) )
-											cUpdates.add( Consumer.makeFilterToAddress( consumer.getAddress() ) );
-										if ( consumer.getDocuments() != null && !consumer.getDocuments().equals( c.getDocuments() )
-												|| consumer.getDocuments() == null && c.getDocuments() != null )
-											cUpdates.add( Consumer.makeFilterToDocuments( consumer.getDocuments() ) );
-										if ( !consumer.getConsumerType().equals( c.getConsumerType() ) )
-											cUpdates.add( Consumer.makeFilterToConsumerType( consumer.getConsumerType() ) );
-										if ( !consumer.getHouseType().equals( c.getHouseType() ) )
-											cUpdates.add( Consumer.makeFilterToHouseType( consumer.getHouseType() ) );
-										if ( !consumer.getStatusType().equals( c.getStatusType() ) )
-											cUpdates.add( Consumer.makeFilterToStatusType( consumer.getStatusType() ) );
+										if ( meterConsumer.getOrder() != meter.getOrder() )
+											cUpdates.add( Meter.makeFilterToOrder( meter.getOrder() ) );
+										if ( meterConsumer.getDateInstall() != meter.getDateInstall() )
+											cUpdates.add( Meter.makeFilterToDateInstall( meter.getDateInstall() ) );
+										if ( meterConsumer.getDateUninstall() != meter.getDateUninstall() )
+											cUpdates.add( Meter.makeFilterToDateUninstall( meter.getDateUninstall() ) );
+										if ( meterConsumer.getDateTesting() != meter.getDateTesting() )
+											cUpdates.add( Meter.makeFilterToDateTesting( meter.getDateTesting() ) );
+										if ( meterConsumer.getNumber() != null && meter.getNumber() != null
+												&& !meterConsumer.getNumber().equals( meter.getNumber() ) || meterConsumer.getNumber() == null
+												&& meter.getNumber() != null )
+											cUpdates.add( Meter.makeFilterToNumber( meter.getNumber() ) );
+										if ( meterConsumer.getMightOutturn() != meter.getMightOutturn() )
+											cUpdates.add( Meter.makeFilterToMightOutturn( meter.getMightOutturn() ) );
+										if ( !meterConsumer.getMeterDeviceId().equals( meter.getMeterDeviceId() ) )
+											cUpdates.add( Meter.makeFilterToMeterDeviceId( meter.getMeterDeviceId() ) );
+										if ( meterConsumer.getDigits() != meter.getDigits() )
+											cUpdates.add( Meter.makeFilterToDigits( meter.getDigits() ) );
+										if ( meterConsumer.getMasterName() != null && meter.getMasterName() != null
+												&& !meterConsumer.getMasterName().equals( meter.getMasterName() )
+												|| meterConsumer.getMasterName() == null && meter.getMasterName() != null )
+											cUpdates.add( Meter.makeFilterToMasterName( meter.getMasterName() ) );
+										if ( !meterConsumer.getLocationMeter().equals( meter.getLocationMeter() ) )
+											cUpdates.add( Meter.makeFilterToLocationType( meter.getLocationMeter() ) );
 										if ( !cUpdates.isEmpty() ) {
 											final Bson cUpdate = Filters.and( cUpdates );
-											consumer.update( cQuery, cUpdate );
-											LOGGER.trace( "Consumer {} modified. Modified {} record!", consumer.getId(), ++pCount );
-											meter.save();
+											meterConsumer.update( cQuery, cUpdate );
+											LOGGER.trace( "Meter {} modified. Count meters is {}", meterConsumer.getId(), ++metersCount );
 										}
 									}
 								} else
-									LOGGER.warn( "Device meter name not fount : {}", meterName );
-								LOGGER.trace( "Meter {} created. Writed by {} record!", meter, ++metersSize );
+									if ( meter != null ) {
+										meter.save();
+										LOGGER.warn( "Meter Consumer {} saved. Count meters is {}", meter, ++metersCount );
+									}
+								result.close();
 							}
-							// Finish all Consumers
-							result.close();
 						}
 					}
 					catch ( final SQLException sqle ) {
