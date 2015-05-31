@@ -1,4 +1,4 @@
-select top 2 m.nazva_marka, n.nomer, n.razr, n.n_date, n.k_date, i.inspektor, n.doc, n.amp, ma.code_mestoacc from _accnastr n
+select top 2 m.nazva_marka, n.nomer, n.razr, n.n_date, n.k_date, i.inspektor, n.doc, n.amp, ma.code_mestoacc, n.date_pov from _accnastr n
 left join _abonent a on a.code_ab = n.code_ab
 left join sl_marka_acc m on m.code_marka = n.code_marka
 left join _tonastr tn on tn.code_ab = n.code_ab and tn.code_to = n.code_to

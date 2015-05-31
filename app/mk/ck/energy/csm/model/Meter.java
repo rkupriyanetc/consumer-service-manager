@@ -1,7 +1,9 @@
 package mk.ck.energy.csm.model;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,56 +20,58 @@ import com.mongodb.client.model.Filters;
 
 public class Meter extends CSMAbstractDocument< Meter > {
 	
-	private static final long		serialVersionUID							= 1L;
+	private static final long			serialVersionUID							= 1L;
 	
-	private static final String	COLLECTION_NAME_METERS				= "meters";
+	private static final String		COLLECTION_NAME_METERS				= "meters";
 	
-	private static final String	DB_FIELD_CONSUMER_ID					= "consumer_id";
+	private static final String		DB_FIELD_CONSUMER_ID					= "consumer_id";
 	
-	private static final String	DB_FIELD_METER_DEVICE_ID			= "meter_device_id";
+	private static final String		DB_FIELD_METER_DEVICE_ID			= "meter_device_id";
 	
-	private static final String	DB_FIELD_NUMBER								= "number";
+	private static final String		DB_FIELD_NUMBER								= "number";
 	
-	private static final String	DB_FIELD_DIGITS								= "digits";
+	private static final String		DB_FIELD_DIGITS								= "digits";
 	
-	private static final String	DB_FIELD_ORDER								= "order";
+	private static final String		DB_FIELD_ORDER								= "order";
 	
-	private static final String	DB_FIELD_DATE_INSTALL					= "date_install";
+	private static final String		DB_FIELD_DATE_INSTALL					= "date_install";
 	
-	private static final String	DB_FIELD_DATE_UNINSTALL				= "date_uninstall";
+	private static final String		DB_FIELD_DATE_UNINSTALL				= "date_uninstall";
 	
-	private static final String	DB_FIELD_DATE_TESTING					= "date_testing";
+	private static final String		DB_FIELD_DATE_TESTING					= "date_testing";
 	
-	private static final String	DB_FIELD_MASTER_NAME					= "master_name";
+	private static final String		DB_FIELD_MASTER_NAME					= "master_name";
 	
-	private static final String	DB_FIELD_MIGHT_OUTTURN				= "might_outturn";
+	private static final String		DB_FIELD_MIGHT_OUTTURN				= "might_outturn";
 	
-	private static final String	DB_FIELD_LOCATION_METER_TYPE	= "location_meter";
+	private static final String		DB_FIELD_LOCATION_METER_TYPE	= "location_meter";
 	
-	public static Date					MINDATE;
+	final static SimpleDateFormat	DATE_FORMAT										= new SimpleDateFormat( "yyyy.MM.dd" );
 	
-	public static Date					MAXDATE;
+	public static Date						MINDATE;
 	
-	public static Date					MAXDATE_PAKED;
+	public static Date						MAXDATE;
+	
+	public static Date						MAXDATE_PAKED;
 	static {
-		try {
-			MINDATE = new SimpleDateFormat( "yyyy.mm.dd" ).parse( "1950.01.01" );
-			MAXDATE = new SimpleDateFormat( "yyyy.mm.dd" ).parse( "9999.12.31" );
-			MAXDATE_PAKED = new SimpleDateFormat( "yyyy.mm.dd" ).parse( "2049.01.01" );
-		}
-		catch ( final Exception e ) {
-			MINDATE = new Date( 1950 * 24 * 60 * 60 * 1000 );
-			MAXDATE = new Date( 9999 * 12 * 31 * 24 * 60 * 60 * 1000 );
-			MAXDATE_PAKED = new Date( 2049 * 24 * 60 * 60 * 1000 );
-		}
+		final Calendar calendar = new GregorianCalendar();
+		calendar.clear();
+		calendar.set( 1950, 0, 1, 0, 0, 0 );
+		MINDATE = calendar.getTime();// 1950-01-01
+		calendar.clear();
+		calendar.set( 9999, 11, 31, 0, 0, 0 );
+		MAXDATE = calendar.getTime();// 9999-12-31
+		calendar.clear();
+		calendar.set( 2049, 0, 1, 0, 0, 0 );
+		MAXDATE_PAKED = calendar.getTime();// 2049-01-01
 	}
 	
-	private MeterDevice					meterDevice;
+	private MeterDevice						meterDevice;
 	
 	/*
 	 * Можливі пломби
 	 */
-	private final List< Plumb >	plumbs;
+	private final List< Plumb >		plumbs;
 	
 	private Meter() {
 		plumbs = new LinkedList<>();
@@ -358,8 +362,19 @@ public class Meter extends CSMAbstractDocument< Meter > {
 		sb.append( getMeterDevice().getName() );
 		sb.append( " № " );
 		sb.append( getNumber() );
-		sb.append( " дата: " );
-		sb.append( getDateInstall() );
+		sb.append( " дата уст.: " );
+		final GregorianCalendar gc = new GregorianCalendar();
+		gc.clear();
+		gc.setTime( new Date( getDateInstall() ) );
+		sb.append( DATE_FORMAT.format( gc.getTime() ) );
+		sb.append( " дата знт.: " );
+		gc.clear();
+		gc.setTime( new Date( getDateUninstall() ) );
+		sb.append( DATE_FORMAT.format( gc.getTime() ) );
+		sb.append( " дата тст.: " );
+		gc.clear();
+		gc.setTime( new Date( getDateTesting() ) );
+		sb.append( DATE_FORMAT.format( gc.getTime() ) );
 		return sb.toString();
 	}
 	

@@ -52,6 +52,7 @@ import mk.ck.energy.csm.model.LocationMeterType;
 import mk.ck.energy.csm.model.LocationType;
 import mk.ck.energy.csm.model.Meter;
 import mk.ck.energy.csm.model.MeterDevice;
+import mk.ck.energy.csm.model.MeterNotFoundException;
 import mk.ck.energy.csm.model.StreetType;
 import mk.ck.energy.csm.model.UndefinedConsumer;
 import mk.ck.energy.csm.model.UndefinedConsumerType;
@@ -1195,10 +1196,16 @@ public class AdministrationTools extends Controller {
 							final ResultSet result = statement.getResultSet();
 							while ( result.next() ) {
 								// m.nazva_marka, n.nomer, n.razr, n.n_date, n.k_date,
-								// i.inspektor, n.doc, n.amp, ma.code_mestoacc
+								// i.inspektor, n.doc, n.amp, ma.code_mestoacc, n.date_pov
 								// Meter InstallDate
 								final Date installDate = result.getDate( 4 );
-								final Meter meterConsumer = Meter.findByConsumerIdAndDateInstall( consumer.getId(), installDate.getTime() );
+								Meter meterConsumer;
+								try {
+									meterConsumer = Meter.findByConsumerIdAndDateInstall( consumer.getId(), installDate.getTime() );
+								}
+								catch ( final MeterNotFoundException mnfe ) {
+									meterConsumer = null;
+								}
 								// Meter name
 								final String meterName = result.getString( 1 );
 								final MeterDevice device = MeterDevice.findByName( meterName );
@@ -1229,7 +1236,6 @@ public class AdministrationTools extends Controller {
 									number = number.substring( 0, p - 1 );
 								// Meter Digits
 								final byte digits = result.getByte( 3 );
-								final Date uninstallDate = result.getDate( 5 );
 								// Meter Order
 								field = result.getString( 7 );
 								short order;
@@ -1245,7 +1251,14 @@ public class AdministrationTools extends Controller {
 									final byte amp = result.getByte( 8 );
 									if ( amp > 0 )
 										meter.setMightOutturn( amp );
-									meter.setDateUninstall( uninstallDate.getTime() );
+									Date date = result.getDate( 5 );
+									if ( date.getTime() != Meter.MAXDATE_PAKED.getTime() ) {
+										LOGGER.trace( "Date is {}. Max Paked date is {}. Difference is {}", date, Meter.MAXDATE_PAKED,
+												Meter.MAXDATE_PAKED.getTime() - date.getTime() );
+										meter.setDateUninstall( date.getTime() );
+									}
+									date = result.getDate( 10 );
+									meter.setDateTesting( date.getTime() );
 								}
 								if ( meterConsumer != null ) {
 									if ( meterConsumer.equals( meter ) )
@@ -1288,8 +1301,8 @@ public class AdministrationTools extends Controller {
 										meter.save();
 										LOGGER.warn( "Meter Consumer {} saved. Count meters is {}", meter, ++metersCount );
 									}
-								result.close();
 							}
+							result.close();
 						}
 					}
 					catch ( final SQLException sqle ) {
