@@ -175,6 +175,13 @@ public class Meter extends CSMAbstractDocument< Meter > {
 		put( DB_FIELD_DATE_INSTALL, dateInstall );
 	}
 	
+	public String getDateInstallFormat() {
+		final GregorianCalendar gc = new GregorianCalendar();
+		gc.clear();
+		gc.setTime( new Date( getDateInstall() ) );
+		return DATE_FORMAT.format( gc.getTime() );
+	}
+	
 	/*
 	 * Закінчення дії ( дата зняття ) лічильника
 	 */
@@ -184,6 +191,13 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	
 	public void setDateUninstall( final long dateUninstall ) {
 		put( DB_FIELD_DATE_UNINSTALL, dateUninstall );
+	}
+	
+	public String getDateUninstallFormat() {
+		final GregorianCalendar gc = new GregorianCalendar();
+		gc.clear();
+		gc.setTime( new Date( getDateUninstall() ) );
+		return DATE_FORMAT.format( gc.getTime() );
 	}
 	
 	/*
@@ -210,6 +224,13 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	
 	public void setDateTesting( final long testingDate ) {
 		put( DB_FIELD_DATE_TESTING, testingDate );
+	}
+	
+	public String getDateTestingFormat() {
+		final GregorianCalendar gc = new GregorianCalendar();
+		gc.clear();
+		gc.setTime( new Date( getDateTesting() ) );
+		return DATE_FORMAT.format( gc.getTime() );
 	}
 	
 	/*

@@ -2,6 +2,9 @@
 
 @import com.feth.play.module.pa.views.html._
 @import mk.ck.energy.csm.controllers._
+@import mk.ck.energy.csm.model.Consumer
+@import mk.ck.energy.csm.model.MeterDevice
+@import mk.ck.energy.csm.model.Meter
 
 @main(Messages("playauthenticate.profile.title"),"profile") {
 	
@@ -116,7 +119,6 @@
       </div>
       
       @if(consumer == null) {
-        <hr/>
       
         <div class="row">
           <div class="col-md-4 col-xs-4">
@@ -129,7 +131,62 @@
           </div>
         </div>
       } else {
-        @consumer.getMeters()
+        <hr/>
+        <div class="row">
+          <div class="col-md-2 col-xs-2">
+            Lichylnyk
+          </div>
+          <div class="col-md-1 col-xs-1">
+            Number
+          </div>
+          <div class="col-md-1 col-xs-1">
+            Symbs
+          </div>
+          <div class="col-md-1 col-xs-1">
+            Power
+          </div>
+          <div class="col-md-2 col-xs-2">
+            Date install
+          </div>
+          <div class="col-md-2 col-xs-2">
+            Uninstall
+          </div>
+          <div class="col-md-1 col-xs-1">
+            Order
+          </div>
+          <div class="col-md-2 col-xs-2">
+            Master name
+          </div>
+        </div>
+        @for(meter <- consumer.getMeters()) {
+          <hr/>
+          <div class="row">
+            <div class="col-md-2 col-xs-2">
+              @meter.getMeterDevice().getName()
+            </div>
+            <div class="col-md-1 col-xs-1">
+              @meter.getNumber()
+            </div>
+            <div class="col-md-1 col-xs-1">
+              @meter.getDigits()
+            </div>
+            <div class="col-md-1 col-xs-1">
+              @meter.getMightOutturn()
+            </div>
+            <div class="col-md-2 col-xs-2">
+              @meter.getDateInstallFormat()
+            </div>
+            <div class="col-md-2 col-xs-2">
+              @meter.getDateUninstallFormat()
+            </div>
+            <div class="col-md-1 col-xs-1">
+              @meter.getOrder()
+            </div>
+            <div class="col-md-2 col-xs-2">
+              @meter.getMasterName()
+            </div>
+          </div>
+        }
       }
       }
     </div>
