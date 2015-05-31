@@ -943,10 +943,12 @@ public class AdministrationTools extends Controller {
 							while ( !statement.getMoreResults() )
 								pCount++ ;
 						LOGGER.trace( "Count results is {} in select consumers", pCount );
+						pCount = 0;// Update count Consumers
 						final ResultSet result = statement.getResultSet();
 						final List< UndefinedConsumer > undefinedConsumers = new LinkedList<>();
+						final List< Consumer > updateBeforeConsumers = new LinkedList<>();
+						final List< Consumer > updateAfterConsumers = new LinkedList<>();
 						boolean undefinedConsomerTry = false;
-						pCount = 0;
 						while ( result.next() ) {
 							UndefinedConsumer ndefinedConsomer = null;
 							// a.code_abon, w.surname, t.nazva_pos, s.nazva_street, a.house,
@@ -1143,7 +1145,9 @@ public class AdministrationTools extends Controller {
 										cUpdates.add( Consumer.makeFilterToStatusType( consumer.getStatusType() ) );
 									if ( !cUpdates.isEmpty() ) {
 										final Bson cUpdate = Filters.and( cUpdates );
+										updateBeforeConsumers.add( c.copyInstance() );
 										consumer.update( cQuery, cUpdate );
+										updateAfterConsumers.add( consumer );
 										LOGGER.trace( "Consumer {} modified. Modified {} record!", consumer.getId(), ++pCount );
 									}
 								}
@@ -1162,6 +1166,8 @@ public class AdministrationTools extends Controller {
 						}
 						// Finish all Consumers
 						result.close();
+						LOGGER.trace( "This Consumers is {}", updateBeforeConsumers );
+						LOGGER.trace( "This Consumers is {}", updateAfterConsumers );
 					}
 					catch ( final SQLException sqle ) {
 						isReadSQLFile = false;

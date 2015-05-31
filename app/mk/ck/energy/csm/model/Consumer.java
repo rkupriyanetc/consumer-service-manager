@@ -303,6 +303,19 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 		return n > 0;
 	}
 	
+	public Consumer copyInstance() {
+		final Consumer c = Consumer.create( getId() );
+		c.setUserId( getUserId() );
+		c.setFullName( getFullName() );
+		c.setAddress( getAddress() );
+		c.setActive( isActive() );
+		c.setDocuments( getDocuments() );
+		c.setConsumerType( getConsumerType() );
+		c.setStatusType( getStatusType() );
+		c.setHouseType( getHouseType() );
+		return c;
+	}
+	
 	@Override
 	public < TDocument >BsonDocument toBsonDocument( final Class< TDocument > documentClass, final CodecRegistry codecRegistry ) {
 		return new BsonDocumentWrapper< Consumer >( this, codecRegistry.get( Consumer.class ) );
