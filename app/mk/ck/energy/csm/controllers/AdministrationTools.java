@@ -1185,6 +1185,7 @@ public class AdministrationTools extends Controller {
 			// Processing UpdateMeters
 			if ( step.isUpdateMeters() ) {
 				int metersCount = 0;
+				int updateCount = 0;
 				final String sqlText = readSQLFile( "meters" );
 				boolean isReadSQLFile = sqlText != "";
 				if ( isReadSQLFile )
@@ -1258,11 +1259,8 @@ public class AdministrationTools extends Controller {
 									if ( amp > 0 )
 										meter.setMightOutturn( amp );
 									Date date = result.getDate( 5 );
-									if ( date.getTime() != Meter.MAXDATE_PAKED.getTime() ) {
-										LOGGER.trace( "Date is {}. Max Paked date is {}. Difference is {}", date, Meter.MAXDATE_PAKED,
-												Meter.MAXDATE_PAKED.getTime() - date.getTime() );
+									if ( date.getTime() != Meter.MAXDATE_PAKED.getTime() )
 										meter.setDateUninstall( date.getTime() );
-									}
 									date = result.getDate( 10 );
 									meter.setDateTesting( date.getTime() );
 								}
@@ -1299,7 +1297,7 @@ public class AdministrationTools extends Controller {
 										if ( !cUpdates.isEmpty() ) {
 											final Bson cUpdate = Filters.and( cUpdates );
 											meterConsumer.update( cQuery, cUpdate );
-											LOGGER.trace( "Meter {} modified. Count meters is {}", meterConsumer.getId(), ++metersCount );
+											LOGGER.trace( "Meter {} modified. Count meters is {}", meterConsumer.getId(), ++updateCount );
 										}
 									}
 								} else
@@ -1323,6 +1321,8 @@ public class AdministrationTools extends Controller {
 					LOGGER.trace( "Import the consumers from MSSQL server successful!" );
 				else
 					LOGGER.trace( "Import the consumers from MSSQL server unsuccessful!" );
+				LOGGER.trace( "Meter saved is {}", metersCount );
+				LOGGER.trace( "Meter modified is {}", updateCount );
 			}
 		}
 		return ok( index.render( CONFIGURATION, findAllUsersByAdminAndOperRoles(), filledForm, 2 ) );
