@@ -350,6 +350,16 @@ public class Account extends Controller {
 		}
 	}
 	
+	@Restrict( @Group( UserRole.USER_ROLE_NAME ) )
+	public static Result unjoinConsumerElectricity() {
+		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
+		final User u = User.getLocalUser( session() );
+		final Consumer consumer = u.getConsumer();
+		if ( !consumer.unjoinConsumerElectricity() )
+			LOGGER.error( "Sorry. Consumer {} not found", consumer.getId() );
+		return Application.profile();
+	}
+	
 	public static Result onChangeAddressTopSelect( final String addrId ) {
 		final Map< String, String > vals = AddressLocation.getMap( addrId, 1 );
 		final StringBuilder buf = new StringBuilder( "<option value='0' selected>" );

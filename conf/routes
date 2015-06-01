@@ -48,6 +48,7 @@ POST    /accounts/merge             	     mk.ck.energy.csm.controllers.Account.d
 
 GET     /accounts/joinConsumer             mk.ck.energy.csm.controllers.Account.joinConsumerElectricity(idAddrTop: String)
 POST    /accounts/joinConsumer             mk.ck.energy.csm.controllers.Account.doJoinConsumerElectricity
+GET     /accounts/unjoinConsumer           mk.ck.energy.csm.controllers.Account.unjoinConsumerElectricity
 
 GET     /accounts/joinConsumerAC           mk.ck.energy.csm.controllers.Account.onChangeAddressTopSelect(addrId: String)
 

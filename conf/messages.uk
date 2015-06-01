@@ -268,6 +268,7 @@ playauthenticate.profile.session_endless=Ваш ідентифікатор {0} �
 playauthenticate.profile.password_change=Змінити/встановити пароль
 playauthenticate.profile.roles=Ролі :
 playauthenticate.profile.join_consumer.electricity=Приєднати споживача електроенергії
+playauthenticate.profile.unjoin_consumer.electricity=Відєднати споживача електроенергії
 playauthenticate.profile.consumer=Особовий рахунок споживача електроенергії
 
 playauthenticate.merge.accounts.title=Merge accounts

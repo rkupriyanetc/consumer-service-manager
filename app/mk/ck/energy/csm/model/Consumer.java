@@ -77,11 +77,15 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 	}
 	
 	public void setUser( final User user ) {
-		if ( user != null )
+		if ( user != null ) {
 			if ( !user.getId().equals( getUserId() ) ) {
 				this.user = user;
 				put( DB_FIELD_USER_ID, user.getId() );
 			}
+		} else {
+			this.user = null;
+			remove( DB_FIELD_USER_ID );
+		}
 	}
 	
 	public void setUserId( final String userId ) {
@@ -300,6 +304,20 @@ public class Consumer extends CSMAbstractDocument< Consumer > {
 				Filters.and( Filters.eq( DB_FIELD_ACTIVE, true ), Filters.eq( DB_FIELD_USER_ID, user.getId() ) ) );
 		final long n = ur.getModifiedCount();
 		LOGGER.trace( "Consumer {} join a user {}. Modified {} document(s) in consumers.", getId(), user.getEmail(), n );
+		return n > 0;
+	}
+	
+	public boolean unjoinConsumerElectricity() {
+		// Consumer no already be stored in the database
+		if ( !isActive() )
+			return false; // Consumer are unjoined
+		final User user = getUser();
+		setUser( null );
+		setActive( false );
+		final UpdateResult ur = update( Filters.eq( DB_FIELD_ID, getId() ),
+				Filters.and( Filters.eq( DB_FIELD_ACTIVE, false ), Filters.eq( DB_FIELD_USER_ID, null ) ) );
+		final long n = ur.getModifiedCount();
+		LOGGER.trace( "Consumer {} unjoin a user {}. Modified {} document(s) in consumers.", getId(), user.getEmail(), n );
 		return n > 0;
 	}
 	
