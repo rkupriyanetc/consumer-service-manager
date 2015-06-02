@@ -933,6 +933,7 @@ public class AdministrationTools extends Controller {
 				// This is temporary variable
 				final String keyReferences = step.getReferences().get( 0 );
 				int consumerSize = 0;
+				int updateCount = 0;// Update count Consumers
 				final String sqlText = readSQLFile( "consumers" );
 				boolean isReadSQLFile = sqlText != "";
 				if ( isReadSQLFile )
@@ -943,7 +944,6 @@ public class AdministrationTools extends Controller {
 							while ( !statement.getMoreResults() )
 								pCount++ ;
 						LOGGER.trace( "Count results is {} in select consumers", pCount );
-						pCount = 0;// Update count Consumers
 						final ResultSet result = statement.getResultSet();
 						final List< UndefinedConsumer > undefinedConsumers = new LinkedList<>();
 						final List< Consumer > updateBeforeConsumers = new LinkedList<>();
@@ -1148,7 +1148,7 @@ public class AdministrationTools extends Controller {
 										updateBeforeConsumers.add( c.copyInstance() );
 										consumer.update( cQuery, cUpdate );
 										updateAfterConsumers.add( consumer );
-										LOGGER.trace( "Consumer {} modified. Modified {} record!", consumer.getId(), ++pCount );
+										LOGGER.trace( "Consumer {} modified. Modified {} record!", consumer.getId(), ++updateCount );
 									}
 								}
 								catch ( final ConsumerException ce ) {
@@ -1166,8 +1166,9 @@ public class AdministrationTools extends Controller {
 						}
 						// Finish all Consumers
 						result.close();
-						LOGGER.trace( "This Consumers is {}", updateBeforeConsumers );
-						LOGGER.trace( "This Consumers is {}", updateAfterConsumers );
+						LOGGER.trace( "Consumer created {} document(s). Consumer changed {} document(s).", consumerSize, updateCount );
+						LOGGER.trace( "This update before change Consumers is {}", updateBeforeConsumers );
+						LOGGER.trace( "This update after change Consumers is {}", updateAfterConsumers );
 					}
 					catch ( final SQLException sqle ) {
 						isReadSQLFile = false;
