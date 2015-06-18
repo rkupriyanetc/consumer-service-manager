@@ -1193,7 +1193,7 @@ public class AdministrationTools extends Controller {
 					try {
 						final PreparedStatement statement = CONFIGURATION.getMSSQLConnection().prepareStatement( sqlText );
 						int pCount = 0;
-						final MongoCursor< Consumer > cursor = Consumer.getMongoCollection().find().limit( 20 ).iterator();
+						final MongoCursor< Consumer > cursor = Consumer.getMongoCollection().find().iterator();
 						while ( cursor.hasNext() ) {
 							final Consumer consumer = cursor.next();
 							statement.setString( 1, consumer.getId() );
@@ -1231,7 +1231,7 @@ public class AdministrationTools extends Controller {
 									place = LocationMeterType.valueOf( field );
 								// Meter Inspector
 								String inspector = result.getString( 6 );
-								if ( inspector.equals( "_невідомий" ) )
+								if ( inspector != null && ( inspector.isEmpty() || inspector.equals( "_невідомий" ) ) )
 									inspector = null;
 								// Meter Number
 								String number = result.getString( 2 );
@@ -1263,7 +1263,8 @@ public class AdministrationTools extends Controller {
 									if ( date.getTime() != Meter.MAXDATE_PAKED.getTime() )
 										meter.setDateUninstall( date.getTime() );
 									date = result.getDate( 10 );
-									meter.setDateTesting( date.getTime() );
+									if ( date != null )
+										meter.setDateTesting( date.getTime() );
 								}
 								if ( meterConsumer != null ) {
 									if ( meterConsumer.equals( meter ) )
