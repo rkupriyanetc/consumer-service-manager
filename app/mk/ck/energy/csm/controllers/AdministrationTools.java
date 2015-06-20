@@ -1192,123 +1192,132 @@ public class AdministrationTools extends Controller {
 				if ( isReadSQLFile )
 					try {
 						final PreparedStatement statement = CONFIGURATION.getMSSQLConnection().prepareStatement( sqlText );
-						int pCount = 0;
-						final MongoCursor< Consumer > cursor = Consumer.getMongoCollection().find().iterator();
-						while ( cursor.hasNext() ) {
-							final Consumer consumer = cursor.next();
-							statement.setString( 1, consumer.getId() );
-							if ( !statement.execute() )
-								while ( !statement.getMoreResults() )
-									pCount++ ;
-							LOGGER.trace( "Count results is {} in select meters", pCount );
-							final ResultSet result = statement.getResultSet();
-							while ( result.next() ) {
-								// m.nazva_marka, n.nomer, n.razr, n.n_date, n.k_date,
-								// i.inspektor, n.doc, n.amp, ma.code_mestoacc, n.date_pov
-								// Meter InstallDate
-								final Date installDate = result.getDate( 4 );
-								Meter meterConsumer;
-								try {
-									meterConsumer = Meter.findByConsumerIdAndDateInstall( consumer.getId(), installDate.getTime() );
-								}
-								catch ( final MeterNotFoundException mnfe ) {
-									meterConsumer = null;
-								}
-								// Meter name
-								final String meterName = result.getString( 1 );
-								final MeterDevice device = MeterDevice.findByName( meterName );
-								// Meter place
-								final int meterPlaceId = result.getInt( 9 );
-								String field;
-								if ( meterPlaceId > 0 && meterPlaceId < 7 )
-									field = Messages.get( METER_CODE_PLACE_NAME + "." + String.valueOf( meterPlaceId ) );
-								else
-									field = null;
-								LocationMeterType place;
-								if ( field == null )
-									place = LocationMeterType.OTHER;
-								else
-									place = LocationMeterType.valueOf( field );
-								// Meter Inspector
-								String inspector = result.getString( 6 );
-								if ( inspector != null && ( inspector.isEmpty() || inspector.equals( "_невідомий" ) ) )
-									inspector = null;
-								// Meter Number
-								String number = result.getString( 2 );
-								int p = number.indexOf( "[" );
-								if ( p < 0 )
-									p = number.indexOf( "{" );
-								if ( p < 0 )
-									p = number.indexOf( "(" );
-								if ( p >= 0 )
-									number = number.substring( 0, p - 1 );
-								// Meter Digits
-								final byte digits = result.getByte( 3 );
-								// Meter Order
-								field = result.getString( 7 );
-								short order;
-								try {
-									order = Short.parseShort( field );
-								}
-								catch ( final NumberFormatException nfe ) {
-									order = 0;
-								}
-								Meter meter = null;
-								if ( device != null ) {
-									meter = Meter.create( consumer.getId(), device, number, digits, installDate.getTime(), order, inspector, place );
-									final byte amp = result.getByte( 8 );
-									if ( amp > 0 )
-										meter.setMightOutturn( amp );
-									Date date = result.getDate( 5 );
-									if ( date.getTime() != Meter.MAXDATE_PAKED.getTime() )
-										meter.setDateUninstall( date.getTime() );
-									date = result.getDate( 10 );
-									if ( date != null )
-										meter.setDateTesting( date.getTime() );
-								}
-								if ( meterConsumer != null ) {
-									if ( meterConsumer.equals( meter ) )
-										LOGGER.trace( "This is the same meter : {}", meter );
-									else {
-										final Bson cQuery = Meter.makeFilterToId( meterConsumer.getId() );
-										final List< Bson > cUpdates = new LinkedList< Bson >();
-										if ( meterConsumer.getOrder() != meter.getOrder() )
-											cUpdates.add( Meter.makeFilterToOrder( meter.getOrder() ) );
-										if ( meterConsumer.getDateInstall() != meter.getDateInstall() )
-											cUpdates.add( Meter.makeFilterToDateInstall( meter.getDateInstall() ) );
-										if ( meterConsumer.getDateUninstall() != meter.getDateUninstall() )
-											cUpdates.add( Meter.makeFilterToDateUninstall( meter.getDateUninstall() ) );
-										if ( meterConsumer.getDateTesting() != meter.getDateTesting() )
-											cUpdates.add( Meter.makeFilterToDateTesting( meter.getDateTesting() ) );
-										if ( meterConsumer.getNumber() != null && meter.getNumber() != null
-												&& !meterConsumer.getNumber().equals( meter.getNumber() ) || meterConsumer.getNumber() == null
-												&& meter.getNumber() != null )
-											cUpdates.add( Meter.makeFilterToNumber( meter.getNumber() ) );
-										if ( meterConsumer.getMightOutturn() != meter.getMightOutturn() )
-											cUpdates.add( Meter.makeFilterToMightOutturn( meter.getMightOutturn() ) );
-										if ( !meterConsumer.getMeterDeviceId().equals( meter.getMeterDeviceId() ) )
-											cUpdates.add( Meter.makeFilterToMeterDeviceId( meter.getMeterDeviceId() ) );
-										if ( meterConsumer.getDigits() != meter.getDigits() )
-											cUpdates.add( Meter.makeFilterToDigits( meter.getDigits() ) );
-										if ( meterConsumer.getMasterName() != null && meter.getMasterName() != null
-												&& !meterConsumer.getMasterName().equals( meter.getMasterName() )
-												|| meterConsumer.getMasterName() == null && meter.getMasterName() != null )
-											cUpdates.add( Meter.makeFilterToMasterName( meter.getMasterName() ) );
-										if ( !meterConsumer.getLocationMeter().equals( meter.getLocationMeter() ) )
-											cUpdates.add( Meter.makeFilterToLocationType( meter.getLocationMeter() ) );
-										if ( !cUpdates.isEmpty() ) {
-											final Bson cUpdate = Filters.and( cUpdates );
-											meterConsumer.update( cQuery, cUpdate );
-											LOGGER.trace( "Meter {} modified. Count meters is {}", meterConsumer.getId(), ++updateCount );
+						int pass = 1;
+						final int docs = 1000;
+						MongoCursor< Consumer > cursor = Consumer.getMongoCollection().find( Consumer.makeFilterToId( "01-000006" ) )
+								.skip( ( pass - 1 ) * docs ).limit( docs ).iterator();
+						while ( cursor != null ) {
+							int pCount = 0;
+							while ( cursor.hasNext() ) {
+								final Consumer consumer = cursor.next();
+								statement.setString( 1, consumer.getId() );
+								if ( !statement.execute() )
+									while ( !statement.getMoreResults() )
+										pCount++ ;
+								LOGGER.trace( "Count results is {} in select meters", pCount );
+								final ResultSet result = statement.getResultSet();
+								while ( result.next() ) {
+									// m.nazva_marka, n.nomer, n.razr, n.n_date, n.k_date,
+									// i.inspektor, n.doc, n.amp, ma.code_mestoacc, n.date_pov
+									// Meter InstallDate
+									final Date installDate = result.getDate( 4 );
+									Meter meterConsumer;
+									try {
+										meterConsumer = Meter.findByConsumerIdAndDateInstall( consumer.getId(), installDate.getTime() );
+									}
+									catch ( final MeterNotFoundException mnfe ) {
+										meterConsumer = null;
+									}
+									// Meter name
+									final String meterName = result.getString( 1 );
+									final MeterDevice device = MeterDevice.findByName( meterName );
+									// Meter place
+									final int meterPlaceId = result.getInt( 9 );
+									String field;
+									if ( meterPlaceId > 0 && meterPlaceId < 7 )
+										field = Messages.get( METER_CODE_PLACE_NAME + "." + String.valueOf( meterPlaceId ) );
+									else
+										field = null;
+									LocationMeterType place;
+									if ( field == null )
+										place = LocationMeterType.OTHER;
+									else
+										place = LocationMeterType.valueOf( field );
+									// Meter Inspector
+									String inspector = result.getString( 6 );
+									if ( inspector != null && ( inspector.isEmpty() || inspector.equals( "_невідомий" ) ) )
+										inspector = null;
+									// Meter Number
+									String number = result.getString( 2 );
+									int p = number.indexOf( "[" );
+									if ( p < 0 )
+										p = number.indexOf( "{" );
+									if ( p < 0 )
+										p = number.indexOf( "(" );
+									if ( p >= 0 )
+										number = number.substring( 0, p - 1 );
+									// Meter Digits
+									final byte digits = result.getByte( 3 );
+									// Meter Order
+									field = result.getString( 7 );
+									short order;
+									try {
+										order = Short.parseShort( field );
+									}
+									catch ( final NumberFormatException nfe ) {
+										order = 0;
+									}
+									Meter meter = null;
+									if ( device != null ) {
+										meter = Meter.create( consumer.getId(), device, number, digits, installDate.getTime(), order, inspector,
+												place );
+										final byte amp = result.getByte( 8 );
+										if ( amp > 0 )
+											meter.setMightOutturn( amp );
+										Date date = result.getDate( 5 );
+										if ( date.getTime() != Meter.MAXDATE_PAKED.getTime() )
+											meter.setDateUninstall( date.getTime() );
+										date = result.getDate( 10 );
+										if ( date != null )
+											meter.setDateTesting( date.getTime() );
+									}
+									if ( meterConsumer != null ) {
+										if ( meterConsumer.equals( meter ) )
+											LOGGER.trace( "This is the same meter : {}", meter );
+										else {
+											final Bson cQuery = Meter.makeFilterToId( meterConsumer.getId() );
+											final List< Bson > cUpdates = new LinkedList< Bson >();
+											if ( meterConsumer.getOrder() != meter.getOrder() )
+												cUpdates.add( Meter.makeFilterToOrder( meter.getOrder() ) );
+											if ( meterConsumer.getDateInstall() != meter.getDateInstall() )
+												cUpdates.add( Meter.makeFilterToDateInstall( meter.getDateInstall() ) );
+											if ( meterConsumer.getDateUninstall() != meter.getDateUninstall() )
+												cUpdates.add( Meter.makeFilterToDateUninstall( meter.getDateUninstall() ) );
+											if ( meterConsumer.getDateTesting() != meter.getDateTesting() )
+												cUpdates.add( Meter.makeFilterToDateTesting( meter.getDateTesting() ) );
+											if ( meterConsumer.getNumber() != null && meter.getNumber() != null
+													&& !meterConsumer.getNumber().equals( meter.getNumber() ) || meterConsumer.getNumber() == null
+													&& meter.getNumber() != null )
+												cUpdates.add( Meter.makeFilterToNumber( meter.getNumber() ) );
+											if ( meterConsumer.getMightOutturn() != meter.getMightOutturn() )
+												cUpdates.add( Meter.makeFilterToMightOutturn( meter.getMightOutturn() ) );
+											if ( !meterConsumer.getMeterDeviceId().equals( meter.getMeterDeviceId() ) )
+												cUpdates.add( Meter.makeFilterToMeterDeviceId( meter.getMeterDeviceId() ) );
+											if ( meterConsumer.getDigits() != meter.getDigits() )
+												cUpdates.add( Meter.makeFilterToDigits( meter.getDigits() ) );
+											if ( meterConsumer.getMasterName() != null && meter.getMasterName() != null
+													&& !meterConsumer.getMasterName().equals( meter.getMasterName() )
+													|| meterConsumer.getMasterName() == null && meter.getMasterName() != null )
+												cUpdates.add( Meter.makeFilterToMasterName( meter.getMasterName() ) );
+											if ( !meterConsumer.getLocationMeter().equals( meter.getLocationMeter() ) )
+												cUpdates.add( Meter.makeFilterToLocationType( meter.getLocationMeter() ) );
+											if ( !cUpdates.isEmpty() ) {
+												final Bson cUpdate = Filters.and( cUpdates );
+												meterConsumer.update( cQuery, cUpdate );
+												LOGGER.trace( "Meter {} modified. Count meters is {}", meterConsumer.getId(), ++updateCount );
+											}
 										}
-									}
-								} else
-									if ( meter != null ) {
-										meter.save();
-										LOGGER.warn( "Meter Consumer {} saved. Count meters is {}", meter, ++metersCount );
-									}
+									} else
+										if ( meter != null ) {
+											meter.save();
+											LOGGER.warn( "Meter Consumer {} saved. Count meters is {}", meter, ++metersCount );
+										}
+								}
+								result.close();
 							}
-							result.close();
+							pass++ ;
+							cursor.close();
+							cursor = Consumer.getMongoCollection().find().skip( ( pass - 1 ) * docs ).limit( docs ).iterator();
 						}
 					}
 					catch ( final SQLException sqle ) {
