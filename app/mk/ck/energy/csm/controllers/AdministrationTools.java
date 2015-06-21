@@ -83,6 +83,7 @@ import views.html.admin.viewXML;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 
@@ -1194,8 +1195,8 @@ public class AdministrationTools extends Controller {
 						final PreparedStatement statement = CONFIGURATION.getMSSQLConnection().prepareStatement( sqlText );
 						int pass = 1;
 						final int docs = 1000;
-						MongoCursor< Consumer > cursor = Consumer.getMongoCollection().find( Consumer.makeFilterToId( "01-000006" ) )
-								.skip( ( pass - 1 ) * docs ).limit( docs ).iterator();
+						final FindIterable< Consumer > filter = Consumer.getMongoCollection().find().skip( ( pass - 1 ) * docs ).limit( docs );
+						MongoCursor< Consumer > cursor = filter.iterator();
 						while ( cursor != null ) {
 							int pCount = 0;
 							while ( cursor.hasNext() ) {
@@ -1315,7 +1316,7 @@ public class AdministrationTools extends Controller {
 								}
 								result.close();
 							}
-							pass++ ;
+							LOGGER.trace( "Number pass is {}.", pass++ );
 							cursor.close();
 							cursor = Consumer.getMongoCollection().find().skip( ( pass - 1 ) * docs ).limit( docs ).iterator();
 						}

@@ -219,7 +219,11 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	 * Остання дата повірки лічильника
 	 */
 	public long getDateTesting() {
-		return getLong( DB_FIELD_DATE_TESTING );
+		final Object testing = get( DB_FIELD_DATE_TESTING );
+		if ( testing != null )
+			return ( Long )testing;
+		else
+			return MINDATE.getTime();
 	}
 	
 	public void setDateTesting( final long testingDate ) {
