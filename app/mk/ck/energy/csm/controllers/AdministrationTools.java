@@ -2,6 +2,7 @@ package mk.ck.energy.csm.controllers;
 
 import static play.data.Form.form;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -96,6 +97,8 @@ public class AdministrationTools extends Controller {
 	private static final String					CONSUMER_CODE_STATUS_NAME	= "consumer.code.status.type";
 	
 	private static final String					METER_CODE_PLACE_NAME			= "place.meter.install.type";
+	
+	private static final String					CONSUMERS_RESULT					= "Consumers_Result.txt";
 	
 	public static class XMLText {
 		
@@ -932,8 +935,10 @@ public class AdministrationTools extends Controller {
 			if ( step.isUpdateConsumers() ) {
 				// Run process
 				// This is temporary variable
+				final ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
 				final String keyReferences = step.getReferences().get( 0 );
 				int consumerSize = 0;
+				int createdCount = 0;// Create count Consumers
 				int updateCount = 0;// Update count Consumers
 				final String sqlText = readSQLFile( "consumers" );
 				boolean isReadSQLFile = sqlText != "";
@@ -1150,11 +1155,13 @@ public class AdministrationTools extends Controller {
 										consumer.update( cQuery, cUpdate );
 										updateAfterConsumers.add( consumer );
 										LOGGER.trace( "Consumer {} modified. Modified {} record!", consumer.getId(), ++updateCount );
+										streamOut.write( ( "Modify consumer " + consumer.toString() + "\n" ).getBytes() );
 									}
 								}
 								catch ( final ConsumerException ce ) {
 									consumer.save();
-									LOGGER.trace( "Consumer {} created. Writed {} record!", consumer.getId(), ++consumerSize );
+									LOGGER.trace( "Consumer {} created. Writed {} record!", consumer.getId(), ++createdCount );
+									streamOut.write( ( "Create consumer " + consumer.toString() + "\n" ).getBytes() );
 								}
 								if ( undefinedConsomerTry && ndefinedConsomer != null ) {
 									ndefinedConsomer.save();
@@ -1162,12 +1169,15 @@ public class AdministrationTools extends Controller {
 									undefinedConsomerTry = false;
 									ndefinedConsomer = null;
 								}
+								consumerSize++ ;
 							} else
 								LOGGER.trace( "Consumer ID should not be empty! Sorry..." );
 						}
 						// Finish all Consumers
 						result.close();
-						LOGGER.trace( "Consumer created {} document(s). Consumer changed {} document(s).", consumerSize, updateCount );
+						LOGGER.trace( "Consumer created {} document(s). Consumer changed {} document(s).", createdCount, updateCount );
+						streamOut.write( ( "\nAll consumers modify " + updateCount + "\nAll consumers created " + createdCount ).getBytes() );
+						streamOut.write( ( "\nAll consumers selected " + consumerSize ).getBytes() );
 						LOGGER.trace( "This update before change Consumers is {}", updateBeforeConsumers );
 						LOGGER.trace( "This update after change Consumers is {}", updateAfterConsumers );
 					}
@@ -1183,6 +1193,9 @@ public class AdministrationTools extends Controller {
 					LOGGER.trace( "Import the consumers from MSSQL server successful!" );
 				else
 					LOGGER.trace( "Import the consumers from MSSQL server unsuccessful!" );
+				response().setContentType( "application/x-download" );
+				response().setHeader( "Content-disposition", "attachment; filename=" + CONSUMERS_RESULT );
+				return created( streamOut.toByteArray() );
 			}
 			// Processing UpdateMeters
 			if ( step.isUpdateMeters() ) {
