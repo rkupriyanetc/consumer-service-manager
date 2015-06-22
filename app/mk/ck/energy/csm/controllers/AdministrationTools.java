@@ -100,6 +100,8 @@ public class AdministrationTools extends Controller {
 	
 	private static final String					CONSUMERS_RESULT					= "Consumers_Result.txt";
 	
+	private static final String					METERS_RESULT							= "Meters_Result.txt";
+	
 	public static class XMLText {
 		
 		private String	textXML;
@@ -944,6 +946,7 @@ public class AdministrationTools extends Controller {
 				boolean isReadSQLFile = sqlText != "";
 				if ( isReadSQLFile )
 					try {
+						streamOut.write( "All consumers that were created or modified written to the file.\n".getBytes() );
 						final PreparedStatement statement = CONFIGURATION.getMSSQLConnection().prepareStatement( sqlText );
 						int pCount = 0;
 						if ( !statement.execute() )
@@ -1134,6 +1137,7 @@ public class AdministrationTools extends Controller {
 									consumer.setStatusType( ConsumerStatusType.valueOf( field ) );
 								try {
 									final Consumer c = Consumer.findById( consumer.getId() );
+									final Consumer beforeUpdate = c.copyInstance();
 									final Bson cQuery = Consumer.makeFilterToId( c.getId() );
 									final List< Bson > cUpdates = new LinkedList< Bson >();
 									if ( consumer.getFullName() != null && !consumer.getFullName().equals( c.getFullName() ) )
@@ -1151,17 +1155,18 @@ public class AdministrationTools extends Controller {
 										cUpdates.add( Consumer.makeFilterToStatusType( consumer.getStatusType() ) );
 									if ( !cUpdates.isEmpty() ) {
 										final Bson cUpdate = Filters.and( cUpdates );
-										updateBeforeConsumers.add( c.copyInstance() );
+										updateBeforeConsumers.add( beforeUpdate );
 										consumer.update( cQuery, cUpdate );
 										updateAfterConsumers.add( consumer );
 										LOGGER.trace( "Consumer {} modified. Modified {} record!", consumer.getId(), ++updateCount );
-										streamOut.write( ( "Modify consumer " + consumer.toString() + "\n" ).getBytes() );
+										streamOut.write( ( "\nBefore modify consumer " + beforeUpdate.toString() + "\n" ).getBytes() );
+										streamOut.write( ( "After  modify consumer " + consumer.toString() + "\n" ).getBytes() );
 									}
 								}
 								catch ( final ConsumerException ce ) {
 									consumer.save();
 									LOGGER.trace( "Consumer {} created. Writed {} record!", consumer.getId(), ++createdCount );
-									streamOut.write( ( "Create consumer " + consumer.toString() + "\n" ).getBytes() );
+									streamOut.write( ( "\nCreate consumer " + consumer.toString() + "\n" ).getBytes() );
 								}
 								if ( undefinedConsomerTry && ndefinedConsomer != null ) {
 									ndefinedConsomer.save();
@@ -1176,8 +1181,9 @@ public class AdministrationTools extends Controller {
 						// Finish all Consumers
 						result.close();
 						LOGGER.trace( "Consumer created {} document(s). Consumer changed {} document(s).", createdCount, updateCount );
-						streamOut.write( ( "\nAll consumers modify " + updateCount + "\nAll consumers created " + createdCount ).getBytes() );
-						streamOut.write( ( "\nAll consumers selected " + consumerSize ).getBytes() );
+						streamOut.write( ( "\nAll consumers modified : " + updateCount ).getBytes() );
+						streamOut.write( ( "\nAll consumers created : " + createdCount ).getBytes() );
+						streamOut.write( ( "\nAll consumers selected : " + consumerSize ).getBytes() );
 						LOGGER.trace( "This update before change Consumers is {}", updateBeforeConsumers );
 						LOGGER.trace( "This update after change Consumers is {}", updateAfterConsumers );
 					}
@@ -1199,17 +1205,21 @@ public class AdministrationTools extends Controller {
 			}
 			// Processing UpdateMeters
 			if ( step.isUpdateMeters() ) {
+				final ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
 				int metersCount = 0;
 				int updateCount = 0;
 				final String sqlText = readSQLFile( "meters" );
 				boolean isReadSQLFile = sqlText != "";
 				if ( isReadSQLFile )
 					try {
+						streamOut.write( "All meters that were created or modified written to the file.\n".getBytes() );
 						final PreparedStatement statement = CONFIGURATION.getMSSQLConnection().prepareStatement( sqlText );
 						int pass = 1;
 						final int docs = 1000;
-						final FindIterable< Consumer > filter = Consumer.getMongoCollection().find().skip( ( pass - 1 ) * docs ).limit( docs );
-						MongoCursor< Consumer > cursor = filter.iterator();
+						final FindIterable< Consumer > filter = Consumer.getMongoCollection()
+								.find( Filters.or( Consumer.makeFilterToId( "07-000669" ), Consumer.makeFilterToId( "37-002569" ) ) )
+								.skip( ( pass - 1 ) * docs ).limit( docs );
+						final MongoCursor< Consumer > cursor = filter.iterator();
 						while ( cursor != null ) {
 							int pCount = 0;
 							while ( cursor.hasNext() ) {
@@ -1316,23 +1326,29 @@ public class AdministrationTools extends Controller {
 											if ( !meterConsumer.getLocationMeter().equals( meter.getLocationMeter() ) )
 												cUpdates.add( Meter.makeFilterToLocationType( meter.getLocationMeter() ) );
 											if ( !cUpdates.isEmpty() ) {
+												streamOut.write( ( "\nBefore modify meter " + meterConsumer.toString() + "\n" ).getBytes() );
 												final Bson cUpdate = Filters.and( cUpdates );
 												meterConsumer.update( cQuery, cUpdate );
+												streamOut.write( ( "After  modify meter " + meterConsumer.toString() + "\n" ).getBytes() );
 												LOGGER.trace( "Meter {} modified. Count meters is {}", meterConsumer.getId(), ++updateCount );
 											}
 										}
 									} else
 										if ( meter != null ) {
 											meter.save();
-											LOGGER.warn( "Meter Consumer {} saved. Count meters is {}", meter, ++metersCount );
+											LOGGER.warn( "Meter consumer {} saved. Count meters is {}", meter, ++metersCount );
+											streamOut.write( ( "\nCreate Meter " + meter.toString() + "\n" ).getBytes() );
 										}
 								}
 								result.close();
 							}
 							LOGGER.trace( "Number pass is {}.", pass++ );
 							cursor.close();
-							cursor = Consumer.getMongoCollection().find().skip( ( pass - 1 ) * docs ).limit( docs ).iterator();
+							// cursor = Consumer.getMongoCollection().find().skip( ( pass - 1
+							// ) * docs ).limit( docs ).iterator();
 						}
+						streamOut.write( ( "\nAll meters modified : " + updateCount ).getBytes() );
+						streamOut.write( ( "\nAll meters created : " + metersCount ).getBytes() );
 					}
 					catch ( final SQLException sqle ) {
 						isReadSQLFile = false;
@@ -1348,6 +1364,9 @@ public class AdministrationTools extends Controller {
 					LOGGER.trace( "Import the consumers from MSSQL server unsuccessful!" );
 				LOGGER.trace( "Meter saved is {}", metersCount );
 				LOGGER.trace( "Meter modified is {}", updateCount );
+				response().setContentType( "application/x-download" );
+				response().setHeader( "Content-disposition", "attachment; filename=" + METERS_RESULT );
+				return created( streamOut.toByteArray() );
 			}
 		}
 		return ok( index.render( CONFIGURATION, findAllUsersByAdminAndOperRoles(), filledForm, 2 ) );
