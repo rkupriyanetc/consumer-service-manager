@@ -42,10 +42,6 @@ public class AccountTools extends Controller {
 	
 	private static final Logger	LOGGER	= LoggerFactory.getLogger( AccountTools.class );
 	
-	private static int					numberOnThePage;
-	
-	private static int					skipOnThePage;
-	
 	public static class AddrTop {
 		
 		@Required
@@ -187,12 +183,20 @@ public class AccountTools extends Controller {
 		}
 	}
 	
-	public static class CountRows {
+	public static class PageViewer {
 		
 		private int	countRows;
 		
-		public CountRows() {
+		private int	totalRows;
+		
+		private int	readRows;
+		
+		private int	pageNumber;
+		
+		public PageViewer() {
 			countRows = 20;
+			pageNumber = 1;
+			readRows = 0;
 		}
 		
 		public int getCountRows() {
@@ -202,6 +206,30 @@ public class AccountTools extends Controller {
 		public void setCountRows( final int countRows ) {
 			this.countRows = countRows;
 		}
+		
+		public int getTotalRows() {
+			return totalRows;
+		}
+		
+		public void setTotalRows( final int totalRows ) {
+			this.totalRows = totalRows;
+		}
+		
+		public int getReadRows() {
+			return readRows;
+		}
+		
+		public void setReadRows( final int readRows ) {
+			this.readRows = readRows;
+		}
+		
+		public int getPageNumber() {
+			return pageNumber;
+		}
+		
+		public void setPageNumber( final int pageNumber ) {
+			this.pageNumber = pageNumber;
+		}
 	}
 	
 	private static final Form< AddrTop >			ADDRTOP_FORM			= form( AddrTop.class );
@@ -210,7 +238,7 @@ public class AccountTools extends Controller {
 	
 	private static final Form< AddrPlace >		ADDRPLACE_FORM		= form( AddrPlace.class );
 	
-	private static final Form< CountRows >		COUNTROWS_FORM		= form( CountRows.class );
+	private static final Form< PageViewer >		PAGEVIEWER_FORM		= form( PageViewer.class );
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
 	public static Result testTopAddress() {
@@ -424,8 +452,6 @@ public class AccountTools extends Controller {
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
 	public static Result viewConsumers() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
-		numberOnThePage = 20;
-		skipOnThePage = 0;
 		final FindIterable< UndefinedConsumer > iterableUndefinedConsumer = UndefinedConsumer.getMongoCollection().find()
 				.sort( Filters.eq( "_id", 1 ) );
 		MongoCursor< UndefinedConsumer > cursorUndefinedConsumer;
@@ -439,7 +465,7 @@ public class AccountTools extends Controller {
 					.limit( numberOnThePage - ( int )nextNumber ).iterator();
 			cursorUndefinedConsumer = iterableUndefinedConsumer.limit( ( int )nextNumber ).iterator();
 		}
-		return ok( viewConsumers.render( COUNTROWS_FORM.fill( new CountRows() ),
+		return ok( viewConsumers.render( PAGEVIEWER_FORM.fill( new PageViewer() ),
 				scala.collection.JavaConversions.asScalaIterator( cursorConsumer ),
 				scala.collection.JavaConversions.asScalaIterator( cursorUndefinedConsumer ) ) );
 	}
@@ -447,11 +473,11 @@ public class AccountTools extends Controller {
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
 	public static Result doViewConsumers() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
-		final Form< CountRows > filledForm = COUNTROWS_FORM.bindFromRequest();
+		final Form< PageViewer > filledForm = PAGEVIEWER_FORM.bindFromRequest();
 		if ( filledForm.hasErrors() )
 			return badRequest( viewConsumers.render( filledForm, null, null ) );
 		else {
-			final CountRows cr = filledForm.get();
+			final PageViewer cr = filledForm.get();
 			final int nextNumber = cr.getCountRows();
 			final FindIterable< UndefinedConsumer > iterableUndefinedConsumer = UndefinedConsumer.getMongoCollection().find()
 					.sort( Filters.eq( "_id", 1 ) );
@@ -465,7 +491,7 @@ public class AccountTools extends Controller {
 						.iterator();
 				cursorUndefinedConsumer = iterableUndefinedConsumer.limit( nextNumber ).iterator();
 			}
-			return ok( viewConsumers.render( COUNTROWS_FORM, scala.collection.JavaConversions.asScalaIterator( cursorConsumer ),
+			return ok( viewConsumers.render( PAGEVIEWER_FORM, scala.collection.JavaConversions.asScalaIterator( cursorConsumer ),
 					scala.collection.JavaConversions.asScalaIterator( cursorUndefinedConsumer ) ) );
 		}
 	}
