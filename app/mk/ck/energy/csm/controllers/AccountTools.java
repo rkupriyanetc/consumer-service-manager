@@ -185,41 +185,41 @@ public class AccountTools extends Controller {
 	
 	public static class PageViewer {
 		
-		private int	countRows;
+		private int		currentRows;
 		
-		private int	totalRows;
+		private long	totalRows;
 		
-		private int	readRows;
+		private long	readRows;
 		
-		private int	pageNumber;
+		private int		pageNumber;
 		
 		public PageViewer() {
-			countRows = 20;
+			currentRows = 20;
 			pageNumber = 1;
 			readRows = 0;
 		}
 		
-		public int getCountRows() {
-			return countRows;
+		public int getCurrentRows() {
+			return currentRows;
 		}
 		
-		public void setCountRows( final int countRows ) {
-			this.countRows = countRows;
+		public void setCurrentRows( final int currentRows ) {
+			this.currentRows = currentRows;
 		}
 		
-		public int getTotalRows() {
+		public long getTotalRows() {
 			return totalRows;
 		}
 		
-		public void setTotalRows( final int totalRows ) {
+		public void setTotalRows( final long totalRows ) {
 			this.totalRows = totalRows;
 		}
 		
-		public int getReadRows() {
+		public long getReadRows() {
 			return readRows;
 		}
 		
-		public void setReadRows( final int readRows ) {
+		public void setReadRows( final long readRows ) {
 			this.readRows = readRows;
 		}
 		
@@ -452,20 +452,22 @@ public class AccountTools extends Controller {
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
 	public static Result viewConsumers() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
+		final PageViewer pv = new PageViewer();
+		final int couRows = pv.getCurrentRows();
 		final FindIterable< UndefinedConsumer > iterableUndefinedConsumer = UndefinedConsumer.getMongoCollection().find()
 				.sort( Filters.eq( "_id", 1 ) );
 		MongoCursor< UndefinedConsumer > cursorUndefinedConsumer;
 		MongoCursor< Consumer > cursorConsumer;
 		final long nextNumber = UndefinedConsumer.getMongoCollection().count();
-		if ( nextNumber >= numberOnThePage ) {
-			cursorUndefinedConsumer = iterableUndefinedConsumer.limit( numberOnThePage ).iterator();
+		if ( nextNumber >= couRows ) {
+			cursorUndefinedConsumer = iterableUndefinedConsumer.limit( couRows ).iterator();
 			cursorConsumer = null;
 		} else {
-			cursorConsumer = Consumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
-					.limit( numberOnThePage - ( int )nextNumber ).iterator();
-			cursorUndefinedConsumer = iterableUndefinedConsumer.limit( ( int )nextNumber ).iterator();
+			cursorConsumer = Consumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) ).limit( couRows - ( int )nextNumber )
+					.iterator();
+			cursorUndefinedConsumer = iterableUndefinedConsumer.iterator();
 		}
-		return ok( viewConsumers.render( PAGEVIEWER_FORM.fill( new PageViewer() ),
+		return ok( viewConsumers.render( PAGEVIEWER_FORM.fill( pv ),
 				scala.collection.JavaConversions.asScalaIterator( cursorConsumer ),
 				scala.collection.JavaConversions.asScalaIterator( cursorUndefinedConsumer ) ) );
 	}
@@ -474,22 +476,25 @@ public class AccountTools extends Controller {
 	public static Result doViewConsumers() {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
 		final Form< PageViewer > filledForm = PAGEVIEWER_FORM.bindFromRequest();
-		if ( filledForm.hasErrors() )
+		final PageViewer pv = filledForm.get();
+		final int currentRows = pv.getCurrentRows();
+		final int pageNumber = pv.getPageNumber();
+		if ( filledForm.hasErrors() || pageNumber < 1 || currentRows < 1 )
 			return badRequest( viewConsumers.render( filledForm, null, null ) );
 		else {
-			final PageViewer cr = filledForm.get();
-			final int nextNumber = cr.getCountRows();
-			final FindIterable< UndefinedConsumer > iterableUndefinedConsumer = UndefinedConsumer.getMongoCollection().find()
+			FindIterable< UndefinedConsumer > iterableUndefinedConsumer = UndefinedConsumer.getMongoCollection().find()
 					.sort( Filters.eq( "_id", 1 ) );
 			MongoCursor< UndefinedConsumer > cursorUndefinedConsumer;
 			MongoCursor< Consumer > cursorConsumer;
-			if ( nextNumber >= numberOnThePage ) {
+			if ( pageNumber * currentRows < UndefinedConsumer.getMongoCollection().count() ) {} else
+				iterableUndefinedConsumer = UndefinedConsumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) );
+			if ( currentRows >= numberOnThePage ) {
 				cursorUndefinedConsumer = iterableUndefinedConsumer.limit( numberOnThePage ).iterator();
 				cursorConsumer = null;
 			} else {
-				cursorConsumer = Consumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) ).limit( numberOnThePage - nextNumber )
-						.iterator();
-				cursorUndefinedConsumer = iterableUndefinedConsumer.limit( nextNumber ).iterator();
+				cursorConsumer = Consumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
+						.limit( numberOnThePage - currentRows ).iterator();
+				cursorUndefinedConsumer = iterableUndefinedConsumer.limit( currentRows ).iterator();
 			}
 			return ok( viewConsumers.render( PAGEVIEWER_FORM, scala.collection.JavaConversions.asScalaIterator( cursorConsumer ),
 					scala.collection.JavaConversions.asScalaIterator( cursorUndefinedConsumer ) ) );
