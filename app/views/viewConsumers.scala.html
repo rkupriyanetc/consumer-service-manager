@@ -1,4 +1,4 @@
-@(formRows: Form[_], itemConsumers: scala.collection.Iterator[mk.ck.energy.csm.model.Consumer], itemUndefinedConsumer: scala.collection.Iterator[mk.ck.energy.csm.model.UndefinedConsumer])
+@(pageNum: Integer, itemConsumers: scala.collection.Iterator[mk.ck.energy.csm.model.Consumer], itemUndefinedConsumer: scala.collection.Iterator[mk.ck.energy.csm.model.UndefinedConsumer])
 
 @import helper._
 @import mk.ck.energy.csm.controllers._
@@ -10,13 +10,7 @@
       <h3 class="panel-title">@Messages("page.home.consumers")</h3>
     </div>
     
-    @helper.form(routes.AccountTools.doViewConsumers, 'class -> "form") {
-        
-      @if(formRows.hasGlobalErrors) { 
-        <div class="alert alert-warning">@formRows.globalError.message</div>
-      }
-      
-      <div class="panel-body">
+    <div class="panel-body">
       
         @if(itemUndefinedConsumer != null ) {
           @itemUndefinedConsumer.zipWithIndex.map { case (item2, kp) =>
@@ -67,17 +61,12 @@
       </div>
       
       <div class="panel-footer">
-        @inputText(
-          formRows("countRows"),
-          '_label -> Messages("Count.Rows"),
-          'size -> 5,
-          'class -> "form-control"
-        )
-        <ul class="pager">  
-          <li class="previous"><a href="@routes.AccountTools.doPrevViewConsumers()">&larr; Previous</a></li>
-          <li class="next"><a href="@routes.AccountTools.doNextViewConsumers()">Next &rarr;</a></li>
+        <ul class="pager">
+          <li class="first"><a href="@routes.AccountTools.viewConsumers(1)">&larr; First</a></li>
+          <li class="previous"><a href="@routes.AccountTools.viewConsumers(pageNum-1)">&larr; Previous</a></li>
+          <li class="next"><a href="@routes.AccountTools.viewConsumers(pageNum+1)">Next &rarr;</a></li>
+          <li class="last"><a href="@routes.AccountTools.viewConsumers(2147483647)">Last &rarr;</a></li>
         </ul>
       </div>
-    }
   </div>
 }

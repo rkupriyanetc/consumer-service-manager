@@ -470,97 +470,122 @@ public class AccountTools extends Controller {
 	}
 	
 	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
-	public static Result viewConsumers() {
+	public static Result viewConsumers( int pageNum ) {
 		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
-		final PageViewer pv = new PageViewer();
-		final int currentRows = pv.getCurrentRows();
-		MongoCursor< UndefinedConsumer > cursorUndefinedConsumer;
-		MongoCursor< Consumer > cursorConsumer;
-		final long nextNumber = UndefinedConsumer.getMongoCollection().count();
-		final long countConsumers = Consumer.getMongoCollection().count();
-		if ( nextNumber >= currentRows ) {
-			cursorUndefinedConsumer = UndefinedConsumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) ).limit( currentRows )
-					.iterator();
-			cursorConsumer = null;
-		} else {
-			cursorConsumer = Consumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
-					.limit( currentRows - ( int )nextNumber ).iterator();
-			cursorUndefinedConsumer = UndefinedConsumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) ).iterator();
-		}
-		pv.setReadRows( currentRows );
-		pv.setTotalRows( nextNumber + countConsumers );
-		pv.setCursorConsumer( cursorConsumer );
-		pv.setCursorUndefinedConsumer( cursorUndefinedConsumer );
-		return ok( viewConsumers.render( PAGEVIEWER_FORM.fill( pv ),
-				scala.collection.JavaConversions.asScalaIterator( cursorConsumer ),
-				scala.collection.JavaConversions.asScalaIterator( cursorUndefinedConsumer ) ) );
+		if ( pageNum > 0 ) {
+			// final PageViewer pv = new PageViewer();
+			final int currentRows = 20;// pv.getCurrentRows();
+			MongoCursor< UndefinedConsumer > cursorUndefinedConsumer;
+			MongoCursor< Consumer > cursorConsumer;
+			final long nextNumber = UndefinedConsumer.getMongoCollection().count();
+			final long countConsumers = Consumer.getMongoCollection().count();
+			if ( pageNum == 2147483647 ) {
+				final int nn = ( int )countConsumers % currentRows;
+				pageNum = nn > 0 ? ( int )countConsumers / currentRows + 1 : ( int )countConsumers / currentRows;
+			}
+			if ( nextNumber >= currentRows * pageNum ) {
+				cursorUndefinedConsumer = UndefinedConsumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
+						.skip( ( pageNum - 1 ) * currentRows ).limit( currentRows ).iterator();
+				cursorConsumer = null;
+			} else {// тут ще не все
+				final int paging = ( pageNum - 1 ) * currentRows;
+				final int p = paging - ( int )nextNumber;
+				cursorConsumer = Consumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) ).skip( p < 0 ? 0 : p )
+						.limit( p < 0 ? p + currentRows : currentRows ).iterator();
+				cursorUndefinedConsumer = UndefinedConsumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) ).skip( paging )
+						.limit( currentRows ).iterator();
+			}
+			/*
+			 * pv.setReadRows( currentRows );
+			 * pv.setTotalRows( nextNumber + countConsumers );
+			 * pv.setCursorConsumer( cursorConsumer );
+			 * pv.setCursorUndefinedConsumer( cursorUndefinedConsumer );
+			 */
+			return ok( viewConsumers.render(
+					pageNum,// PAGEVIEWER_FORM.fill( pv ),
+					scala.collection.JavaConversions.asScalaIterator( cursorConsumer ),
+					scala.collection.JavaConversions.asScalaIterator( cursorUndefinedConsumer ) ) );
+		} else
+			return ok( viewConsumers.render( pageNum, null, null ) );
 	}
-	
-	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
-	public static Result doViewConsumers() {
-		final Form< PageViewer > filledForm = PAGEVIEWER_FORM.bindFromRequest();
-		final PageViewer pv = filledForm.get();
-		final int currentRows = pv.getCurrentRows();
-		final int pageNumber = pv.getPageNumber();
-		MongoCursor< UndefinedConsumer > cursorUndefinedConsumer;
-		MongoCursor< Consumer > cursorConsumer;
-		final long nextNumber = UndefinedConsumer.getMongoCollection().count();
-		if ( nextNumber >= currentRows * pageNumber ) {
-			cursorUndefinedConsumer = UndefinedConsumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
-					.skip( ( pageNumber - 1 ) * currentRows ).limit( currentRows ).iterator();
-			cursorConsumer = null;
-		} else {// тут ще не все
-			cursorConsumer = Consumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
-					.limit( ( pageNumber - 1 ) * currentRows - ( int )nextNumber ).iterator();
-			cursorUndefinedConsumer = UndefinedConsumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
-					.skip( ( pageNumber - 1 ) * currentRows ).limit( currentRows ).iterator();
-		}
-		pv.setCursorConsumer( cursorConsumer );
-		pv.setCursorUndefinedConsumer( cursorUndefinedConsumer );
-		return ok( viewConsumers.render( PAGEVIEWER_FORM, scala.collection.JavaConversions.asScalaIterator( cursorConsumer ),
-				scala.collection.JavaConversions.asScalaIterator( cursorUndefinedConsumer ) ) );
-	}
-	
-	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
-	public static Result doPrevViewConsumers() {
-		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
-		final Form< PageViewer > filledForm = PAGEVIEWER_FORM.bindFromRequest();
-		final PageViewer pv = filledForm.get();
-		final int currentRows = pv.getCurrentRows();
-		if ( currentRows < 1 )
-			pv.setCurrentRows( 1 );
-		if ( currentRows > 30 )
-			pv.setCurrentRows( 30 );
-		final int pageNumber = pv.getPageNumber() - 1;
-		if ( pageNumber < 1 )
-			pv.setPageNumber( 1 );
-		if ( filledForm.hasErrors() )
-			return badRequest( viewConsumers.render( filledForm,
-					scala.collection.JavaConversions.asScalaIterator( pv.getCursorConsumer() ),
-					scala.collection.JavaConversions.asScalaIterator( pv.getCursorUndefinedConsumer() ) ) );
-		else
-			return doViewConsumers();
-	}
-	
-	@Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group( UserRole.ADMIN_ROLE_NAME ) } )
-	public static Result doNextViewConsumers() {
-		com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
-		final Form< PageViewer > filledForm = PAGEVIEWER_FORM.bindFromRequest();
-		final PageViewer pv = filledForm.get();
-		final int currentRows = pv.getCurrentRows();
-		if ( currentRows < 1 )
-			pv.setCurrentRows( 1 );
-		if ( currentRows > 30 )
-			pv.setCurrentRows( 30 );
-		final int pageNumber = pv.getPageNumber() + 1;
-		final int countPages = ( int )( pv.getTotalRows() / pv.getCurrentRows() ) + 1;
-		if ( pageNumber > countPages )
-			pv.setPageNumber( countPages );
-		if ( filledForm.hasErrors() )
-			return badRequest( viewConsumers.render( filledForm,
-					scala.collection.JavaConversions.asScalaIterator( pv.getCursorConsumer() ),
-					scala.collection.JavaConversions.asScalaIterator( pv.getCursorUndefinedConsumer() ) ) );
-		else
-			return doViewConsumers();
-	}
+	/*
+	 * @Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group(
+	 * UserRole.ADMIN_ROLE_NAME ) } )
+	 * public static Result doViewConsumers() {
+	 * final Form< PageViewer > filledForm = PAGEVIEWER_FORM.bindFromRequest();
+	 * final PageViewer pv = filledForm.get();
+	 * final int currentRows = pv.getCurrentRows();
+	 * final int pageNumber = pv.getPageNumber();
+	 * MongoCursor< UndefinedConsumer > cursorUndefinedConsumer;
+	 * MongoCursor< Consumer > cursorConsumer;
+	 * final long nextNumber = UndefinedConsumer.getMongoCollection().count();
+	 * if ( nextNumber >= currentRows * pageNumber ) {
+	 * cursorUndefinedConsumer =
+	 * UndefinedConsumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 )
+	 * )
+	 * .skip( ( pageNumber - 1 ) * currentRows ).limit( currentRows ).iterator();
+	 * cursorConsumer = null;
+	 * } else {// тут ще не все
+	 * cursorConsumer = Consumer.getMongoCollection().find().sort( Filters.eq(
+	 * "_id", 1 ) )
+	 * .limit( ( pageNumber - 1 ) * currentRows - ( int )nextNumber ).iterator();
+	 * cursorUndefinedConsumer =
+	 * UndefinedConsumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 )
+	 * )
+	 * .skip( ( pageNumber - 1 ) * currentRows ).limit( currentRows ).iterator();
+	 * }
+	 * pv.setCursorConsumer( cursorConsumer );
+	 * pv.setCursorUndefinedConsumer( cursorUndefinedConsumer );
+	 * return ok( viewConsumers.render( PAGEVIEWER_FORM,
+	 * scala.collection.JavaConversions.asScalaIterator( cursorConsumer ),
+	 * scala.collection.JavaConversions.asScalaIterator( cursorUndefinedConsumer )
+	 * ) );
+	 * }
+	 * @Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group(
+	 * UserRole.ADMIN_ROLE_NAME ) } )
+	 * public static Result doPrevViewConsumers() {
+	 * com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
+	 * final Form< PageViewer > filledForm = PAGEVIEWER_FORM.bindFromRequest();
+	 * final PageViewer pv = filledForm.get();
+	 * final int currentRows = pv.getCurrentRows();
+	 * if ( currentRows < 1 )
+	 * pv.setCurrentRows( 1 );
+	 * if ( currentRows > 30 )
+	 * pv.setCurrentRows( 30 );
+	 * final int pageNumber = pv.getPageNumber() - 1;
+	 * if ( pageNumber < 1 )
+	 * pv.setPageNumber( 1 );
+	 * if ( filledForm.hasErrors() )
+	 * return badRequest( viewConsumers.render( filledForm,
+	 * scala.collection.JavaConversions.asScalaIterator( pv.getCursorConsumer() ),
+	 * scala.collection.JavaConversions.asScalaIterator(
+	 * pv.getCursorUndefinedConsumer() ) ) );
+	 * else
+	 * return doViewConsumers();
+	 * }
+	 * @Restrict( { @Group( UserRole.OPER_ROLE_NAME ), @Group(
+	 * UserRole.ADMIN_ROLE_NAME ) } )
+	 * public static Result doNextViewConsumers() {
+	 * com.feth.play.module.pa.controllers.Authenticate.noCache( response() );
+	 * final Form< PageViewer > filledForm = PAGEVIEWER_FORM.bindFromRequest();
+	 * final PageViewer pv = filledForm.get();
+	 * final int currentRows = pv.getCurrentRows();
+	 * if ( currentRows < 1 )
+	 * pv.setCurrentRows( 1 );
+	 * if ( currentRows > 30 )
+	 * pv.setCurrentRows( 30 );
+	 * final int pageNumber = pv.getPageNumber() + 1;
+	 * final int countPages = ( int )( pv.getTotalRows() / pv.getCurrentRows() ) +
+	 * 1;
+	 * if ( pageNumber > countPages )
+	 * pv.setPageNumber( countPages );
+	 * if ( filledForm.hasErrors() )
+	 * return badRequest( viewConsumers.render( filledForm,
+	 * scala.collection.JavaConversions.asScalaIterator( pv.getCursorConsumer() ),
+	 * scala.collection.JavaConversions.asScalaIterator(
+	 * pv.getCursorUndefinedConsumer() ) ) );
+	 * else
+	 * return doViewConsumers();
+	 * }
+	 */
 }
