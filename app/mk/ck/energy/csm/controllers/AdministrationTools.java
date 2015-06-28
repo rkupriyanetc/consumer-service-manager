@@ -84,7 +84,6 @@ import views.html.admin.viewXML;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 
@@ -1216,11 +1215,9 @@ public class AdministrationTools extends Controller {
 						final PreparedStatement statement = CONFIGURATION.getMSSQLConnection().prepareStatement( sqlText );
 						int pass = 1;
 						final int docs = 1000;
-						final FindIterable< Consumer > filter = Consumer.getMongoCollection()
-								.find( Filters.or( Consumer.makeFilterToId( "07-000669" ), Consumer.makeFilterToId( "37-002569" ) ) )
-								.skip( ( pass - 1 ) * docs ).limit( docs );
-						final MongoCursor< Consumer > cursor = filter.iterator();
-						while ( cursor != null ) {
+						MongoCursor< Consumer > cursor = Consumer.getMongoCollection().find().skip( ( pass - 1 ) * docs ).limit( docs )
+								.iterator();
+						while ( cursor != null && cursor.hasNext() ) {
 							int pCount = 0;
 							while ( cursor.hasNext() ) {
 								final Consumer consumer = cursor.next();
@@ -1344,8 +1341,7 @@ public class AdministrationTools extends Controller {
 							}
 							LOGGER.trace( "Number pass is {}.", pass++ );
 							cursor.close();
-							// cursor = Consumer.getMongoCollection().find().skip( ( pass - 1
-							// ) * docs ).limit( docs ).iterator();
+							cursor = Consumer.getMongoCollection().find().skip( ( pass - 1 ) * docs ).limit( docs ).iterator();
 						}
 						streamOut.write( ( "\nAll meters modified : " + updateCount ).getBytes() );
 						streamOut.write( ( "\nAll meters created : " + metersCount ).getBytes() );

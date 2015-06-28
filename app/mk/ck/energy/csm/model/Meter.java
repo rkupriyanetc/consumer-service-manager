@@ -383,23 +383,33 @@ public class Meter extends CSMAbstractDocument< Meter > {
 	
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer( "Марка - " );
+		final StringBuffer sb = new StringBuffer( "Ос.рах. " );
+		sb.append( getConsumerId() );
+		sb.append( ". Марка - " );
 		sb.append( getMeterDevice().getName() );
 		sb.append( " № " );
 		sb.append( getNumber() );
-		sb.append( " дата уст.: " );
+		sb.append( ". Дата уст.: " );
 		final GregorianCalendar gc = new GregorianCalendar();
 		gc.clear();
 		gc.setTime( new Date( getDateInstall() ) );
 		sb.append( DATE_FORMAT.format( gc.getTime() ) );
-		sb.append( " дата знт.: " );
+		sb.append( ", дата знт.: " );
 		gc.clear();
 		gc.setTime( new Date( getDateUninstall() ) );
 		sb.append( DATE_FORMAT.format( gc.getTime() ) );
-		sb.append( " дата тст.: " );
+		sb.append( ", дата тст.: " );
 		gc.clear();
 		gc.setTime( new Date( getDateTesting() ) );
 		sb.append( DATE_FORMAT.format( gc.getTime() ) );
+		sb.append( ". " );
+		sb.append( getLocationMeter().name() );
+		sb.append( ", " );
+		sb.append( getMightOutturn() );
+		sb.append( "A" );
+		sb.append( ", " );
+		sb.append( getMasterName() );
+		sb.append( "." );
 		return sb.toString();
 	}
 	
