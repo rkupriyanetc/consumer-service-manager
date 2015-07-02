@@ -479,10 +479,10 @@ public class AccountTools extends Controller {
 			MongoCursor< Consumer > cursorConsumer;
 			final long nextNumber = UndefinedConsumer.getMongoCollection().count();
 			final long countConsumers = Consumer.getMongoCollection().count();
-			if ( pageNum == 2147483647 ) {
-				final int nn = ( int )countConsumers % currentRows;
-				pageNum = nn > 0 ? ( int )countConsumers / currentRows + 1 : ( int )countConsumers / currentRows;
-			}
+			int nn = ( int )countConsumers % currentRows;
+			nn = nn > 0 ? ( int )countConsumers / currentRows + 1 : ( int )countConsumers / currentRows;
+			if ( pageNum == 2147483647 || pageNum > nn )
+				pageNum = nn;
 			if ( nextNumber >= currentRows * pageNum ) {
 				cursorUndefinedConsumer = UndefinedConsumer.getMongoCollection().find().sort( Filters.eq( "_id", 1 ) )
 						.skip( ( pageNum - 1 ) * currentRows ).limit( currentRows ).iterator();

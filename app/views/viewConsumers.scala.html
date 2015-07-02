@@ -11,12 +11,12 @@
     </div>
     
     <div class="panel-body">
-      
+      @defining((pageNum-1)*20) { number =>
         @if(itemUndefinedConsumer != null ) {
           @itemUndefinedConsumer.zipWithIndex.map { case (item2, kp) =>
             <div class="row">
               <div class="col-md-1 col-xs-1">
-                N : @(kp+1)
+                N : @(kp+1+number)
               </div>
               <div class="col-md-2 col-xs-2">
                 _id : @item2.getId()
@@ -36,7 +36,7 @@
           @itemConsumers.zipWithIndex.map { case (item1, kn) =>
             <div class="row">
               <div class="col-md-1 col-xs-1">
-                N : @(kn+1)
+                N : @(kn+1+number)
               </div>
               <div class="col-md-2 col-xs-2">
                 _id : @item1.getId()
@@ -58,15 +58,16 @@
             </div>
           }
         }
-      </div>
+      }
+    </div>
       
-      <div class="panel-footer">
-        <ul class="pager">
-          <li class="first"><a href="@routes.AccountTools.viewConsumers(1)">&larr; First</a></li>
-          <li class="previous"><a href="@routes.AccountTools.viewConsumers(pageNum-1)">&larr; Previous</a></li>
-          <li class="next"><a href="@routes.AccountTools.viewConsumers(pageNum+1)">Next &rarr;</a></li>
-          <li class="last"><a href="@routes.AccountTools.viewConsumers(2147483647)">Last &rarr;</a></li>
-        </ul>
-      </div>
+    <div class="panel-footer">
+      <ul class="pager">
+        <li class="first"><a href="@routes.AccountTools.viewConsumers(1)">&larr; First</a></li>
+        <li class="previous"><a href="@routes.AccountTools.viewConsumers(pageNum-1)">&larr; Previous</a></li>
+        <li class="next"><a href="@routes.AccountTools.viewConsumers(pageNum+1)">Next &rarr;</a></li>
+        <li class="last"><a href="@routes.AccountTools.viewConsumers(2147483647)">Last &rarr;</a></li>
+      </ul>
+    </div>
   </div>
 }
