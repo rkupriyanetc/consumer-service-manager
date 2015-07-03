@@ -53,6 +53,7 @@ import mk.ck.energy.csm.model.LocationMeterType;
 import mk.ck.energy.csm.model.LocationType;
 import mk.ck.energy.csm.model.Meter;
 import mk.ck.energy.csm.model.MeterDevice;
+import mk.ck.energy.csm.model.MeterDeviceNotFoundException;
 import mk.ck.energy.csm.model.MeterNotFoundException;
 import mk.ck.energy.csm.model.StreetType;
 import mk.ck.energy.csm.model.UndefinedConsumer;
@@ -96,6 +97,8 @@ public class AdministrationTools extends Controller {
 	private static final String					CONSUMER_CODE_STATUS_NAME	= "consumer.code.status.type";
 	
 	private static final String					METER_CODE_PLACE_NAME			= "place.meter.install.type";
+	
+	private static final String					METERDEVICES_RESULT				= "MeterDevices_Result.txt";
 	
 	private static final String					CONSUMERS_RESULT					= "Consumers_Result.txt";
 	
@@ -887,6 +890,10 @@ public class AdministrationTools extends Controller {
 				// Run process
 				final String meterDevicesTable = CONFIGURATION.getMSSQLDBTables().get( "meterDevices" );
 				final Statement statement = CONFIGURATION.getMSSQLStatement();
+				int meterDeviceSize = 0;
+				int createdCount = 0;// Create count MeterDevice
+				int updatedCount = 0;// Update count MeterDevice
+				final ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
 				try {
 					final String select = "select nazva_marka, fazi, code_method_type, code_power_type, code_reestr, "
 							+ "klass, interval from " + meterDevicesTable + " order by nazva_marka, fazi";
@@ -919,10 +926,45 @@ public class AdministrationTools extends Controller {
 								MeterDevice.MethodType.values()[ methodType ], MeterDevice.InductiveType.values()[ inductiveType ],
 								MeterDevice.RegisterType.values()[ registerType ], meterPrecision, meterInterval );
 						try {
-							meterDevice.save();
+							final MeterDevice md = MeterDevice.findByName( meterName );
+							if ( md == null ) {
+								LOGGER.trace( "Meter device {} saved. Count Meter devices is {}", meterDevice, ++createdCount );
+								streamOut.write( ( "\nCreate MeterDevice " + meterDevice.toString() + "\n" ).getBytes() );
+								meterDevice.save();
+							} else
+								if ( !md.equals( meterDevice ) ) {
+									final Bson cQuery = MeterDevice.makeFilterToId( md.getId() );
+									final List< Bson > cUpdates = new LinkedList< Bson >();
+									if ( md.getPhasing() != meterDevice.getPhasing() )
+										cUpdates.add( MeterDevice.makeFilterToPhasing( meterDevice.getPhasing() ) );
+									if ( !md.getMethodType().equals( meterDevice.getMethodType() ) )
+										cUpdates.add( MeterDevice.makeFilterToMethodType( meterDevice.getMethodType() ) );
+									if ( !md.getInductiveType().equals( meterDevice.getInductiveType() ) )
+										cUpdates.add( MeterDevice.makeFilterToInductiveType( meterDevice.getInductiveType() ) );
+									if ( !md.getRegisterType().equals( meterDevice.getRegisterType() ) )
+										cUpdates.add( MeterDevice.makeFilterToRegisterType( meterDevice.getRegisterType() ) );
+									if ( md.getPrecision() != meterDevice.getPrecision() )
+										cUpdates.add( MeterDevice.makeFilterToPrecision( meterDevice.getPrecision() ) );
+									if ( md.getInterval() != meterDevice.getInterval() )
+										cUpdates.add( MeterDevice.makeFilterToInterval( meterDevice.getInterval() ) );
+									if ( !cUpdates.isEmpty() ) {
+										streamOut.write( ( "\nBefore modify meter device " + md.toString() + "\n" ).getBytes() );
+										final Bson cUpdate = Filters.and( cUpdates );
+										md.update( cQuery, cUpdate );
+										streamOut.write( ( "After modify meter device " + meterDevice.toString() + "\n" ).getBytes() );
+										LOGGER.trace( "MeterDevice {} {} modified. Count meter devices is {}", md.getId(), md.getName(),
+												++updatedCount );
+									}
+								} else
+									LOGGER.trace( "This is the same meter device : {}", meterDevice );
 						}
+						catch ( final MeterDeviceNotFoundException mnfe ) {}
 						catch ( final ImpossibleCreatingException ice ) {}
+						meterDeviceSize++ ;
 					}
+					streamOut.write( ( "\nAll meter devices modified : " + updatedCount ).getBytes() );
+					streamOut.write( ( "\nAll meter devices created : " + createdCount ).getBytes() );
+					streamOut.write( ( "\nAll meter devices selected : " + meterDeviceSize ).getBytes() );
 				}
 				catch ( final SQLFeatureNotSupportedException sfnse ) {
 					LOGGER.error( "SQLFeatureNotSupportedException in the ResultSet.first(): {}", sfnse );
@@ -930,7 +972,14 @@ public class AdministrationTools extends Controller {
 				catch ( final SQLException sqle ) {
 					LOGGER.error( "Query no retrive result. Exception: {}", sqle );
 				}
-				LOGGER.trace( "Import the consumers from MSSQL server" );
+				catch ( final IOException ioe ) {
+					LOGGER.error( "Write to stream error. Exception: {}", ioe );
+				}
+				LOGGER.trace( "MeterDevice created {} document(s). MeterDevice changed {} document(s).", createdCount, updatedCount );
+				LOGGER.trace( "Import the MeterDevice from MSSQL server successfull!" );
+				response().setContentType( "application/x-download" );
+				response().setHeader( "Content-disposition", "attachment; filename=" + METERDEVICES_RESULT );
+				return created( streamOut.toByteArray() );
 			}
 			// Processing UpdateConsumers
 			if ( step.isUpdateConsumers() ) {
@@ -940,7 +989,7 @@ public class AdministrationTools extends Controller {
 				final String keyReferences = step.getReferences().get( 0 );
 				int consumerSize = 0;
 				int createdCount = 0;// Create count Consumers
-				int updateCount = 0;// Update count Consumers
+				int updatedCount = 0;// Update count Consumers
 				final String sqlText = readSQLFile( "consumers" );
 				boolean isReadSQLFile = sqlText != "";
 				if ( isReadSQLFile )
@@ -1157,7 +1206,7 @@ public class AdministrationTools extends Controller {
 										updateBeforeConsumers.add( beforeUpdate );
 										consumer.update( cQuery, cUpdate );
 										updateAfterConsumers.add( consumer );
-										LOGGER.trace( "Consumer {} modified. Modified {} record!", consumer.getId(), ++updateCount );
+										LOGGER.trace( "Consumer {} modified. Modified {} record!", consumer.getId(), ++updatedCount );
 										streamOut.write( ( "\nBefore modify consumer " + beforeUpdate.toString() + "\n" ).getBytes() );
 										streamOut.write( ( "After  modify consumer " + consumer.toString() + "\n" ).getBytes() );
 									}
@@ -1179,8 +1228,8 @@ public class AdministrationTools extends Controller {
 						}
 						// Finish all Consumers
 						result.close();
-						LOGGER.trace( "Consumer created {} document(s). Consumer changed {} document(s).", createdCount, updateCount );
-						streamOut.write( ( "\nAll consumers modified : " + updateCount ).getBytes() );
+						LOGGER.trace( "Consumer created {} document(s). Consumer changed {} document(s).", createdCount, updatedCount );
+						streamOut.write( ( "\nAll consumers modified : " + updatedCount ).getBytes() );
 						streamOut.write( ( "\nAll consumers created : " + createdCount ).getBytes() );
 						streamOut.write( ( "\nAll consumers selected : " + consumerSize ).getBytes() );
 						LOGGER.trace( "This update before change Consumers is {}", updateBeforeConsumers );

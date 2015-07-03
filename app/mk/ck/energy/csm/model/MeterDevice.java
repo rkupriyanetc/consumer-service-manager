@@ -36,15 +36,33 @@ public class MeterDevice extends CSMAbstractDocument< MeterDevice > {
 	private static final String	DB_FIELD_INTERVAL								= "interval";
 	
 	public enum MethodType {
-		INDUCTION, ELECTRONIC,
+		INDUCTION, ELECTRONIC, ;
+		
+		public boolean equals( final MethodType o ) {
+			if ( o == null )
+				return false;
+			return name().equals( o.name() );
+		}
 	}
 	
 	public enum InductiveType {
-		ACTIVE, REACTIVE, ACTIVE_REACTIVE,
+		ACTIVE, REACTIVE, ACTIVE_REACTIVE, ;
+		
+		public boolean equals( final InductiveType o ) {
+			if ( o == null )
+				return false;
+			return name().equals( o.name() );
+		}
 	}
 	
 	public enum RegisterType {
-		STATE, SELF_REGIONAL, DISTRICT,
+		STATE, SELF_REGIONAL, DISTRICT, ;
+		
+		public boolean equals( final RegisterType o ) {
+			if ( o == null )
+				return false;
+			return name().equals( o.name() );
+		}
 	}
 	
 	private MeterDevice() {}
@@ -168,6 +186,38 @@ public class MeterDevice extends CSMAbstractDocument< MeterDevice > {
 		if ( meter == null )
 			throw new MeterDeviceNotFoundException( "MeterDevice by " + meterName + " not found" );
 		return meter;
+	}
+	
+	public static Bson makeFilterToId( final String value ) {
+		return Filters.eq( DB_FIELD_ID, value );
+	}
+	
+	public static Bson makeFilterToName( final String value ) {
+		return Filters.eq( DB_FIELD_NAME, value );
+	}
+	
+	public static Bson makeFilterToPhasing( final byte value ) {
+		return Filters.eq( DB_FIELD_PHASING, value );
+	}
+	
+	public static Bson makeFilterToMethodType( final MethodType value ) {
+		return Filters.eq( DB_FIELD_METHOD_TYPE, value.name() );
+	}
+	
+	public static Bson makeFilterToInductiveType( final InductiveType value ) {
+		return Filters.eq( DB_FIELD_INDUCTIVE_TYPE, value.name() );
+	}
+	
+	public static Bson makeFilterToRegisterType( final RegisterType value ) {
+		return Filters.eq( DB_FIELD_REGISTER_TYPE, value.name() );
+	}
+	
+	public static Bson makeFilterToPrecision( final double value ) {
+		return Filters.eq( DB_FIELD_PRECISION, value );
+	}
+	
+	public static Bson makeFilterToInterval( final byte value ) {
+		return Filters.eq( DB_FIELD_INTERVAL, value );
 	}
 	
 	public void save() throws ImpossibleCreatingException {
