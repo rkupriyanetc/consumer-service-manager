@@ -34,66 +34,75 @@ public class Plumb extends CSMAbstractDocument< Plumb > {
 		}
 	}
 	
-	public Plumb( final String number, final long installDate, final String inspector, final PlumbType type ) {
-		if ( type == null )
-			this.type = PlumbType.SECURITY;
-		else
-			this.type = type;
-		this.number = number;
-		this.installDate = installDate;
-		this.inspector = inspector;
-		this.uninstallDate = Meter.MAXDATE.getTime();
+	private Plumb() {}
+	
+	public static Plumb create() {
+		return new Plumb();
 	}
 	
-	/**
-	 * public Plumb( final DBObject dbo ) {
-	 * this.number = ( String )dbo.get( "number" );
-	 * this.installDate = ( ( Long )dbo.get( "install_date" ) ).longValue();
-	 * this.uninstallDate = ( ( Long )dbo.get( "uninstall_date" ) ).longValue();
-	 * this.inspector = ( String )dbo.get( "inspector" );
-	 * final String type = ( String )dbo.get( "type" );
-	 * if ( type != null && !type.isEmpty() )
-	 * this.type = PlumbType.valueOf( type );
-	 * }
+	public static Plumb create( final String number, final long installDate, final String inspector, final PlumbType type ) {
+		final Plumb pl = new Plumb();
+		pl.setPlumbType( type == null ? PlumbType.SECURITY : type );
+		pl.setNumber( number );
+		pl.setDateInstall( installDate );
+		pl.setMasterName( inspector );
+		pl.setDateUninstall( Meter.MAXDATE.getTime() );
+		return pl;
+	}
+	
+	/*
+	 * № пломби
 	 */
 	public String getNumber() {
-		return number;
+		return getString( DB_FIELD_NUMBER );
 	}
 	
 	public void setNumber( final String number ) {
-		this.number = number;
+		put( DB_FIELD_NUMBER, number );
 	}
 	
-	public long getInstallDate() {
-		return installDate;
+	/*
+	 * Початок дії ( дата встановлення ) пломби
+	 */
+	public long getDateInstall() {
+		return getLong( DB_FIELD_DATE_INSTALL );
 	}
 	
-	public void setInstallDate( final long installDate ) {
-		this.installDate = installDate;
+	public void setDateInstall( final long dateInstall ) {
+		put( DB_FIELD_DATE_INSTALL, dateInstall );
 	}
 	
-	public long getUninstallDate() {
-		return uninstallDate;
+	/*
+	 * Закінчення дії ( дата зняття ) пломби
+	 */
+	public long getDateUninstall() {
+		return getLong( DB_FIELD_DATE_UNINSTALL );
 	}
 	
-	public void setUninstallDate( final long uninstallDate ) {
-		this.uninstallDate = uninstallDate;
+	public void setDateUninstall( final long dateUninstall ) {
+		put( DB_FIELD_DATE_UNINSTALL, dateUninstall );
 	}
 	
-	public String getInspector() {
-		return inspector;
+	/*
+	 * Майстер, що встановив пломбу
+	 */
+	public String getMasterName() {
+		return getString( DB_FIELD_MASTER_NAME );
 	}
 	
-	public void setInspector( final String inspector ) {
-		this.inspector = inspector;
+	public void setMasterName( final String masterName ) {
+		put( DB_FIELD_MASTER_NAME, masterName );
 	}
 	
-	public PlumbType getType() {
-		return type;
+	/*
+	 * Тип пломби
+	 */
+	public PlumbType getPlumbType() {
+		return PlumbType.valueOf( getString( DB_FIELD_PLUMB_TYPE ) );
 	}
 	
-	public void setType( final PlumbType type ) {
-		this.type = type;
+	public void setPlumbType( final PlumbType type ) {
+		put( DB_FIELD_PLUMB_TYPE, type.name() );
 	}
 	
 	@Override
@@ -101,7 +110,7 @@ public class Plumb extends CSMAbstractDocument< Plumb > {
 		if ( o == null || !( o instanceof Plumb ) )
 			return false;
 		final Plumb plumb = ( Plumb )o;
-		return plumb.getNumber().equalsIgnoreCase( number );
+		return plumb.getNumber().equalsIgnoreCase( getNumber() );
 	}
 	
 	/*

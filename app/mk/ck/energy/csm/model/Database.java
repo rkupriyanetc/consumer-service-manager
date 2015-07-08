@@ -10,8 +10,10 @@ import mk.ck.energy.csm.model.codecs.AddressLocationCodec;
 import mk.ck.energy.csm.model.codecs.AddressPlaceCodec;
 import mk.ck.energy.csm.model.codecs.AddressTopCodec;
 import mk.ck.energy.csm.model.codecs.ConsumerCodec;
+import mk.ck.energy.csm.model.codecs.MeasurementCodec;
 import mk.ck.energy.csm.model.codecs.MeterCodec;
 import mk.ck.energy.csm.model.codecs.MeterDeviceCodec;
+import mk.ck.energy.csm.model.codecs.PlumbCodec;
 import mk.ck.energy.csm.model.codecs.TokenActionCodec;
 import mk.ck.energy.csm.model.codecs.UndefinedConsumerCodec;
 import mk.ck.energy.csm.model.codecs.UserCodec;
@@ -108,9 +110,12 @@ public class Database {
 						final MeterCodec meterCodec = new MeterCodec( defaultDocumentCodec );
 						final ConsumerCodec consumerCodec = new ConsumerCodec( defaultDocumentCodec );
 						final UndefinedConsumerCodec undefinedConsumerCodec = new UndefinedConsumerCodec( defaultDocumentCodec );
+						final PlumbCodec plumbCodec = new PlumbCodec( defaultDocumentCodec );
+						final MeasurementCodec measurementCodec = new MeasurementCodec( defaultDocumentCodec );
 						final CodecRegistry codecRegistry = CodecRegistries.fromRegistries( MongoClient.getDefaultCodecRegistry(),
 								CodecRegistries.fromCodecs( userCodec, tokenActionCodec, addressTopCodec, addressLocationCodec,
-										addressPlaceCodec, meterDeviceCodec, meterCodec, consumerCodec, undefinedConsumerCodec ) );
+										addressPlaceCodec, meterDeviceCodec, meterCodec, consumerCodec, undefinedConsumerCodec, plumbCodec,
+										measurementCodec ) );
 						final MongoClientOptions options = MongoClientOptions.builder().codecRegistry( codecRegistry ).build();
 						mongoClient = new MongoClient( new ServerAddress( config.getString( "host" ) ), Arrays.asList( credential ), options );
 					}
