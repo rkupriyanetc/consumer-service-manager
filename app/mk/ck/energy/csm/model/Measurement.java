@@ -1,10 +1,10 @@
 package mk.ck.energy.csm.model;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import mk.ck.energy.csm.model.mongodb.CSMAbstractDocument;
 
-import org.apache.commons.collections.map.LinkedMap;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWrapper;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -55,7 +55,7 @@ public class Measurement extends CSMAbstractDocument< Measurement > {
 	private final Map< String, Double >	values;
 	
 	private Measurement() {
-		this.values = new LinkedMap();
+		this.values = new LinkedHashMap< String, Double >();
 	}
 	
 	public static Measurement create() {
