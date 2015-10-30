@@ -8,16 +8,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.feth.play.module.mail.Mailer.Mail.Body;
+import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
+import com.feth.play.module.pa.providers.password.UsernamePasswordAuthUser;
+import com.google.inject.Inject;
+
 import mk.ck.energy.csm.controllers.routes;
 import mk.ck.energy.csm.model.auth.LinkedAccount;
 import mk.ck.energy.csm.model.auth.TokenAction;
 import mk.ck.energy.csm.model.auth.TokenType;
 import mk.ck.energy.csm.model.auth.User;
 import mk.ck.energy.csm.model.auth.UserNotFoundException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import play.Application;
 import play.data.Form;
 import play.data.validation.Constraints.Email;
@@ -28,26 +33,20 @@ import play.i18n.Messages;
 import play.mvc.Call;
 import play.mvc.Http.Context;
 
-import com.feth.play.module.mail.Mailer.Mail.Body;
-import com.feth.play.module.pa.PlayAuthenticate;
-import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
-import com.feth.play.module.pa.providers.password.UsernamePasswordAuthUser;
-
-public class MyUsernamePasswordAuthProvider
-		extends
+public class MyUsernamePasswordAuthProvider extends
 		UsernamePasswordAuthProvider< String, MyLoginUsernamePasswordAuthUser, MyUsernamePasswordAuthUser, MyUsernamePasswordAuthProvider.MyLogin, MyUsernamePasswordAuthProvider.MySignup > {
-	
+		
 	private static final Logger	LOGGER																			= LoggerFactory
-																																							.getLogger( MyUsernamePasswordAuthProvider.class );
-	
+			.getLogger( MyUsernamePasswordAuthProvider.class );
+			
 	private static final String	SETTING_KEY_VERIFICATION_LINK_SECURE				= SETTING_KEY_MAIL + "." + "verificationLink.secure";
-	
+																																					
 	private static final String	SETTING_KEY_PASSWORD_RESET_LINK_SECURE			= SETTING_KEY_MAIL + "." + "passwordResetLink.secure";
-	
+																																					
 	private static final String	SETTING_KEY_LINK_LOGIN_AFTER_PASSWORD_RESET	= "loginAfterPasswordReset";
-	
+																																					
 	private static final String	EMAIL_TEMPLATE_FALLBACK_LANGUAGE						= "en";
-	
+																																					
 	@Override
 	protected List< String > neededSettingKeys() {
 		final List< String > needed = new ArrayList< String >( super.neededSettingKeys() );
@@ -71,7 +70,7 @@ public class MyUsernamePasswordAuthProvider
 		
 		@Required
 		@Email
-		private String	email;
+		private String email;
 		
 		public String getEmail() {
 			return email;
@@ -82,12 +81,12 @@ public class MyUsernamePasswordAuthProvider
 		}
 	}
 	
-	public static class MyLogin extends MyIdentity implements
-			com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider.UsernamePassword {
-		
+	public static class MyLogin extends MyIdentity
+			implements com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider.UsernamePassword {
+			
 		@Required
 		@MinLength( 3 )
-		private String	password;
+		private String password;
 		
 		@Override
 		public String getPassword() {
@@ -104,10 +103,10 @@ public class MyUsernamePasswordAuthProvider
 		@Required
 		@MinLength( 3 )
 		private String	repeatPassword;
-		
+										
 		@Required
 		private String	name;
-		
+										
 		public String getName() {
 			return name;
 		}
@@ -139,9 +138,10 @@ public class MyUsernamePasswordAuthProvider
 	}
 	
 	public static final Form< MySignup >	SIGNUP_FORM	= form( MySignup.class );
-	
+																										
 	public static final Form< MyLogin >		LOGIN_FORM	= form( MyLogin.class );
-	
+																										
+	@Inject
 	public MyUsernamePasswordAuthProvider( final Application app ) {
 		super( app );
 	}
@@ -230,7 +230,8 @@ public class MyUsernamePasswordAuthProvider
 	}
 	
 	@Override
-	protected MyLoginUsernamePasswordAuthUser transformAuthUser( final MyUsernamePasswordAuthUser authUser, final Context context ) {
+	protected MyLoginUsernamePasswordAuthUser transformAuthUser( final MyUsernamePasswordAuthUser authUser,
+			final Context context ) {
 		return new MyLoginUsernamePasswordAuthUser( authUser.getEmail() );
 	}
 	

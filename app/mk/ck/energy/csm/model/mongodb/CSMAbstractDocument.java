@@ -3,8 +3,6 @@ package mk.ck.energy.csm.model.mongodb;
 import java.util.List;
 import java.util.UUID;
 
-import mk.ck.energy.csm.model.Database;
-
 import org.bson.BsonArray;
 import org.bson.BsonString;
 import org.bson.Document;
@@ -21,18 +19,20 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
-public abstract class CSMAbstractDocument< I extends Document > extends Document {
+import mk.ck.energy.csm.model.Database;
+
+public abstract class CSMAbstractDocument< I extends Document >extends Document {
 	
 	private static final MongoDatabase	db								= Database.getInstance().getDatabase();
-	
+																												
 	private static final long						serialVersionUID	= 1L;
-	
+																												
 	protected static final Logger				LOGGER						= LoggerFactory.getLogger( CSMAbstractDocument.class );
-	
+																												
 	protected static final String				DB_FIELD_ID				= "_id";
-	
+																												
 	private String											id;
-	
+																			
 	public String getId() {
 		return id;
 	}
@@ -71,6 +71,7 @@ public abstract class CSMAbstractDocument< I extends Document > extends Document
 		return ur;
 	}
 	
+	@SuppressWarnings( "unchecked" )
 	public void insertIntoDB() {
 		createId();
 		try {

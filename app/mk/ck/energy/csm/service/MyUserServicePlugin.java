@@ -1,21 +1,22 @@
 package mk.ck.energy.csm.service;
 
-import mk.ck.energy.csm.model.auth.User;
-import mk.ck.energy.csm.model.auth.UserNotFoundException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import play.Application;
 
 import com.feth.play.module.pa.service.UserServicePlugin;
 import com.feth.play.module.pa.user.AuthUser;
 import com.feth.play.module.pa.user.AuthUserIdentity;
+import com.google.inject.Inject;
+
+import mk.ck.energy.csm.model.auth.User;
+import mk.ck.energy.csm.model.auth.UserNotFoundException;
+import play.Application;
 
 public class MyUserServicePlugin extends UserServicePlugin {
 	
-	private static final Logger	LOGGER	= LoggerFactory.getLogger( MyUserServicePlugin.class );
+	private static final Logger LOGGER = LoggerFactory.getLogger( MyUserServicePlugin.class );
 	
+	@Inject
 	public MyUserServicePlugin( final Application app ) {
 		super( app );
 	}

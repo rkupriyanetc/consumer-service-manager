@@ -333,10 +333,10 @@ public class User extends CSMAbstractDocument< User > implements Subject {
 		final String identityKey = "user-" + identity.toString();
 		try {
 			return Cache.getOrElse( identityKey, new ByIdentityFinder( identity ), 60 );
-		}
+		}/*
 		catch ( final UserNotFoundException e ) {
 			throw e;
-		}
+		}*/
 		catch ( final Exception e ) {
 			LOGGER.error( "Could not find user for identity {}", identity, e );
 			throw new UserNotFoundException();

@@ -12,21 +12,23 @@
  */
 package mk.ck.energy.csm.providers;
 
+import com.feth.play.module.pa.providers.wwwauth.basic.BasicAuthProvider;
+import com.feth.play.module.pa.user.AuthUser;
+import com.google.inject.Inject;
+
 import play.Application;
 import play.mvc.Http.Context;
 import play.twirl.api.Content;
 import views.html.login;
 
-import com.feth.play.module.pa.providers.wwwauth.basic.BasicAuthProvider;
-import com.feth.play.module.pa.user.AuthUser;
-
 /** A really simple basic auth provider that accepts one hard coded user */
 public class MyStupidBasicAuthProvider extends BasicAuthProvider {
 	
 	public static String	GUEST_PROVIDER	= "basic";
-	
+																				
 	public static String	GUEST_ID				= "basic";
-	
+																				
+	@Inject
 	public MyStupidBasicAuthProvider( final Application app ) {
 		super( app );
 	}
@@ -36,7 +38,7 @@ public class MyStupidBasicAuthProvider extends BasicAuthProvider {
 		if ( username.equals( "guest" ) && password.equals( "guest" ) )
 			return new AuthUser() {
 				
-				private static final long	serialVersionUID	= 1L;
+				private static final long serialVersionUID = 1L;
 				
 				@Override
 				public String getId() {

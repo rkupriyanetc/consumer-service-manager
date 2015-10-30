@@ -3,48 +3,48 @@
 # ~~~~
 
 # Home page
-GET     /                           	     mk.ck.energy.csm.controllers.Application.index
-GET     /restricted                 	     mk.ck.energy.csm.controllers.Application.restricted
-GET     /about                      	     mk.ck.energy.csm.controllers.Application.about
+GET     /                           	   mk.ck.energy.csm.controllers.Application.index
+GET     /restricted                 	   mk.ck.energy.csm.controllers.Application.restricted
+GET     /about                      	   mk.ck.energy.csm.controllers.Application.about
 GET     /feedback                      	   mk.ck.energy.csm.controllers.Application.feedback
-GET     /phoneBook                   	     mk.ck.energy.csm.controllers.Application.phoneBook
-GET     /officialHome                	     mk.ck.energy.csm.controllers.Application.officialHome
-GET     /rates                 			       mk.ck.energy.csm.controllers.Application.rates
+GET     /phoneBook                   	   mk.ck.energy.csm.controllers.Application.phoneBook
+GET     /officialHome                	   mk.ck.energy.csm.controllers.Application.officialHome
+GET     /rates                 		   mk.ck.energy.csm.controllers.Application.rates
 GET     /aboutStaft                        mk.ck.energy.csm.controllers.Application.listAboutStaft
 POST    /aboutStaft                        mk.ck.energy.csm.controllers.Application.doListAboutStaft
 
-GET     /profile                    	     mk.ck.energy.csm.controllers.Application.profile
+GET     /profile                    	   mk.ck.energy.csm.controllers.Application.profile
 
-GET     /login                      	     mk.ck.energy.csm.controllers.Application.login
-POST    /login                      	     mk.ck.energy.csm.controllers.Application.doLogin
+GET     /login                      	   mk.ck.energy.csm.controllers.Application.login
+POST    /login                      	   mk.ck.energy.csm.controllers.Application.doLogin
 
-GET     /logout                     	     com.feth.play.module.pa.controllers.Authenticate.logout
-GET     /authenticate/:provider     	     com.feth.play.module.pa.controllers.Authenticate.authenticate(provider: String)
+GET     /logout                     	   com.feth.play.module.pa.controllers.Authenticate.logout
+GET     /authenticate/:provider     	   com.feth.play.module.pa.controllers.Authenticate.authenticate(provider: String)
 
-GET     /signup                     	     mk.ck.energy.csm.controllers.Application.signup
-POST    /signup                     	     mk.ck.energy.csm.controllers.Application.doSignup
+GET     /signup                     	   mk.ck.energy.csm.controllers.Application.signup
+POST    /signup                     	   mk.ck.energy.csm.controllers.Application.doSignup
 
-GET     /accounts/unverified        	     mk.ck.energy.csm.controllers.Signup.unverified
+GET     /accounts/unverified        	   mk.ck.energy.csm.controllers.Signup.unverified
 GET     /authenticate/:provider/denied     mk.ck.energy.csm.controllers.Signup.oAuthDenied(provider: String)
 
-GET     /accounts/verify/:token     	     mk.ck.energy.csm.controllers.Signup.verify(token: String)
-GET     /accounts/exists           		     mk.ck.energy.csm.controllers.Signup.exists
+GET     /accounts/verify/:token     	   mk.ck.energy.csm.controllers.Signup.verify(token: String)
+GET     /accounts/exists           	   mk.ck.energy.csm.controllers.Signup.exists
 
 GET     /accounts/password/reset/:token	   mk.ck.energy.csm.controllers.Signup.resetPassword(token: String)
 POST    /accounts/password/reset           mk.ck.energy.csm.controllers.Signup.doResetPassword
 
-GET     /accounts/password/change    	     mk.ck.energy.csm.controllers.Account.changePassword
-POST    /accounts/password/change    	     mk.ck.energy.csm.controllers.Account.doChangePassword
+GET     /accounts/password/change    	   mk.ck.energy.csm.controllers.Account.changePassword
+POST    /accounts/password/change    	   mk.ck.energy.csm.controllers.Account.doChangePassword
 
-GET     /accounts/verify            	     mk.ck.energy.csm.controllers.Account.verifyEmail
+GET     /accounts/verify            	   mk.ck.energy.csm.controllers.Account.verifyEmail
 
-GET     /accounts/add               	     mk.ck.energy.csm.controllers.Account.link
+GET     /accounts/add               	   mk.ck.energy.csm.controllers.Account.link
 
-GET     /accounts/link              	     mk.ck.energy.csm.controllers.Account.askLink
-POST    /accounts/link              	     mk.ck.energy.csm.controllers.Account.doLink
+GET     /accounts/link              	   mk.ck.energy.csm.controllers.Account.askLink
+POST    /accounts/link              	   mk.ck.energy.csm.controllers.Account.doLink
 
-GET     /accounts/merge             	     mk.ck.energy.csm.controllers.Account.askMerge
-POST    /accounts/merge             	     mk.ck.energy.csm.controllers.Account.doMerge
+GET     /accounts/merge             	   mk.ck.energy.csm.controllers.Account.askMerge
+POST    /accounts/merge             	   mk.ck.energy.csm.controllers.Account.doMerge
 
 GET     /accounts/joinConsumer             mk.ck.energy.csm.controllers.Account.joinConsumerElectricity(idAddrTop: String)
 POST    /accounts/joinConsumer             mk.ck.energy.csm.controllers.Account.doJoinConsumerElectricity
@@ -52,8 +52,8 @@ GET     /accounts/unjoinConsumer           mk.ck.energy.csm.controllers.Account.
 
 GET     /accounts/joinConsumerAC           mk.ck.energy.csm.controllers.Account.onChangeAddressTopSelect(addrId: String)
 
-GET     /login/password/forgot     		     mk.ck.energy.csm.controllers.Signup.forgotPassword(email: String ?= "")
-POST    /login/password/forgot     		     mk.ck.energy.csm.controllers.Signup.doForgotPassword
+GET     /login/password/forgot     	   mk.ck.energy.csm.controllers.Signup.forgotPassword(email: String ?= "")
+POST    /login/password/forgot     	   mk.ck.energy.csm.controllers.Signup.doForgotPassword
 
 GET     /account/addr/top                  mk.ck.energy.csm.controllers.AccountTools.testTopAddress
 POST    /account/addr/top                  mk.ck.energy.csm.controllers.AccountTools.doTestTopAddress
@@ -80,4 +80,4 @@ GET     /oper/scripts                      mk.ck.energy.csm.controllers.Operator
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/javascript/routes.js       mk.ck.energy.csm.controllers.Application.jsRoutes
-GET     /assets/*file               	     controllers.Assets.at(path="/public", file)
+GET     /assets/*file               	   controllers.Assets.versioned(path="/public", file: Asset)

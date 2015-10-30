@@ -2,30 +2,38 @@ name := "consumer-service-manager"
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayJava)
-
-scalaVersion := "2.11.2"
-
-resolvers ++= Seq(
-  Resolver.url("Objectify Play Repository", url("http://deadbolt.ws/releases/"))(Resolver.ivyStylePatterns),
-  "play-easymail (release)" at "http://joscha.github.io/play-easymail/repo/releases/",
-  "play-easymail (snapshot)" at "http://joscha.github.io/play-easymail/repo/snapshots/",
-  "play-authenticate (release)" at "http://joscha.github.io/play-authenticate/repo/releases/",
-  "play-authenticate (snapshot)" at "http://joscha.github.io/play-authenticate/repo/snapshots/"
-)
+scalaVersion := "2.11.6"
 
 libraryDependencies ++= Seq(
   javaCore,
   cache,
-  "be.objectify"         %% "deadbolt-java"           % "2.3.2",
-  "com.feth"             %% "play-authenticate"       % "0.6.8",
-  "org.mongodb"          %  "mongo-java-driver"       % "3.0.0",
-  "org.apache.poi"       %  "poi"                     % "3.11",
-  "org.apache.poi"       %  "poi-ooxml"               % "3.11",
-  "org.webjars"          %  "select2"                 % "4.0.0-rc.2"
+  javaWs,
+  "be.objectify"              %% "deadbolt-java"       % "2.4.3",
+  "com.feth"                  %% "play-authenticate"   % "0.7.0-SNAPSHOT",
+  "org.mongodb"               %  "mongo-java-driver"   % "3.0.4",
+  "org.apache.poi"            %  "poi"                 % "3.12",
+  "org.apache.poi"            %  "poi-ooxml"           % "3.12",
+  "org.webjars"               %  "bootstrap"           % "3.3.5",
+  "org.webjars"               %  "select2"             % "4.0.0-2",
+  "org.easytesting"           % "fest-assert"          % "1.4"             % "test"
 )
+
+// add resolver for deadbolt and easymail snapshots
+resolvers ++= Seq( 
+  Resolver.sonatypeRepo("snapshots")
+)
+
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
+
+// Play provides two styles of routers, one expects its actions to be injected, the
+// other, legacy style, accesses its actions statically.
+
+lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
 //  Uncomment the next line for local development of the Play Authenticate core:
 //lazy val playAuthenticate = project.in(file("modules/play-authenticate")).enablePlugins(PlayJava)
 
-javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
+//routesGenerator := InjectedRoutesGenerator
+
+EclipseKeys.preTasks := Seq(compile in Compile)
+
