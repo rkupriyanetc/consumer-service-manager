@@ -76,6 +76,9 @@ page.leadership.title=Guide REN
 page.phoneBook.title=Telephone directory
 page.phoneBook.codes=Dialing code
 
+page.meter.transfer_report.title=Transferring Meter Report
+page.meter.transfer_report.value=Indicator
+
 button.admin.addUserOper=Create Operator
 button.admin.addUserAdmin=Create Administrator
 button.admin.addUser=Create Now
@@ -89,6 +92,7 @@ button.address.remove.title=Remove record
 button.address.remove.question=Do you want to delete the record?
 button.addrTop.save=Save file
 button.staff.about.export=Export to Excel
+button.save.title=Save
 
 text.about.play=Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis.
 text.about.bootstrap=Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis.

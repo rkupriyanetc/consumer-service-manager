@@ -9,7 +9,7 @@ GET     /about                      	   mk.ck.energy.csm.controllers.Application
 GET     /feedback                      	   mk.ck.energy.csm.controllers.Application.feedback
 GET     /phoneBook                   	   mk.ck.energy.csm.controllers.Application.phoneBook
 GET     /officialHome                	   mk.ck.energy.csm.controllers.Application.officialHome
-GET     /rates                 		   mk.ck.energy.csm.controllers.Application.rates
+GET     /rates                 		       mk.ck.energy.csm.controllers.Application.rates
 GET     /aboutStaft                        mk.ck.energy.csm.controllers.Application.listAboutStaft
 POST    /aboutStaft                        mk.ck.energy.csm.controllers.Application.doListAboutStaft
 
@@ -28,7 +28,7 @@ GET     /accounts/unverified        	   mk.ck.energy.csm.controllers.Signup.unve
 GET     /authenticate/:provider/denied     mk.ck.energy.csm.controllers.Signup.oAuthDenied(provider: String)
 
 GET     /accounts/verify/:token     	   mk.ck.energy.csm.controllers.Signup.verify(token: String)
-GET     /accounts/exists           	   mk.ck.energy.csm.controllers.Signup.exists
+GET     /accounts/exists           	       mk.ck.energy.csm.controllers.Signup.exists
 
 GET     /accounts/password/reset/:token	   mk.ck.energy.csm.controllers.Signup.resetPassword(token: String)
 POST    /accounts/password/reset           mk.ck.energy.csm.controllers.Signup.doResetPassword
@@ -52,8 +52,11 @@ GET     /accounts/unjoinConsumer           mk.ck.energy.csm.controllers.Account.
 
 GET     /accounts/joinConsumerAC           mk.ck.energy.csm.controllers.Account.onChangeAddressTopSelect(addrId: String)
 
-GET     /login/password/forgot     	   mk.ck.energy.csm.controllers.Signup.forgotPassword(email: String ?= "")
-POST    /login/password/forgot     	   mk.ck.energy.csm.controllers.Signup.doForgotPassword
+GET     /login/password/forgot     	       mk.ck.energy.csm.controllers.Signup.forgotPassword(email: String ?= "")
+POST    /login/password/forgot     	       mk.ck.energy.csm.controllers.Signup.doForgotPassword
+
+GET     /accounts/meter/transfer           mk.ck.energy.csm.controllers.Meter.transferReport
+POST    /accounts/meter/transfer           mk.ck.energy.csm.controllers.Meter.doTransferReport
 
 GET     /account/addr/top                  mk.ck.energy.csm.controllers.AccountTools.testTopAddress
 POST    /account/addr/top                  mk.ck.energy.csm.controllers.AccountTools.doTestTopAddress

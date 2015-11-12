@@ -346,7 +346,7 @@ public class Account extends Controller {
 				filledForm.reject( unfe.getMessage() );
 				return badRequest( joinConsumer.render( filledForm, new HashMap< String, String >( 0 ) ) );
 			}
-			return Application.profile();
+			return redirect( routes.Meter.transferReport() );
 		}
 	}
 	

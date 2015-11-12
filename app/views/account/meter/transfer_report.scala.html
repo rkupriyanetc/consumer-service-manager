@@ -1,0 +1,37 @@
+@(report: Form[_])
+
+@import helper._
+@import mk.ck.energy.csm.controllers._
+
+@main(Messages("page.meter.transfer_report.title"), "transfer_report") {
+  
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title">@Messages("page.meter.transfer_report.title")</h3>
+    </div>
+    <div class="panel-body">
+      
+      <div class="row">
+      
+        <div class="col-md-6">
+          @helper.form(routes.Application.doLogin, 'class -> "form") {
+          
+            @if(report.hasGlobalErrors) {
+              <div class="alert alert-danger">@report.globalError.message</div>
+            }
+            
+            @inputText(
+              report("report"),
+              '_label -> Messages("page.meter.transfer_report.value"),
+              'class -> "form-control"
+            )
+            
+            <input type="submit" value='@Messages("button.save.title")' class="btn btn-info">
+          }
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+}
