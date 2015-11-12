@@ -14,7 +14,7 @@
       <div class="row">
       
         <div class="col-md-6">
-          @helper.form(routes.Application.doLogin, 'class -> "form") {
+          @helper.form(routes.Meter.doTransferReport, 'class -> "form") {
           
             @if(report.hasGlobalErrors) {
               <div class="alert alert-danger">@report.globalError.message</div>

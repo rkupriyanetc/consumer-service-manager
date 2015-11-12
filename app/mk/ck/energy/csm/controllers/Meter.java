@@ -33,6 +33,7 @@ public class Meter extends Controller {
 	
 	private static final Form< Report > REPORT_FORM = form( Report.class );
 	
+	
 	public static Result transferReport() {
 		AuthenticateBase.noCache( response() );
 		return ok( transfer_report.render( REPORT_FORM ) );
