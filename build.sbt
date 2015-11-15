@@ -9,13 +9,13 @@ libraryDependencies ++= Seq(
   cache,
   javaWs,
   "be.objectify"              %% "deadbolt-java"       % "2.4.3",
-  "com.feth"                  %% "play-authenticate"   % "0.7.0-SNAPSHOT",
+  "com.feth"                  %% "play-authenticate"   % "0.7.1-SNAPSHOT",
   "org.mongodb"               %  "mongo-java-driver"   % "3.0.4",
   "org.apache.poi"            %  "poi"                 % "3.12",
   "org.apache.poi"            %  "poi-ooxml"           % "3.12",
   "org.webjars"               %  "bootstrap"           % "3.3.5",
   "org.webjars"               %  "select2"             % "4.0.0-2",
-  "org.easytesting"           % "fest-assert"          % "1.4"             % "test"
+  "org.easytesting"           %  "fest-assert"         % "1.4"              % "test"
 )
 
 // add resolver for deadbolt and easymail snapshots

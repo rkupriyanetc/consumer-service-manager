@@ -50,33 +50,13 @@ GET     /accounts/joinConsumer             mk.ck.energy.csm.controllers.Account.
 POST    /accounts/joinConsumer             mk.ck.energy.csm.controllers.Account.doJoinConsumerElectricity
 GET     /accounts/unjoinConsumer           mk.ck.energy.csm.controllers.Account.unjoinConsumerElectricity
 
-GET     /accounts/joinConsumerAC           mk.ck.energy.csm.controllers.Account.onChangeAddressTopSelect(addrId: String)
-
-GET     /login/password/forgot     	       mk.ck.energy.csm.controllers.Signup.forgotPassword(email: String ?= "")
-POST    /login/password/forgot     	       mk.ck.energy.csm.controllers.Signup.doForgotPassword
+GET     /accounts/joinConsumerATS          mk.ck.energy.csm.controllers.Account.onChangeAddressTopSelect(addrId: String)
 
 GET     /accounts/meter/transfer           mk.ck.energy.csm.controllers.Meter.transferReport
 POST    /accounts/meter/transfer           mk.ck.energy.csm.controllers.Meter.doTransferReport
 
-GET     /account/addr/top                  mk.ck.energy.csm.controllers.AccountTools.testTopAddress
-POST    /account/addr/top                  mk.ck.energy.csm.controllers.AccountTools.doTestTopAddress
-GET     /account/addr/topRemove/:id        mk.ck.energy.csm.controllers.AccountTools.removeTopAddress(id: String)
-GET     /account/addr/place                mk.ck.energy.csm.controllers.AccountTools.testPlaceAddress
-POST    /account/addr/place                mk.ck.energy.csm.controllers.AccountTools.doTestPlaceAddress
-GET     /account/addr/location             mk.ck.energy.csm.controllers.AccountTools.testLocationAddress
-POST    /account/addr/location             mk.ck.energy.csm.controllers.AccountTools.doTestLocationAddress
-GET     /account/addr/locationRemove/:id   mk.ck.energy.csm.controllers.AccountTools.removeLocationAddress(id: String)
-GET     /account/addr/consumers/:pageNum   mk.ck.energy.csm.controllers.AccountTools.viewConsumers(pageNum: Integer)
-
-GET     /admin/tools                       mk.ck.energy.csm.controllers.AdministrationTools.index(indexTab: Integer ?= 1)
-GET     /admin/tools/userAdd               mk.ck.energy.csm.controllers.AdministrationTools.addUser(userRole: String)
-POST    /admin/tools/userAdd               mk.ck.energy.csm.controllers.AdministrationTools.doAddUser
-GET     /admin/tools/userRemove            mk.ck.energy.csm.controllers.AdministrationTools.removeUser(userId: String)
-POST    /admin/tools/stepSync              mk.ck.energy.csm.controllers.AdministrationTools.doSteppingSynchronizationDB
-GET     /admin/tools/viewXML/:n            mk.ck.energy.csm.controllers.AdministrationTools.viewXML(n: Integer)
-POST    /admin/tools/viewXML/              mk.ck.energy.csm.controllers.AdministrationTools.doViewXML
-
-POST    /admin/tools/changeDB              mk.ck.energy.csm.controllers.AdministrationTools.doChangeActiveDB
+GET     /login/password/forgot             mk.ck.energy.csm.controllers.Signup.forgotPassword(email: String ?= "")
+POST    /login/password/forgot             mk.ck.energy.csm.controllers.Signup.doForgotPassword
 
 GET     /oper                              mk.ck.energy.csm.controllers.Operator.index
 GET     /oper/scripts                      mk.ck.energy.csm.controllers.Operator.script
